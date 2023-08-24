@@ -830,28 +830,29 @@ function configChartApply(chartID) {
             $dialog.error("Start of trend after report date")
             errorFound = true
         }
-    }
-    if (forecastFactors.trim() != "") {
 
-        const { isValid, error } = parseInput(forecastFactors, TRENDOC_FORECAST_GRAMMAR)
-        if (!isValid) {
-            $dialog.error(`Forecast factor invalid: ${error}`, false)
-            errorFound = true
+        if (forecastFactors.trim() != "") {
+
+            const { isValid, error } = parseInput(forecastFactors, TRENDOC_FORECAST_GRAMMAR)
+            if (!isValid) {
+                $dialog.error(`Forecast factor invalid: ${error}`, false)
+                errorFound = true
+            }
+            if (errorFound) return
+
+            Object.assign(newCol, {
+                trendStartDate, openDateCol, closeDateCol,
+                forecastDays: Number(forecastDays), forecastBasis: Number(forecastBasis),
+                forecastFactors: forecastFactors.trim()
+            })
+
+            if (autoTitle) {
+                newCol.title = "Trend using open/close dates".toUpperCase()
+            }
+            $dialog.close()
+            if ($p.setColProperties(key, newCol)) reCreateCharts(getChartId(key))
+            return
         }
-        if (errorFound) return
-
-        Object.assign(newCol, {
-            trendStartDate, openDateCol, closeDateCol,
-            forecastDays: Number(forecastDays), forecastBasis: Number(forecastBasis),
-            forecastFactors: forecastFactors.trim()
-        })
-
-        if (autoTitle) {
-            newCol.title = "Trend using open/close dates".toUpperCase()
-        }
-        $dialog.close()
-        if ($p.setColProperties(key, newCol)) reCreateCharts(getChartId(key))
-        return
     }
     if (type == "String") {
         const { countType, colOver, order, colname } = $dialog.data()
