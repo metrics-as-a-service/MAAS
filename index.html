@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Metrics-as-a-Service</title>
+    <meta name="description" content="Metrics for IT Projects">
+    <meta name="keywords" content="Metrics, Project, Program, Goverrance">
+    <meta name="author" content="Abhijit Majumdar">
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="icon" href="images/favicon.ico?v=M44lzPylqQ">
+    <link rel="mask-icon" href="images/favicon.ico?v=M44lzPylqQ" color="#000000">
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+    <link rel="manifest" href="images/site.webmanifest">
+    <link rel="mask-icon" href="images/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- <link rel="icon" type="image/x-icon" href="images/favicon.ico"/> -->
+
+
+    <!-- <link rel="stylesheet" href="./css/W3.css"> -->
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="./css/main.css">
+    <link rel="stylesheet" href="./css/print.css">
+    <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300&display=swap" rel="stylesheet"> -->
+
+    <script src="./js/main.js" charset="utf-8" defer></script>
+    <script src="./js/param.js" charset="utf-8" defer></script>
+    <script src="./js/democofigs.js" charset="utf-8" defer></script>
+    <script src="./js/papaparse.js" charset="utf-8" defer></script>
+    <script src="./js/chart.js" charset="utf-8" defer></script>
+    <script src="./js/dialog.js" charset="utf-8" defer></script>
+    <script src="./js/store.js" charset="utf-8" defer></script>
+    <script src="./js/logger.js" charset="utf-8" defer></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts" defer></script>
+    <!-- <script src="https://unpkg.com/website-carbon-badges@1.1.3/b.min.js" defer></script> -->
+
+</head>
+
+<body>
+    <div class="w3-container">
+        <input type="file" class="w3-input label" name="file" id="file" style='display:none;' accept=".csv"
+            onchange="loadNewFile()">
+        <div class="maas-noprint">
+            <div id="normalMenu" class="w3-bar maas-dark">
+                <!-- create links here as follows
+                    <a href="#" class="w3-bar-item w3-button w3-hide-small">Link 1</a>  
+                -->
+                <a href="javascript:void(0)" class="w3-bar-item w3-button w3-hide-large w3-hide-medium"
+                    onclick="toggleNav()">&#9776;</a>
+            </div>
+
+            <div id="nav" class="w3-bar-block maas-dark w3-hide w3-hide-large w3-hide-medium">
+                <!-- create links here as follows
+                    <a href="#" class="w3-bar-item w3-button">Link 1</a>
+                -->
+            </div>
+        </div>
+
+        <div id="reportTitles">
+            <h2 style="font-weight: bolder;" id="mainTitle">No file loaded</h2>
+            <h4 id="subTitle"></h4>
+        </div>
+        <div class="maas-printonly">
+            <h4>Table of Content</h4>
+            <div id="toc">
+            </div>
+        </div>
+        <br>
+        <div id="data-source"></div>
+        <br>
+        <div id="filter-value"></div>
+        <br>
+        <div class="maas-page-break"></div>
+        <div class="maas-noprint">
+            <div id="log"></div>
+        </div>
+        <br>
+        <div class="maas-chart-container" id="wrapper"></div>
+        <br>
+        <div class="maas-page-break"></div>
+        <footer>
+            <p>metrics-as-a-service (Version Beta, July-2023)</p>
+            <p>Copyright &#169; July 2023 Abhijit Majumdar</p>
+            <p>Powered by HTML5, CSS3, JS,
+                <!-- </a><img src="icons/html5.svg" style= "opacity: 50%;" width="15"><a>, </a>
+                <img src="icons/css3-alt.svg" style= "opacity: 50%;" width="15"><a>, </a>
+                <img src="icons/js.svg" style= "opacity: 50%;" width="15"><a>, </a> -->
+                <a href="https://www.papaparse.com" target="_blank">papaparse</a><a>, </a>
+                <a href="https://apexcharts.com" target="_blank">apexchart</a>
+                <a> and a lot of elbow grease</a>
+            </p>
+            <p>Tested on Macbook (Safari and Chrome) and iPhone X (Safari)</p>
+            <!-- <div id="wcb" class="carbonbadge"></div> -->
+        </footer>
+    </div>
+</body>
+<script>
+    'use strict'
+    setupMTML()
+
+    async function loadDemoFile(demotype) {
+        $l.clear()
+        try {
+            const { configString, reportDate, filename } = $demo.getConfigJSON(demotype)
+
+            $p.setDemoConfig(configString, filename, reportDate)
+            clearCounts()
+            destroyAllCharts()
+            await countNow(filename, undefined, false, "Keep Config")
+            updateDataSource("File: " + filename)
+        } catch (error) {
+            destroyAllCharts()
+            $l.show()
+        }
+    }
+
+    async function loadNewFile() {
+        $l.clear()
+        const files = document.querySelector('#file').files
+        if (files.length == 0) {
+            alert("Please select a file.")
+            return
+        }
+
+        const file = files[0]
+        const configAction = await $p.configAction(file)//  "Keep Config", "Abort Load", "Reset Config"
+
+        if (configAction == "Abort Load") return
+        clearCounts()
+        destroyAllCharts()
+        await countNow(files[0], undefined, false, configAction)
+        updateDataSource("File: " + files[0].name)
+    }
+    async function countNow(file, filter, update = true, configAction) {
+        $l.start()
+        const allCounts = await $c.processCSVFile(file, filter, configAction)
+        saveCounts(allCounts)
+        if (update)
+            updateCharts()
+        else
+            showCharts()
+        showFilters()
+        $l.show()
+    }
+    function clearCounts() {
+        saveCounts({})//localStorage.setItem("allCounts", JSON.stringify({}))
+    }
+    function saveCounts(x) {
+        $is.setItem("allCounts", JSON.stringify(x))
+        //localStorage.setItem("allCounts", JSON.stringify(x))
+    }
+    function getCounts() {
+        return JSON.parse($is.getItem("allCounts"))
+    }
+
+    function createTag(text, colorclass, tooltip) {
+        const tag = document.createElement('span')
+        tag.setAttribute("class", "maas-tag")
+        tag.textContent = text
+        if (tooltip) tag.title = tooltip
+        return tag
+    }
+
+    function showFilters() {
+        const filterValueDiv = document.querySelector('#filter-value')
+        filterValueDiv.innerHTML = ""
+        const { totalRows, filteredRows } = $c.getCountSummary()
+
+        if (filteredRows != totalRows)
+            filterValueDiv.appendChild(createTag(`${filteredRows} out of ${totalRows} rows of data shown`, "w3-pale-blue"))
+
+        else
+            filterValueDiv.appendChild(createTag(`All ${totalRows} rows of data shown`, "w3-pale-blue"))
+
+        const allCounts = getCounts()
+
+        for (const [key, value] of Object.entries(allCounts)) {
+            const excluded = [], included = []
+            for (const [k, v] of Object.entries(allCounts[key])) {
+                if (v.include)
+                    included.push(k)
+                else
+                    excluded.push(k)
+            }
+
+            if (excluded.length > 0) {
+                const isMember = "=", isNotMember = "\u2260"
+                let filterValue = $p.getColProperties(key).title + " "
+                if (included.length <= excluded.length)
+                    filterValue += isMember + " [" + included.join(", ") + "] "
+                else
+                    filterValue += isNotMember + " [" + excluded.join(", ") + "] "
+
+                filterValueDiv.appendChild(createTag(filterValue, "w3-light-gray"))
+            }
+        }
+    }
+    function getChartId(key) {
+        return "CHART_" + key
+    }
+    function getKey(chartId) {
+        return chartId.replace("CHART_", "")
+    }
+    function destroyAllCharts() {
+        destroyApexCharts()
+        const wrapper = document.querySelector('#wrapper')
+        const toc = document.querySelector('#toc')
+        wrapper.innerHTML = ""
+        toc.innerHTML = ""
+    }
+
+    function showCharts() {
+        const mainTitle = document.getElementById("mainTitle")
+        const { reportDate, reportTitle } = $p.getConfig()
+        mainTitle.textContent = reportTitle
+        const subTitle = document.getElementById("subTitle")
+        subTitle.textContent = "Data as of: " + formatDate(reportDate, "DDD DD-MMM-YYYY")
+        var allCounts = getCounts()
+        const wrapper = document.querySelector('#wrapper')
+        const toc = document.querySelector('#toc')
+        wrapper.innerHTML = ""
+        toc.innerHTML = ""
+        for (const [key, value] of Object.entries(allCounts)) {
+
+            const { title, chartSize } = $p.getColProperties(key)
+            const newDiv = document.createElement("div")
+            const spanClass = chartSize == "Small" ? "maas-small" : chartSize == "Medium" ? "maas-medium" : "maas-large"
+            newDiv.setAttribute("class", "maas-chart " + spanClass)
+
+            const canvas = document.createElement("div")
+            const id = getChartId(key)
+            canvas.setAttribute("id", id)
+            newDiv.appendChild(canvas)
+
+            const watermark = document.createElement("div")
+            watermark.textContent = "metrics-as-a-service" //"\u00A9 metrics-as-a-service"
+            watermark.setAttribute("class", "maas-watermark")
+            newDiv.appendChild(watermark)
+
+            wrapper.appendChild(newDiv)
+
+            const tocEntry = document.createElement("a")
+            tocEntry.textContent = title//chartTitle
+            tocEntry.setAttribute("href", "#" + getChartId(key))
+            toc.appendChild(tocEntry)
+            toc.appendChild(document.createElement("br"))
+
+            //create the data for the chart...
+            const chartData = $p.transformDataAndLabels(key, allCounts[key])
+            drawChart(id, $p.getColProperties(key), chartData.data, chartData.labels, chartClick)
+        }
+
+    }
+    async function chartClick(chartid, category) {
+
+        if (category == null) {
+            return
+        }
+
+        let allCounts = getCounts()
+        const key = getKey(chartid)
+        const oneCount = allCounts[key]
+
+        for (const [k, v] of Object.entries(oneCount))
+            if (k != category)
+                v.include = !v.include
+
+        const { file } = $p.getConfig()
+        await countNow(file, allCounts, true, "Keep Config")
+
+    }
+    async function chartResetFilter(chart) {
+
+        let allCounts = getCounts()
+        const key = getKey(chartid)
+        const oneCount = allCounts[key]
+
+        for (const [k, v] of Object.entries(oneCount))
+            v.include = true
+
+        const { file } = $p.getConfig()
+        await countNow(file, allCounts, true, "Keep Config")
+    }
+
+    function updateCharts() {
+        var allCounts = getCounts()
+        for (const [key, value] of Object.entries(allCounts)) {
+            //prepare the data for chart ...
+            const chartData = $p.transformDataAndLabels(key, value)
+            //... update the chart
+            updateChart(key, chartData.data, chartData.labels)
+        }
+    }
+
+    function menu(action) {
+        if (action == "printPDF") {
+            window.print()
+            return
+        }
+
+        if (action == "loaddata") {
+            const fileInput = document.getElementById('file')
+            fileInput.value = "" //forces a reload of same file
+            fileInput.click()
+            return
+        }
+        if (action == "loadconfig") {
+            loadConfigDialog()
+            return
+        }
+
+        if (action == "copyconfig") {
+            navigator.clipboard.writeText($p.getConfigJSON())
+            return
+        }
+
+        if (action == "layout") return showLayoutDialog()
+        if (action == "help") {
+            window.open(
+                'help.html',
+                '_blank' // <- This is what makes it open in a new window.
+            )
+            return
+        }
+        if (action == "feedback") {
+            window.open(
+                "mailto:abhi.majumdar.uk@gmail.com?&subject=Feedback%20on%20metrics%2Das%2Da%2Dservice%20App",
+                "_top"
+            )
+            return
+        }
+        alert("Not yet implemented " + action)
+    }
+    function updateDataSource(sourceName, clear = true) {
+        const dataSource = document.querySelector('#data-source')
+        if (clear) {
+            dataSource.innerHTML = ""
+            dataSource.appendChild(createTag(`Data source`, "w3-pale-blue"))
+        }
+        const nameHasSlash = sourceName.lastIndexOf("/")
+        if (nameHasSlash == -1) {
+            dataSource.appendChild(createTag(sourceName, "w3-pale-blue"))
+            return
+        }
+        const filenameToDisplay = sourceName.substring(nameHasSlash + 1, sourceName.length)
+        dataSource.appendChild(createTag(`...${filenameToDisplay}`, "w3-pale-blue", sourceName))
+    }
+    ///////////////////////////nav bar functions
+    function toggleNav() {
+        const nav = document.getElementById("nav");
+        if (nav.className.indexOf("w3-show") == -1) {
+            nav.className += " w3-show";
+        } else {
+            nav.className = nav.className.replace(" w3-show", "");
+        }
+    }
+    function setupMTML() {
+        function loadmenu(menus) {
+            const nav = document.getElementById("nav")
+            const main = document.getElementById("normalMenu")
+            menus.forEach(v => {
+                const a = document.createElement('a')
+                a.setAttribute("class", "w3-bar-item w3-button w3-hide-small")
+                a.setAttribute("href", "#")
+                a.setAttribute("onclick", v.onclick)
+                a.textContent = v.label
+                main.appendChild(a)
+
+                const aNav = document.createElement('a')
+                aNav.setAttribute("class", "w3-bar-item w3-button")
+                aNav.setAttribute("href", "#")
+                aNav.setAttribute("onclick", v.onclick)
+                aNav.textContent = v.label
+                nav.appendChild(aNav)
+            })
+        }
+
+        const commonMenu = [
+            { onclick: "menu('printPDF')", label: "Print PDF" },
+            { onclick: "menu('help')", label: "Help" },
+            { onclick: "menu('feedback')", label: "Feedback" },
+        ]
+        const demoMenu = [
+            { onclick: "loadDemoFile('State Change')", label: "Demo: State Change" },
+            { onclick: "loadDemoFile('Stories')", label: "Demo: Stories" },
+            { onclick: "loadDemoFile('')", label: "Demo: Incidents" },
+        ]
+        const mainMenu = [
+            { onclick: "menu('loaddata')", label: "Load Data" },
+            { onclick: "menu('layout')", label: "Modify Layout" },
+            { onclick: "menu('copyconfig')", label: "Copy Main Config" },
+            { onclick: "menu('loadconfig')", label: "Paste Main Config" },
+
+        ]
+        const url = new URL(window.location.toLocaleString());
+        const demo = url.searchParams.get("demo")
+       
+        if (demo)
+            loadmenu(demoMenu)
+        else
+            loadmenu(mainMenu)
+        loadmenu(commonMenu)
+        return
+        if (demo) {
+            demobuttons.style.display = "block"
+            normalbuttons.style.display = "none"
+            return
+        }
+        demobuttons.style.display = "none"
+        normalbuttons.style.display = "block"
+    }
+
+</script>
+
+</html>
