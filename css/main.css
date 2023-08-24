@@ -1,0 +1,318 @@
+:root {
+    --maas-bg-color: #dceaf4;
+    /* --maas-font-family: 'Raleway', sans-serif; */
+    --maas-font-family: 'Trebuchet MS', sans-serif;
+
+    --maas-primary-color-very-very-light: #F6F9FE;
+    --maas-primary-color-very-light: #DEE9FC;
+    --maas-primary-color-light: #6395F2;
+    --maas-primary-color: #1258DC;
+    --maas-primary-color-dark: #0A337F;
+    --maas-primary-color-very-dark: #091834;
+    /* --maas-primary-color-very-dark: red; */
+    --maas-light-green: #C0DF81;
+    --maas-green: #98CA32;
+    --maas-light-amber: #FDB768;
+    --maas-amber: #FB8604;
+    --maas-light-red: #FE8176;
+    --maas-red: #FE2712;
+    /* --maas-chart-colors */
+    /* --maas-chart-color-1: #F7DDD4;
+    --maas-chart-color-2: #FD4D0C;
+    --maas-chart-color-3: #6395F2;
+    --maas-chart-color-4: #FCBA12;
+    --maas-chart-color-5: #342809; */
+
+    /* --maas-chart-color-1: hsl(219, 85%, 67%);
+    --maas-chart-color-4: hsl(279, 85%, 67%);
+    --maas-chart-color-2: hsl(339, 85%, 67%);
+    --maas-chart-color-5: hsl(399, 85%, 67%);
+    --maas-chart-color-3: hsl(459, 85%, 67%); */
+
+    --maas-chart-color-1: hsl(219, 85%, 67%);
+    --maas-chart-color-6: hsl(259, 85%, 67%);
+    --maas-chart-color-2: hsl(299, 85%, 67%);
+    --maas-chart-color-7: hsl(339, 85%, 67%);
+    --maas-chart-color-3: hsl(19, 85%, 67%);
+    --maas-chart-color-8: hsl(59, 85%, 67%);
+    --maas-chart-color-4: hsl(99, 85%, 67%);
+    --maas-chart-color-9: hsl(139, 85%, 67%);
+    --maas-chart-color-5: hsl(179, 85%, 67%);
+
+    /* --maas-red: hsl(339, 85%, 67%);
+    --maas-light-red: hsl(19, 85%, 67%);
+    --maas-amber: hsl(59, 85%, 67%);
+    --maas-light-green: hsl(99, 85%, 67%);
+    --maas-green: hsl(139, 85%, 67%); */
+}
+
+.w3-button:hover {
+    color: #000 !important;
+    background-color: var(--maas-primary-color-very-light) !important;
+}
+/* * {
+    color-scheme: dark;
+} */
+
+body {
+    font-family: var(--maas-font-family);
+    color: var(--maas-primary-color-very-dark);
+    font-size: 1rem;
+    line-height: 1.4;
+}
+
+.maas-tag {
+    /* background-color: var(--maas-bg-color); */
+    background-color: var(--maas-primary-color-very-light);
+    color: var(--maas-primary-color-very-dark);
+    display: inline-block;
+    padding: 8px;
+    /* padding-right: 8px; */
+    text-align: left;
+    border: 1px solid white;
+    cursor: default;
+}
+
+
+.maas-very-light {
+    background-color: var(--maas-primary-color-very-light);
+    color: var(--maas-primary-color-very-dark);
+    /* font-weight: bold; */
+}
+
+.maas-light {
+    background-color: var(--maas-primary-color-light);
+    color: var(--maas-primary-color-very-dark);
+    /* font-weight: bold; */
+}
+
+.maas-dark {
+    background-color: var(--maas-primary-color-dark);
+    color: var(--maas-primary-color-very-light);
+    /* font-weight: bold; */
+}
+
+.maas-very-dark {
+    background-color: var(--maas-primary-color-very-dark);
+    color: var(--maas-primary-color-very-light);
+    /* font-weight: bold; */
+}
+
+.maas-button {
+    color: var(--maas-primary-color-very-light);
+    background-color: var(--maas-primary-color-dark);
+    border: 1px solid white;
+    display: inline-block;
+    padding: 16px 16px;
+    vertical-align: middle;
+    overflow: hidden;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    white-space: nowrap
+}
+
+.maas-button-light {
+    background-color: var(--maas-primary-color-very-light);
+    /* background-color: white; */
+    color: var(--maas-primary-color-very-dark);
+    border: 1px solid white;
+    margin: 4px;
+    display: inline-block;
+    padding: 8px 16px;
+    vertical-align: middle;
+    overflow: hidden;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    white-space: nowrap
+}
+
+.maas-button:hover {
+    /* background-color: rgb(3, 127, 243); */
+    background-color: var(--maas-primary-color);
+}
+
+.maas-button-light:hover {
+    /* background-color: rgb(3, 127, 243); */
+    background-color: var(--maas-primary-color-very-dark);
+    color: var(--maas-primary-color-very-light);
+}
+
+.maas-input {
+    background-color: var(--maas-primary-color-very-light);
+    padding: 8px;
+    display: block;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    width: 100%
+}
+
+.maas-table {
+    border: 1px solid #ccc
+}
+
+/* .maas-table tr {
+    border-bottom: 0px solid #ddd
+} */
+
+.maas-table tr:nth-child(odd) {
+    background-color: #fff
+}
+
+.maas-table tr:nth-child(even) {
+    background-color: rgb(239, 236, 236)
+}
+
+.maas-table td,
+.maas-table th {
+    padding: 8px 8px;
+    display: table-cell;
+    text-align: left;
+    vertical-align: top
+}
+
+.maas-table th {
+    font-weight: bold;
+    position: sticky;
+    background-color: white;
+    top: 0;
+}
+
+.maas-table th:first-child,
+.maas-table td:first-child {
+    padding-left: 16px;
+}
+
+.maas-table tr:hover {
+    background-color: var(--maas-primary-color-very-light);
+}
+
+dialog {
+    padding: 5%;
+    /* border: 1px solid var(--maas-primary-color-dark); */
+    background-color: white;
+    border: white;
+    /* box-shadow: 5px 5px 5px lightslategrey; */
+    box-shadow: 8px 8px 8px 8px rgba(0, 0, 0, 0.2);
+    /* margin: 2%; */
+    /* width: 400px; */
+}
+
+dialog>div {
+    padding: 2%;
+    /* margin: 2%; */
+}
+
+
+
+/* maas css --------------------------*/
+@media all {
+    .maas-page-break {
+        display: none;
+    }
+}
+
+.maas-printonly {
+    display: none;
+}
+
+.maas-watermark {
+    font-size: 10px;
+    height: 15px;
+}
+
+.maas-log-warning {
+    background-color: var(--maas-light-amber);
+    padding: .5%;
+}
+
+.maas-log-error {
+    background-color: var(--maas-light-red);
+    padding: .5%;
+}
+
+.maas-small,
+.maas-medium,
+.maas-large {
+    grid-column: span 1;
+}
+
+.maas-chart-container {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    margin: 0 auto;
+    gap: .5rem;
+    /* font-size: 2vw; */
+}
+
+.maas-chart {
+    /* .chart-container > div {  */
+    /* background-color: var(--maas-bg-color); */
+    background-color: var(--maas-primary-color-very-very-light);
+    /* background-color: var(--maas-primary-color-dark); */
+    /* border: 1px solid var(--maas-primary-color); */
+    border: 1px solid #fff;
+    padding: 20px;
+    transition: .5s;
+    /* font-size: 5vw; */
+}
+
+.maas-chart:hover {
+    /* background-color: white; */
+    /* border: 1px solid var(--maas-primary-color-very-dark); */
+    /* box-shadow:  0px 0px 16px 0px #000000; */
+    /* box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.2); */
+    background-color: var(--maas-primary-color-very-light);
+    transform: scale(1.05);
+}
+
+@media (min-width: 600px) {
+    .maas-chart-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .maas-small {
+        grid-column: span 1;
+    }
+
+    .maas-medium {
+        grid-column: span 2;
+    }
+
+    .maas-large {
+        grid-column: span 2;
+    }
+}
+
+@media (min-width: 900px) {
+    .maas-chart-container {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .maas-small {
+        grid-column: span 1;
+    }
+
+    .maas-medium {
+        grid-column: span 2;
+    }
+
+    .maas-large {
+        grid-column: span 3;
+    }
+}
+
+textarea,
+select,
+input[type=text],
+input[type=url],
+input[type=tel],
+input[type=number],
+input[type=color],
+input[type=email] {
+    border: 1px solid var(--maas-primary-color-very-light);
+    /* padding: 8px; */
+    background: rgba(255, 255, 255, 0.5);
+    /* margin: 0 0 10px 0; */
+}
