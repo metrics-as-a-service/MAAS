@@ -406,10 +406,11 @@
         ]
         const url = new URL(window.location.toLocaleString());
         const demo = url.searchParams.get("demo")
-       
-        if (demo)
+        
+        if (demo) {
             loadmenu(demoMenu)
-        else
+            document.title += " Demo" 
+        } else
             loadmenu(mainMenu)
         loadmenu(commonMenu)
         return
