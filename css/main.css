@@ -50,6 +50,7 @@
     color: #000 !important;
     background-color: var(--maas-primary-color-very-light) !important;
 }
+
 /* * {
     color-scheme: dark;
 } */
@@ -148,9 +149,14 @@ body {
     width: 100%
 }
 
-.maas-table {
-    border: 1px solid #ccc
+.maas-note {
+    font-size: 85%;
 }
+
+.maas-table {
+    border: 1px solid #ccc;
+    font-size: 85%;
+}   
 
 /* .maas-table tr {
     border-bottom: 0px solid #ddd
@@ -218,7 +224,7 @@ dialog>div {
 }
 
 .maas-watermark {
-    font-size: 10px;
+    font-size: 8px;
     height: 15px;
 }
 
