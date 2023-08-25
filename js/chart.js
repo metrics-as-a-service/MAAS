@@ -453,10 +453,10 @@ function createMessageChart(id, col, data, labels, clickCallback) {
 
     //create wrapper
     const wrapper = document.createElement('div')
-    wrapper.setAttribute("class", "w3-responsive w3-margin-top")
+    wrapper.setAttribute("class", "w3-responsive w3-margin-top maas-note")
 
     wrapper.style.height = (CHART_HEIGHT * .95) + "px"
-    wrapper.style.overflow = "auto"
+    //wrapper.style.overflow = "auto"
 
     const msg = document.createElement('div')
     const lines = message.split("\n") //"xx lhjsdad soaioshis osihdoih ".split("\n") // message.split("\n") 

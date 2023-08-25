@@ -64,6 +64,7 @@ var $c = (function () {
 
         return new Promise((resolve) => {
             Papa.parse(file, {
+                delimiter: ",",
                 download: true,
                 header: true,
                 step: function (row) {
