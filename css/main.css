@@ -1,21 +1,25 @@
 :root {
-    --maas-bg-color: #dceaf4;
+    /* --maas-bg-color: #dceaf4; */
     /* --maas-font-family: 'Raleway', sans-serif; */
+    /* --maas-font-family: 'Arial', sans-serif; */
+    /* --maas-font-family: 'Verdana', sans-serif; */
+    /* --maas-font-family: 'Tahoma', sans-serif; */
     --maas-font-family: 'Trebuchet MS', sans-serif;
+    /* --maas-font-family: 'Trebuchet MS', sans-serif; */
 
-    --maas-primary-color-very-very-light: #F6F9FE;
+    /* --maas-primary-color-very-very-light: #F6F9FE;
     --maas-primary-color-very-light: #DEE9FC;
     --maas-primary-color-light: #6395F2;
     --maas-primary-color: #1258DC;
     --maas-primary-color-dark: #0A337F;
-    --maas-primary-color-very-dark: #091834;
+    --maas-primary-color-very-dark: #091834; */
     /* --maas-primary-color-very-dark: red; */
-    --maas-light-green: #C0DF81;
+    /* --maas-light-green: #C0DF81;
     --maas-green: #98CA32;
     --maas-light-amber: #FDB768;
     --maas-amber: #FB8604;
     --maas-light-red: #FE8176;
-    --maas-red: #FE2712;
+    --maas-red: #FE2712; */
     /* --maas-chart-colors */
     /* --maas-chart-color-1: #F7DDD4;
     --maas-chart-color-2: #FD4D0C;
@@ -29,7 +33,7 @@
     --maas-chart-color-5: hsl(399, 85%, 67%);
     --maas-chart-color-3: hsl(459, 85%, 67%); */
 
-    --maas-chart-color-1: hsl(219, 85%, 67%);
+    /* --maas-chart-color-1: hsl(219, 85%, 67%);
     --maas-chart-color-6: hsl(259, 85%, 67%);
     --maas-chart-color-2: hsl(299, 85%, 67%);
     --maas-chart-color-7: hsl(339, 85%, 67%);
@@ -37,18 +41,72 @@
     --maas-chart-color-8: hsl(59, 85%, 67%);
     --maas-chart-color-4: hsl(99, 85%, 67%);
     --maas-chart-color-9: hsl(139, 85%, 67%);
-    --maas-chart-color-5: hsl(179, 85%, 67%);
+    --maas-chart-color-5: hsl(179, 85%, 67%); */
 
     /* --maas-red: hsl(339, 85%, 67%);
     --maas-light-red: hsl(19, 85%, 67%);
     --maas-amber: hsl(59, 85%, 67%);
     --maas-light-green: hsl(99, 85%, 67%);
     --maas-green: hsl(139, 85%, 67%); */
+
+    /* generated via huemint bootstarp colors */
+    /* --maas-color-white: #ffffff;
+    --maas-color-light: #abdadf;
+    --maas-color-dark: #0d0804;
+    --maas-color-primary: #00374b;
+    --maas-color-secondary: #0072a7;
+    --maas-color-info: #20a0d0;
+    --maas-color-accent1: #e336bf;
+    --maas-color-accent2: #796589;
+    --maas-color-accent3: #a39baa;
+    --maas-color-success: #00a757;
+    --maas-color-warning: #e7ca00;
+    --maas-color-danger: #f60015; */
+
+    --maas-color-white: #ffffff;
+    --maas-color-light: #dee3f3;
+    --maas-color-dark: #131215;
+    --maas-color-primary: #093bac;
+    --maas-color-secondary: #0e6fd3;
+    --maas-color-info: #359ce3;
+    --maas-color-accent1: #484049;
+    --maas-color-accent2: #db5832;
+    --maas-color-accent3: #a8adb9;
+    --maas-color-success: #06a660;
+    --maas-color-warning: #e2cc06;
+    --maas-color-danger: #f21b02;
+
+    --maas-font-color: color-mix(in lch, var(--maas-color-dark), var(--maas-color-info));
+
+    --maas-primary-color-very-very-light: var(--maas-color-white);
+    --maas-primary-color-very-light: var(--maas-color-light);
+    --maas-primary-color-light: var(--maas-color-secondary);
+    --maas-primary-color: var(--maas-color-info);
+    --maas-primary-color-dark: var(--maas-color-primary);
+    --maas-primary-color-very-dark: var(--maas-color-dark);
+
+    --maas-green: var(--maas-color-success);
+    --maas-green-amber: color-mix(in lch, var(--maas-color-success), var(--maas-color-warning));
+    /* --maas-light-amber: color-mix(in lch, var(--maas-color-success), var(--maas-color-warning)); */
+    --maas-amber: var(--maas-color-warning);
+    --maas-amber-red: color-mix(in lch, var(--maas-color-danger), var(--maas-color-warning));
+    /* --maas-light-red: color-mix(in lch, var(--maas-color-warning), var(--maas-color-danger)); */
+    --maas-red: var(--maas-color-danger);
+
+    --maas-chart-color-1: var(--maas-color-info);
+    --maas-chart-color-2: var(--maas-color-accent1);
+    --maas-chart-color-3: var(--maas-color-accent2);
+    --maas-chart-color-4: var(--maas-color-accent3);
+    --maas-chart-color-5: var(--maas-color-primary);
+    --maas-chart-color-6: var(--maas-color-secondary);
+    --maas-chart-color-7: var(--maas-color-success);
+    --maas-chart-color-8: var(--maas-color-warning);
+    --maas-chart-color-9: var(--maas-color-danger);
 }
 
 .w3-button:hover {
     color: #000 !important;
-    background-color: var(--maas-primary-color-very-light) !important;
+    background-color: var(--maas-color-light) !important;
 }
 
 /* * {
@@ -57,15 +115,18 @@
 
 body {
     font-family: var(--maas-font-family);
-    color: var(--maas-primary-color-very-dark);
-    font-size: 1rem;
+    /* color: color-mix(in lch, var(--maas-color-dark), var(--maas-color-primary)); */
+    color: var(--maas-font-color);
+    /* background-image: linear-gradient(to right, var(--maas-color-white), var(--maas-color-light)); */
+    /* font-size: 1rem; */
     line-height: 1.4;
 }
 
 .maas-tag {
-    /* background-color: var(--maas-bg-color); */
-    background-color: var(--maas-primary-color-very-light);
-    color: var(--maas-primary-color-very-dark);
+    background-color: var(--maas-color-info);
+    /* background-color: var(--maas-primary-color-very-light); */
+    /* color: var(--maas-primary-color-very-dark); */
+    color: var(--maas-color-white);
     display: inline-block;
     padding: 8px;
     /* padding-right: 8px; */
@@ -79,6 +140,10 @@ body {
     background-color: var(--maas-primary-color-very-light);
     color: var(--maas-primary-color-very-dark);
     /* font-weight: bold; */
+}
+
+.maas-icon {
+    color: var(--maas-font-color) !important;
 }
 
 .maas-light {
@@ -113,11 +178,19 @@ body {
     white-space: nowrap
 }
 
-.maas-button-light {
-    background-color: var(--maas-primary-color-very-light);
-    /* background-color: white; */
-    color: var(--maas-primary-color-very-dark);
+/* .maas-button {
+    color: var(--maas-primary-color-very-light);
+    background-color: var(--maas-primary-color-dark);
     border: 1px solid white;
+} */
+.maas-button:hover {
+    background-color: var(--maas-primary-color);
+}
+
+/* .maas-button-light {
+    background-color: var(--maas-color-white);
+    color: var(--maas-primary-color-very-dark);
+    border: 1px solid var(--maas-color-info);
     margin: 4px;
     display: inline-block;
     padding: 8px 16px;
@@ -127,36 +200,37 @@ body {
     text-align: center;
     cursor: pointer;
     white-space: nowrap
+} */
+.maas-input,
+.maas-button-light {
+    background-color: var(--maas-color-white);
+    color: var(--maas-primary-color-very-dark);
+    border: 1px solid var(--maas-color-info);
+    margin: 4px;
 }
 
-.maas-button:hover {
-    /* background-color: rgb(3, 127, 243); */
-    background-color: var(--maas-primary-color);
+select.maas-input {
+    height: 40px;
 }
 
 .maas-button-light:hover {
-    /* background-color: rgb(3, 127, 243); */
     background-color: var(--maas-primary-color-very-dark);
     color: var(--maas-primary-color-very-light);
 }
 
-.maas-input {
-    background-color: var(--maas-primary-color-very-light);
+/* .maas-input {
+    background-color: var(--maas-color-info);
     padding: 8px;
     display: block;
     border: none;
     border-bottom: 1px solid #ccc;
     width: 100%
-}
-
-.maas-note {
-    font-size: 85%;
-}
+} */
 
 .maas-table {
     border: 1px solid #ccc;
     font-size: 85%;
-}   
+}
 
 /* .maas-table tr {
     border-bottom: 0px solid #ddd
@@ -180,6 +254,7 @@ body {
 
 .maas-table th {
     font-weight: bold;
+    position: -webkit-sticky;
     position: sticky;
     background-color: white;
     top: 0;
@@ -190,9 +265,9 @@ body {
     padding-left: 16px;
 }
 
-.maas-table tr:hover {
+/* .maas-table tr:hover {
     background-color: var(--maas-primary-color-very-light);
-}
+} */
 
 dialog {
     padding: 5%;
@@ -226,15 +301,26 @@ dialog>div {
 .maas-watermark {
     font-size: 8px;
     height: 15px;
+    /* vertical-align: bottom; */
+    /* position: absolute; */
+    /* bottom: 0;  */
 }
 
 .maas-log-warning {
-    background-color: var(--maas-light-amber);
+    border: 2px solid var(--maas-color-warning);
+    /* background-color: var(--maas-color-warning); */
+    padding: .5%;
+}
+
+.maas-log-info {
+    border: 2px solid var(--maas-color-info);
+    /* background-color: var(--maas-color-warning); */
     padding: .5%;
 }
 
 .maas-log-error {
-    background-color: var(--maas-light-red);
+    border: 2px solid var(--maas-color-danger);
+    /* background-color: var(--maas-color-danger); */
     padding: .5%;
 }
 
@@ -255,21 +341,21 @@ dialog>div {
 .maas-chart {
     /* .chart-container > div {  */
     /* background-color: var(--maas-bg-color); */
-    background-color: var(--maas-primary-color-very-very-light);
+    /* background-color: var(--maas-primary-color-very-light); */
+    background-color: color-mix(in lch, var(--maas-color-light), var(--maas-color-white));
+    ;
     /* background-color: var(--maas-primary-color-dark); */
-    /* border: 1px solid var(--maas-primary-color); */
-    border: 1px solid #fff;
+    /* border: 1px solid var(--maas-primary-color-light); */
+    /* box-shadow: 0px 0px 8px 8px rgba(0, 0, 0, 0.2); */
+    /* border: 1px solid #ebe6e6; */
     padding: 20px;
     transition: .5s;
+    /* aspect-ratio: 16 / 10; */
     /* font-size: 5vw; */
 }
 
 .maas-chart:hover {
-    /* background-color: white; */
-    /* border: 1px solid var(--maas-primary-color-very-dark); */
-    /* box-shadow:  0px 0px 16px 0px #000000; */
-    /* box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.2); */
-    background-color: var(--maas-primary-color-very-light);
+    background-color: var(--maas-color-light);
     transform: scale(1.05);
 }
 
@@ -306,19 +392,54 @@ dialog>div {
 
     .maas-large {
         grid-column: span 3;
+        /* grid-row: span 3; */
     }
 }
 
-textarea,
-select,
-input[type=text],
-input[type=url],
-input[type=tel],
-input[type=number],
-input[type=color],
-input[type=email] {
-    border: 1px solid var(--maas-primary-color-very-light);
-    /* padding: 8px; */
-    background: rgba(255, 255, 255, 0.5);
-    /* margin: 0 0 10px 0; */
+.maas-dialog-error {
+    /* border: 1px solid var(--maas-color-danger); */
+    color: var(--maas-color-danger);
 }
+
+details.maas-help {
+    padding-top: .5%;
+    padding-bottom: .5%;
+}
+
+.maas-help>mark {
+    background-color: var(--maas-primary-color-very-light);
+}
+
+summary.maas-help {
+    background-color: var(--maas-primary-color);
+    color: white;
+    /* var(--maas-primary-color-very-light);  */
+    /* font-weight: 900; */
+    /* color: var(--maas-primary-color-very-light); */
+    padding: 1%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--maas-font-family);
+}
+
+/* TO DO following works but need to make it proper */
+
+/* :focus-visible {
+    outline: 3px solid red;
+} */
+
+/* summary>p {
+    -webkit-transition: max-height 1s;
+    -moz-transition: max-height 1s;
+    -ms-transition: max-height 1s;
+    -o-transition: max-height 1s;
+    transition: max-height 1s;
+    overflow: hidden;
+    max-height: 0;
+} */
