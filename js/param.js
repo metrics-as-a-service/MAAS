@@ -1,15 +1,19 @@
 ////common functions
 'use strict'
-
+const DISPLAY_OTHERS = "..."
+const DISPLAY_INVALID = "?"
+const DISPLAY_LESS = "<"
+const DISPLAY_MORE = ">"
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",]
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 const WORKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"]
+
 function formatDate(date, format) {
     const newDate = new Date(date)
     const dateparts = newDate.toDateString().split(" ") //datepart = Thu Jul 13 2023 (DDD MMM DD YYYY)
 
     const DDD = dateparts[0]
-    if (DDD == "Invalid") return "?"
+    if (DDD == "Invalid") return DISPLAY_INVALID
     if (!format) return true
     const MMM = dateparts[1]
     const monthNumber = newDate.getMonth() + 1
@@ -39,7 +43,8 @@ function isValidDate(date) {// checks for "YYYY-MM-DD" or DD-MMM-YY {
     }
     if (!date) return false
 
-    const dateWithHyphen = date.toUpperCase().replaceAll("/", "-") // allow for / as a separater 
+    // const dateWithHyphen = date.toUpperCase().replaceAll("/", "-") // allow for / as a separater 
+    const dateWithHyphen = date
 
     const YYYY_MM_DD = /[0-9]{4}-[0-9]{2}-[0-9]{2}/g;
     if (dateWithHyphen.search(YYYY_MM_DD) == 0) {
@@ -101,10 +106,6 @@ const dateTimeDiff = function (dateTimeStart, dateTimeEnd, format = "Days") {
     if (formatUC == "WORKDAYS") return workdays(start, end)
 }
 
-function test_dateTimeDiff() {
-
-}
-
 const addDays = function (dateTimeStart, days) {
     const start = new Date(dateTimeStart)
     start.setDate(start.getDate() + days);
@@ -114,7 +115,8 @@ const _getCSSVar = function (v) {
     const style = getComputedStyle(document.body)
     return style.getPropertyValue(v)
 }
-//////////////////////
+
+//////////////////////////////////////////////////////////////
 let $p = (function () {
     'use strict'
     var $ = {};// public object - returned at end of module
@@ -122,7 +124,14 @@ let $p = (function () {
     let demoDate = ""
     const chartTypes = {
         "Date": {
-            formats: ["YYYY", "MMM", "MMM-YY", "DDD", "DD", "W4"],
+            formats: ["YYYY", "MMM", "MMM-YY", "DDD", "DD", "W-8", "W-4+4", "W+8"],
+            getminmax: (dateFormat) => {
+                const hasMinus = dateFormat.indexOf("-")
+                const min = hasMinus == -1 ? 0 : -Number(dateFormat[hasMinus + 1])
+                const hasPlus = dateFormat.indexOf("+")
+                const max = hasPlus == -1 ? 0 : Number(dateFormat[hasPlus + 1])
+                return { min, max }
+            },
             orderedValues: (col) => {
                 const { dateFormat } = col
                 if (!dateFormat) return []
@@ -133,15 +142,18 @@ let $p = (function () {
                     for (let i = 1; i < 32; i++) days.push(i)
                     return days
                 }
-                if (dateFormat == "W4") {
-                    const weeks = ["<", "-4W", "-3W", "-2W", "-1W", "0W", "1W", "2W", "3W", "4W", ">"]
+                if (dateFormat.substring(0, 1) == "W") {
+                    const { min, max } = chartTypes['Date'].getminmax(dateFormat)
+                    const weeks = ["<"]
+                    for (let i = min; i <= max; i++) weeks.push(i + "W")
+                    weeks.push(">")
                     return weeks
                 }
                 return []
             },
             sortKey: (v, col) => {
                 const { dateFormat } = col
-                if (v == "?") return v
+                if (v == DISPLAY_INVALID) return v
                 if (dateFormat == "MMM") {
                     const m = MONTHS.findIndex((val) => val == v)
                     console.assert(m != -1, `MMM failed value: ${v}`)
@@ -167,20 +179,22 @@ let $p = (function () {
                 return v
             },
             formatValue: (v, col) => {
+                if (!isValidDate(v)) return "?"
+
                 const { dateFormat } = col
-                let fomateddate
-                if (dateFormat == "W4") {
-                    function formatWeek(w) {
-                        if (w < -4) return "<"
-                        if (w > 4) return ">"
-                        return w.toString() + "W"
-                    }
-                    const weeks = Math.floor(dateTimeDiff(config.reportDate, v, "Days") / 7)
-                    fomateddate = formatWeek(weeks)
-                    //console.log({v, weeks, fomateddate})
+                if (dateFormat.substring(0, 1) != "W") {
+                    const fomateddate = formatDate(v, dateFormat)
+                    return { formatedValue: fomateddate, unFormatedValue: chartTypes['Date'].sortKey(fomateddate, col) }
                 }
-                else
-                    fomateddate = formatDate(v, dateFormat)
+                function formatWeek(w, min, max) {
+                    if (w < min) return "<"
+                    if (w > max) return ">"
+                    return w.toString() + "W"
+                }
+                const { min, max } = chartTypes['Date'].getminmax(dateFormat)
+
+                const weeks = Math.floor(dateTimeDiff(config.reportDate, v, "Days") / 7)
+                const fomateddate = formatWeek(weeks, min, max)
 
                 return { formatedValue: fomateddate, unFormatedValue: chartTypes['Date'].sortKey(fomateddate, col) }
             }
@@ -220,7 +234,7 @@ let $p = (function () {
                         unFormatedValue: v//bin[binIndex - 1] + 0
                     }
                 }
-                if (isNaN(v)) return returnValue("?", v)
+                if (isNaN(v)) return returnValue(DISPLAY_INVALID, v)
                 const { bin } = col
                 if (!bin) returnValue(v, v)
 
@@ -241,9 +255,11 @@ let $p = (function () {
                 return binValues
             },
         },
-        'List': {
-            // cannotFilter: true,
-            //hasSpecialCounter: true,
+        'List Members': {
+            cannotFilter: true,
+            hasSpecialCounter: true,
+        },
+        'List Count': {
             formatValue: (v, col) => {
                 function countMembers() {
                     let count = 0
@@ -251,12 +267,6 @@ let $p = (function () {
                         if (v.trim() != "") count++
                     })
                     return count
-                }
-                function countByMember() {
-                    listmembers.forEach(v => {
-                        const member = v.trim()
-                    })
-
                 }
                 const { separator } = col
                 const list = v.trim()
@@ -276,12 +286,12 @@ let $p = (function () {
             cannotFilter: true,
             formatValue: (v, col, row) => {
                 function reformat(x) {
-                    if (!x) return "?"
-                    if (isNaN(x)) return "?"
-                    if (x < 1 || x > 5) return "?"
+                    if (!x) return DISPLAY_INVALID
+                    if (isNaN(x)) return DISPLAY_INVALID
+                    if (x < 1 || x > 5) return DISPLAY_INVALID
                     return x.toString()
                 }
-                if (!col || !row) return { formatedValue: "?", unFormatedValue: "?" }
+                if (!col || !row) return { formatedValue: DISPLAY_INVALID, unFormatedValue: DISPLAY_INVALID }
                 const { impactCol, likelihoodCol } = col
                 const impact = row[impactCol]
                 const likelihood = row[likelihoodCol]
@@ -292,7 +302,7 @@ let $p = (function () {
         '2X2': {
             cannotFilter: true,
             formatValue: (v, col, row) => {
-                if (!col || !row) return { formatedValue: "?", unFormatedValue: "?" }
+                if (!col || !row) return { formatedValue: DISPLAY_INVALID, unFormatedValue: DISPLAY_INVALID }
                 const { xCol, yCol } = col
                 const x = row[xCol].trim()
                 const y = row[yCol].trim()
@@ -304,7 +314,7 @@ let $p = (function () {
             cannotFilter: true,
             hasSpecialCounter: true,
             formatValue: (v, col, row) => {
-                if (!col || !row) return { formatedValue: "?", unFormatedValue: "?" }
+                if (!col || !row) return { formatedValue: DISPLAY_INVALID, unFormatedValue: DISPLAY_INVALID }
                 const { fromCol, toCol } = col
                 const to = row[toCol].trim()
                 const from = row[fromCol].trim()
@@ -313,6 +323,7 @@ let $p = (function () {
             }
         },
         'Data Table': { cannotFilter: true, hasSpecialCounter: true },
+        'Data Description': { cannotFilter: true, hasSpecialCounter: true },
         'Plan': { cannotFilter: true, hasSpecialCounter: true },
         'Trend': {
             cannotFilter: true,
@@ -342,7 +353,7 @@ let $p = (function () {
                 const { trendStartDate } = col
                 const trendEndDate = config.reportDate
                 if (!isValidDate(v)) {
-                    return { formatedValue: "?", unFormatedValue: "?" }
+                    return { formatedValue: DISPLAY_INVALID, unFormatedValue: DISPLAY_INVALID }
                 }
                 // let date = dateparts[4]
                 if (v <= trendStartDate) return { formatedValue: trendStartDate, unFormatedValue: trendStartDate }
@@ -370,7 +381,7 @@ let $p = (function () {
     }
     $.getFotmattedValue = function (col, value, row) {
         const { type } = col
-        const invalidvalues = { formatedValue: "?", unFormatedValue: "?" }
+        const invalidvalues = { formatedValue: DISPLAY_INVALID, unFormatedValue: DISPLAY_INVALID }
 
         if (!type) return invalidvalues
         if (!chartTypes[type]) return invalidvalues
@@ -414,12 +425,6 @@ let $p = (function () {
                     trimmedValue = formatDate(trimmedValue, "YYYY-MM-DD")
                 }
                 row[key] = trimmedValue
-                // if (demoDate == "") return
-                // if (isValidDate(value)) {
-                //     const today = new Date().toISOString().substring(0, 10)
-                //     const daysToAdd = dateTimeDiff(demoDate, today, "Days")
-                //     row[key] = addDays(value, daysToAdd)
-                // }
             }
         }
         function addNewColumns() {
@@ -444,14 +449,13 @@ let $p = (function () {
         return v.filteredCount
     }
     $.transformDataAndLabels = function (i, dataIn) {
-        const sortArrayOfObjects = (arr, propertyName, order = 'a') => {
+        const sortArrayOfObjects = (arr, sortparams) => { //propertyName, order = 'a') => {
+            const { propertyName, order } = sortparams
             const sortedArr = arr.sort((a, b) => {
-                if (a[propertyName] < b[propertyName]) {
-                    return -1;
-                }
-                if (a[propertyName] > b[propertyName]) {
-                    return 1;
-                }
+                const avalue = a[propertyName]
+                const bvalue = b[propertyName]
+                if (avalue < bvalue) return -1;
+                if (avalue > bvalue) return 1;
                 return 0;
             });
 
@@ -473,12 +477,87 @@ let $p = (function () {
 
         const { countType, type, bin, order } = config.cols[i]
 
+        const datapoints = Object.keys(dataIn).length
+
+        // if (type == "Data") {
+        //     function datatablevalues() {
+        //         const data = [], labels = []
+        //         const dataLength = Object.keys(dataIn).length
+        //         for (i = 1; i <= dataLength; i++) {
+        //             labels.push(i)
+        //             data.push({ "": i, ...dataIn[i].filteredValue })
+        //         }
+        //         return { labels, data }
+        //     }
+
+        //     function datadescriptionvalues() {
+        //         const data = [], labels = []
+        //         const headers = {
+        //             spaceCount: "Spaces: #",
+        //             numberStringCount: "Strings: #", maxstring: "String: Max", minstring: "String: Min",
+        //             numberDateCount: "Date: #", maxdate: "Date: Max", mindate: "Date: Min", avDate: "Date: Av",
+        //             numberValueCount: "Number: #", maxnumber: "Number: Max", minnumber: "Number: Min", avnumber: "Number: Av",
+        //         }
+
+        //         let i = 0
+        //         for (const head of Object.keys(headers)) {
+        //             const entry = {}
+        //             entry[""] = headers[head]
+        //             for (const key of Object.keys(dataIn)) {
+        //                 entry[key] = dataIn[key][head] ?? ""
+        //             }
+        //             data.push(entry)
+        //             labels.push(i++)
+        //         }
+        //         return { labels, data }
+        //     }
+
+        //     const { dataformat } = config.cols[i]
+        //     if (dataformat == "Table") return datatablevalues()
+        //     return datadescriptionvalues()
+        // }
+
         if (type == "Data Table") {
             let data = [], labels = []
             const dataLength = Object.keys(dataIn).length
             for (i = 1; i <= dataLength; i++) {
                 labels.push(i)
-                data.push(dataIn[i].filteredValue)
+                data.push({ "#": i, ...dataIn[i].filteredValue })
+            }
+            return { labels, data }
+        }
+        if (type == "Data Description") {
+            let data = [], labels = []
+            const headers = {
+                spaceCount: "Spaces: #",
+                numberStringCount: "Strings: #", maxstring: "String: Max", minstring: "String: Min",
+                numberDateCount: "Date: #", maxdate: "Date: Max", mindate: "Date: Min", /* avDate: "Date: Av", */
+                numberValueCount: "Number: #", maxnumber: "Number: Max", minnumber: "Number: Min", /* avnumber: "Number: Av", */
+            }
+            // const dataLength = Object.keys(dataIn).length
+            // console.log(dataIn)
+            const head = Object.keys(dataIn)
+            let i = 0
+
+            // for (const key of Object.keys(dataIn)) {
+            //     const entry = {}
+            //     entry[""] = key
+            //     for (const head of Object.keys(headers)) {
+            //         const h = headers[head]
+            //         entry[h] = dataIn[key][head] ?? ""
+            //     }
+            //     data.push(entry)
+            //     labels.push(i++)
+            // }
+
+            for (const head of Object.keys(headers)) {
+                const entry = {}
+                entry["Attributes"] = headers[head]
+                for (const key of Object.keys(dataIn)) {
+                    entry[key] = dataIn[key][head] ?? ""
+                }
+                data.push(entry)
+                labels.push(i++)
             }
             return { labels, data }
         }
@@ -494,6 +573,47 @@ let $p = (function () {
             // return { labels: this.getOrderedValues(type, config.cols[i]), data: dataIn }
         }
 
+        if (datapoints > 30) { ///move this to end of file processing????
+            function addtoDISPLAY_OTHERS(x) {
+                for (const key in x) {
+                    const newvalue = x[key]
+                    if (isNaN(newvalue)) return
+                    dataIn[DISPLAY_OTHERS][key] += newvalue
+                }
+            }
+
+            // if (dataIn[DISPLAY_OTHERS])
+            //     $l.log(`100+ unique values present, larger values may be obscured`, "warning", i)
+
+            //reduce the counts to 30
+            if (!dataIn[DISPLAY_OTHERS]) {
+                dataIn[DISPLAY_OTHERS] = {
+                    totalSum: 0,
+                    filteredSum: 0,
+                    totalCount: 0,
+                    filteredCount: 0
+                }
+            }
+            const counts = []
+            for (const [col, value] of Object.entries(dataIn)) {
+                const displayValue = this.getDisplayValue(countType, value)
+                counts.push({
+                    col: col,
+                    value: displayValue,
+                })
+            }
+            const sortedCounts = sortArrayOfObjects(counts, { propertyName: "value", order: "d" })//"value", "d")
+            for (let i = 0; i < sortedCounts.length; i++) {
+                const col = sortedCounts[i].col
+                if (col == DISPLAY_OTHERS || col == DISPLAY_INVALID) continue
+                if (i > 30) {
+                    addtoDISPLAY_OTHERS(dataIn[col])
+                    delete dataIn[col]
+
+                }
+            }
+        }
+
         const orderedValue = this.getOrderedValues(type, config.cols[i]) //bin ? getOrderedValues(type, config.cols[i]) : order ? order : getOrderedValues(type, config.cols[i])
 
 
@@ -503,7 +623,7 @@ let $p = (function () {
 
         for (const [col, value] of Object.entries(dataIn)) {
             const displayValue = this.getDisplayValue(countType, value)
-            if (col == "..." || col == "?")
+            if (col == DISPLAY_OTHERS || col == DISPLAY_INVALID)
                 specials[col] = displayValue
             else {
                 const i = orderedCounts.findIndex(v => v.cat == col)
@@ -518,10 +638,10 @@ let $p = (function () {
             }
         }
         //if date type then insert all values and add a sort value
+        const sortparam = type == "List Members" ? { propertyName: "value", order: "d" } : { propertyName: "sortkey", order: "a" }
+        let sortedCounts = sortArrayOfObjects(counts, sortparam)//"sortkey")
 
-        let sortedCounts = sortArrayOfObjects(counts, "sortkey");
-
-        appendToEnd(["...", "?"])
+        appendToEnd([DISPLAY_OTHERS, DISPLAY_INVALID])
         orderedCounts.toReversed().forEach(v => {
             sortedCounts.unshift(v)
         })
@@ -549,12 +669,20 @@ let $p = (function () {
     $.setColProperties = function (index, newValues) {
         let updated = false
         const col = config.cols[index]
+
         for (const [key, value] of Object.entries(newValues)) {
-            if (!col[key] || (col[key] != value)) {
+            //if (col[key] == undefined) continue
+            if ((col[key] != value)) {
                 col[key] = value
                 updated = true
             }
         }
+        if (col.position) delete col.position
+
+        for (const key of Object.keys(col)) {
+            if (newValues[key] == undefined) delete col[key]
+        }
+
         const position = Number(newValues.position) - 1
         if (position != index) {
             function arrayMove(arr, oldIndex, newIndex) {
@@ -570,27 +698,30 @@ let $p = (function () {
             arrayMove(config.cols, index, position)
             updated = true
         }
+
         return updated
     }
     $.configAction = async function (file) {
+        if (!config) return "Reset Config"
         if (!config.file) return "Reset Config"
         const filename = typeof file == "string" ? file : file.name
         const configfilename = typeof config.file == "string" ? config.file : config.file.name
-        console.log({ configfilename, filename })
-        if (configfilename == filename) return "Keep Config"
+
+        if (!configfilename) {
+            //TO DO check if same headers????????
+            config.file = file
+            return "Keep Config"
+        }
+        if (configfilename == filename) {
+            //TO DO check if same headers????????
+            config.file = file
+            return "Keep Config"
+        }
+
         const action = await $dialog.alert(
             `The current file is: "${filename}" but config is for file "${configfilename}". Override config`,
             ["Keep Config", "Reset Config", "Abort Load"])
-        //     // .then(v => {
-        //     //     console.log(v)
-        //     //     if (v == "Keep Config") return true
-        //     //     if (v == "Reset Config") {
-        //     //         createDeafult()
-        //     //         return true
-        //     //     }
-        //     //     return false
         return action
-        //     // })
     }
     $.autoCreateConfig = function (file, row, action) {
         function autoType(value) {
@@ -609,17 +740,18 @@ let $p = (function () {
             config.colNames = []
             config.colTypes = []
             config.callouts = [] //use in future
-            config.validations = [] // use in future
             const autoCols = []
             for (const [colName, value] of Object.entries(row.data)) {
                 const type = autoType(value)
                 const col = {
-                    colname: colName,
                     title: ("Count by " + colName).toUpperCase(),
+                    autoTitle: true,
+                    chartSize: "Small",
+                    colname: colName,
+                    countif: "",
+                    countType: "Count",
                     autoType: type,
                     type: type,
-                    countType: "Count",
-                    chartSize: "Small",
                 }
                 if (type == "Date") col.dateFormat = "MMM"
                 autoCols.push(col)
@@ -637,10 +769,52 @@ let $p = (function () {
                 autoType: autoCols[0].autoType,
                 type: "Data Table",
                 countType: "Count",
-                chartSize: "Medium",
+                chartSize: "Small",
                 maxEntries: 10
 
             })
+            // autoCols.push({
+            //     col: autoCols[0].colname,
+            //     title: "DATA TABLE",
+            //     autoType: autoCols[0].autoType,
+            //     type: "Data",
+            //     dataformat: "Table",
+            //     countType: "Count",
+            //     chartSize: "Small",
+            //     maxEntries: 10
+
+            // })
+            //add decsription
+            autoCols.push({
+                col: autoCols[0].colname,
+                title: "DATA DESCRIPTION",
+                autoType: autoCols[0].autoType,
+                type: "Data Description",
+                countType: "Count",
+                chartSize: "Small",
+            })
+            // autoCols.push({
+            //     col: autoCols[0].colname,
+            //     title: "DATA DESCRIPTION",
+            //     autoType: autoCols[0].autoType,
+            //     type: "Data",
+            //     dataformat: "Description",
+            //     countType: "Count",
+            //     chartSize: "Samll",
+            // })
+            //add notes at the start
+
+            const message = config.colNames.reduce(
+                (message, col, i) => `${message}\n${i + 1}. ${col} (${config.colTypes[i]})`,
+                "The input has the following data headers (value in bracket indicates type assumed):")
+
+            autoCols.unshift({
+                title: "AUTO GENERATED NOTE",
+                type: "Note",
+                chartSize: "Small",
+                message: message,
+            })
+
             config.cols = autoCols
         }
 
@@ -731,13 +905,27 @@ let $p = (function () {
     }
     $.getConfigJSON = function () {
         try {
-            const json = JSON.stringify(config)
+            const json = JSON.stringify(config, null, 2)
             return json
         } catch (e) {
             console.error(`Error while JSON.stringify(config). Cofig not copied. Error: ${e}`)
             return
         }
     }
+    $.seConfigfromJSON = function (configtext) {
+        if (config.cols) return
+        try {
+            config = JSON.parse(configtext)
+            $dialog.alert("File loaded sucessfully", ["OK"])
+            return true
+        } catch (error) {
+            const errormessage = `Config parse failed. Error: ${error}`
+            //$.log("Config parse failed", "Error")
+            console.log(false, errormessage)
+            return false
+        }
+    }
+
     $.setDemoConfig = function (configstring, filename, date) {
         //if no data create new config execpt the report date; reportdate = today
 

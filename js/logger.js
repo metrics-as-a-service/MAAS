@@ -4,25 +4,28 @@ var $l = (function () {
     var $ = {};// public object - returned at end of module
     var startDateTime
     var logRecord = {}
-    $.clear = function() {
-        logRecord={}
+
+    function logkey(message, severity = "warning", chartno) {
+        return `${message} | ${severity} | ${chartno}`
     }
-    $.log = function (message, severity = "Warning") {
-        const record = logRecord[message]
-        if (record)
-            record.count++
-        else {
-            logRecord[message] = {
-                count: 1,
-                severity: severity
-            }
+    function logkeyvalues(logkey) {
+        const logkeyparts = logkey.split("|")
+        return {
+            message: logkeyparts[0].trim(),
+            severity: logkeyparts[1].trim(),
+            chartno: logkeyparts[2].trim(),
         }
-        //console.log(message, severity)
     }
-    // $.timestamp = function (msg) {
-    //     const datetime = new Date()
-    //     logRecord[msg] = datetime
-    // }
+    $.clear = function () {
+        logRecord = {}
+    }
+    $.log = function (message, severity = "warning", chartno) {
+        const logkey = `${message} | ${severity} | ${chartno}`
+
+        if (!logRecord[logkey]) logRecord[logkey] = 0
+        logRecord[logkey] += 1
+    }
+
     $.start = function () {
         const datetime = new Date()
         logRecord = {}
@@ -32,11 +35,24 @@ var $l = (function () {
         console.log(logRecord)
     }
     $.show = function () {
-        function addp(message, severity) {
+        function addp(message, severity, chartno) {
             const p = document.createElement("p")
             p.setAttribute("class", "maas-log-" + severity.toLowerCase())
             p.textContent = message
+            if (!isNaN(chartno)) {//!= undefinedmessage.substring(0, 5) == "Chart") {
+                //const chartno = Number(message.substring(6, 8).trim())-1
+
+                const chartid = getChartId(chartno)
+                const chartdiv = document.getElementById(chartid)
+                if (chartdiv != null) {
+                    chartdiv.appendChild(p)
+                    return
+                }
+                else
+                    p.setAttribute("class", "maas-log-error")
+            }
             logdiv.appendChild(p)
+
         }
         function getTimeToPrepareReport() {
             const end = new Date()
@@ -49,12 +65,12 @@ var $l = (function () {
             console.log(getTimeToPrepareReport())
         }
         logdiv.innerHTML = ""
-        for (const msg in logRecord) {
-            const severity = logRecord[msg].severity
-            addp(`${msg}. Count: ${logRecord[msg].count}`, severity)
+        for (const logkey in logRecord) {
+            const { message, severity, chartno } = logkeyvalues(logkey)
+            const countinfo = logRecord[logkey].count > 1 ? `Count: ${logRecord[logkey].count}` : ""
+            addp(`${message}. ${countinfo}`, severity, chartno)
         }
-        addp(getTimeToPrepareReport(), "Information")
-        //console.log(logRecord)
+        addp(getTimeToPrepareReport(), "info")
     }
     return $; // expose externally
 }());

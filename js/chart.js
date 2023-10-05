@@ -1,20 +1,26 @@
 'use strict'
 //draw the chart: APEXCHAFRT
 //https://apexcharts.com/docs/update-charts-from-json-api-ajax/
-const CHART_HEIGHT = 350
+const CHART_HEIGHT = 350 //"auto"
 const FONT_FAMILY = _getCSSVar("--maas-font-family")//'Raleway, Arial, sans-serif'
+const FONT_COLOR = _getCSSVar("--maas-font-color")
+const TITLE_STYLE = {
+    fontSize: '14px',
+    fontWeight: 900,
+}
 const TOOLICONS = {
     menu: {
         icon: '&#9776;',
         index: 0,
         title: 'Chart menu',
-        class: 'custom-icon',
+        class: 'maas-icon',
+        color: FONT_COLOR,
         click: function (chart, options, e) {
             showChartMenus(options.globals.chartID, { x: e.screenX, y: e.screenY })
         }
     },
 }
-// const RAG_COLORS = ["#96d35f", "#74b057", "#f3ba34", "#f28f1c", "#ff4013"] //from https://huemint.com 
+
 const TOOLBAR = {
     show: true,
     tools: {
@@ -38,20 +44,21 @@ const CHART_COLORS = [
 ]
 
 const RAG_COLORS = [
-    _getCSSVar("--maas-light-green"),
     _getCSSVar("--maas-green"),
-    _getCSSVar("--maas-light-amber"),
+    _getCSSVar("--maas-green-amber"),
     _getCSSVar("--maas-amber"),
-    _getCSSVar("--maas-red")
+    _getCSSVar("--maas-amber-red"),
+    _getCSSVar("--maas-red"),
 ]
 
 
 function drawChart(id, col, data, labels, clickCallback) {
     const { type } = col
+
     if (type == "Risk" || type == "2X2" || type == "State Change")
         return createHeatMapChart(id, col, data, labels, clickCallback)
 
-    if (type == "Data Table")
+    if (type == "Data Table" || type == "Data Description")
         return createTableChart(id, col, data, labels, clickCallback)
 
     if (type == "Note")
@@ -70,7 +77,7 @@ function updateChart(key, data, labels) {
     if (type == "Risk" || type == "2X2" || type == "State Change")
         return updateHeatMapChart(key, data, labels, "R5X5")
 
-    if (type == "Data Table")
+    if (type == "Data Table" || type == "Data Description")
         return updateTableChart(key, data, labels)
 
     if (type == "Note")
@@ -89,7 +96,7 @@ function createBarChart(id, col, data, labels, clickCallback) {
     //checkForInvalidChartData(title, labels, data)
     var options = {
         series: [{
-            name: countType,//ol.countType,
+            name: countType,
             data: data,
         }],
         colors: CHART_COLORS,
@@ -97,6 +104,7 @@ function createBarChart(id, col, data, labels, clickCallback) {
             id: id,
             height: CHART_HEIGHT,
             fontFamily: FONT_FAMILY,
+            foreColor: FONT_COLOR,
             //background: '#fff',
 
             type: 'bar',
@@ -116,9 +124,6 @@ function createBarChart(id, col, data, labels, clickCallback) {
                 //borderRadius: 10,
                 dataLabels: {
                     position: 'top', // top, center, bottom
-                    style: {
-                        colors: [_getCSSVar("--maas-primary-color-dark")],
-                    }
                 },
             }
         },
@@ -129,9 +134,7 @@ function createBarChart(id, col, data, labels, clickCallback) {
             // },
             offsetY: -20,
             style: {
-                // fontSize: '12px',
-                colors: [_getCSSVar("--maas-primary-color-dark")],
-
+                colors: [FONT_COLOR,]
             }
         },
 
@@ -148,8 +151,8 @@ function createBarChart(id, col, data, labels, clickCallback) {
         },
 
         title: {
-            text: title,//col.title,
-
+            text: title,
+            style: TITLE_STYLE,
         }
     }
     var chart = new ApexCharts(document.querySelector('#' + id), options)
@@ -165,7 +168,7 @@ function updateBarChart(key, data, labels) {
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////heatmap/risk
 const dataLabelFormatter = function (countType, seriesIndex, dataPointIndex, data) {
-    const xy = (dataPointIndex > 4 ? "?" : (dataPointIndex + 1)) + "|" + (seriesIndex > 4 ? "?" : (seriesIndex + 1))
+    const xy = (dataPointIndex > 4 ? DISPLAY_INVALID : (dataPointIndex + 1)) + "|" + (seriesIndex > 4 ? DISPLAY_INVALID : (seriesIndex + 1))
     if (!data[xy]) return ""
     const value = $p.getDisplayValue(countType, data[xy])//amountToDisplay(countType, data[xy])
     return value == 0 ? "" : value
@@ -264,7 +267,7 @@ function createHeatMapChart(id, col, data, labels, clickCallback) {//, riskType)
         let invalidData = false
         for (const key in data) {
             const values = key.split("|")
-            if (values[0] == "?" || values[1] == "?") invalidData = true
+            if (values[0] == DISPLAY_INVALID || values[1] == DISPLAY_INVALID) invalidData = true
         }
         return invalidData
     }
@@ -274,9 +277,9 @@ function createHeatMapChart(id, col, data, labels, clickCallback) {//, riskType)
         const s = []
         const invalidValue = checkData(data)
         if (invalidValue) {
-            impactValues.push("?")
-            likelihoodValues.push("?")
-            colors.push({ from: 26, to: 1000, color: "lightgray", name: "?" })
+            impactValues.push(DISPLAY_INVALID)
+            likelihoodValues.push(DISPLAY_INVALID)
+            colors.push({ from: 26, to: 1000, color: "lightgray", name: DISPLAY_INVALID })
         }
 
         impactValues.forEach((iVal, iIndex) => {
@@ -299,6 +302,7 @@ function createHeatMapChart(id, col, data, labels, clickCallback) {//, riskType)
             height: CHART_HEIGHT,
             type: 'heatmap',
             fontFamily: FONT_FAMILY,
+            foreColor: FONT_COLOR,
             toolbar: TOOLBAR,
         },
         stroke: {
@@ -331,6 +335,7 @@ function createHeatMapChart(id, col, data, labels, clickCallback) {//, riskType)
         },
         title: {
             text: title,
+            style: TITLE_STYLE,
         },
         legend: { show: true },
     };
@@ -443,23 +448,35 @@ function updateHeatMapChart(key, data, labels, riskType) {
     chart.updateOptions(options, true)
 }
 ////////////////////////////////////////////////////////Message
+const hamburgermenu = (id) =>
+    `<span
+            title="Chart menu"
+            tabindex="0"
+            style="font-wight: 100;float:right; cursor:pointer;" 
+            onclick="showChartMenus('${id}')"
+            >&#9776;
+        </span>`
 function createMessageChart(id, col, data, labels, clickCallback) {
     const key = getKey(id)
     const chartDiv = document.querySelector('#' + id,)
+    chartDiv.style.fontSize = TITLE_STYLE.fontSize
+    chartDiv.style.fontWeight = TITLE_STYLE.fontWeight
     const { title, message } = $p.getColProperties(key)
 
     chartDiv.innerHTML = ""
-    chartDiv.innerHTML = `${title}<span style="float:right; cursor:pointer;" onclick="showChartMenus('${id}')">&#9776;</span>`
+
+    chartDiv.innerHTML = title + hamburgermenu(id)
+    // chartDiv.innerHTML = `${title}<span style="float:right; cursor:pointer;" onclick="showChartMenus('${id}')">&#9776;</span>`
 
     //create wrapper
     const wrapper = document.createElement('div')
-    wrapper.setAttribute("class", "w3-responsive w3-margin-top maas-note")
-
+    wrapper.setAttribute("class", "w3-responsive w3-margin-top")
+    wrapper.style.fontWeight = 100
     wrapper.style.height = (CHART_HEIGHT * .95) + "px"
     //wrapper.style.overflow = "auto"
 
     const msg = document.createElement('div')
-    const lines = message.split("\n") //"xx lhjsdad soaioshis osihdoih ".split("\n") // message.split("\n") 
+    const lines = message.split("\n")
     lines.forEach(v => {
         const p = document.createElement('p')
         p.textContent = v
@@ -481,44 +498,55 @@ function createTableChart(id, col, data, labels, clickCallback) {
     const { title, } = $p.getColProperties(key)
 
     chartDiv.innerHTML = ""
-    chartDiv.innerHTML = `${title}<span style="float:right; cursor:pointer;" onclick="showChartMenus('${id}')">&#9776;</span>`
+    chartDiv.style.fontSize = TITLE_STYLE.fontSize
+    chartDiv.style.fontWeight = TITLE_STYLE.fontWeight
+    chartDiv.innerHTML = title + hamburgermenu(id)
 
     //create table
     const tableWrapper = document.createElement('div')
-    tableWrapper.setAttribute("class", "w3-responsive w3-margin-top")
+    tableWrapper.setAttribute("class", "w3-container w3-responsive w3-margin-top")
 
     tableWrapper.style.height = (CHART_HEIGHT * .95) + "px"
     tableWrapper.style.overflow = "auto"
 
     const table = document.createElement('table')
-    table.setAttribute("class", "maas-table") // w3-hoverable doesn't work, why?
+    table.style.fontWeight = 100
+    table.setAttribute("class", "w3-table-all w3-hoverable")
 
-    // table 
+    // table
     //  tr header
     //      th
     //  tr rows
     //      td
 
-    function newTableRow(row, tr, thd) {
-        const trEelement = document.createElement(tr)
-        row.forEach(v => {
+    function newTableRow(row, thd, addtooltip) {
+        const trEelement = document.createElement("tr")
+        row.forEach((v, i) => {
             const thdElement = document.createElement(thd)
             thdElement.textContent = v
+            if (addtooltip) thdElement.title = `${row[0]}: ${tableheader[i]}`
             trEelement.appendChild(thdElement)
         })
         return trEelement
     }
     //create Haeder
-    const serialNoHeader = "#"
-    const head = newTableRow([serialNoHeader, ...Object.keys(data[0])], 'tr', 'th')
-    table.appendChild(head)
+    const tablehead = document.createElement("thead")
+    const tableheader = Object.keys(data[0])//[serialNoHeader, ...Object.keys(data[0])]
+    const head = newTableRow(tableheader, 'th')
+    head.style.position = "sticky"
+    head.style.top = "0px"
+    tablehead.appendChild(head)
+    table.appendChild(tablehead)
+
     //create entries
+    const tablebody = document.createElement("tbody")
     labels.forEach((v, i) => {
         const serialNo = i + 1
-        const row = newTableRow([serialNo, ...Object.values(data[i])], 'tr', 'td')
-        table.appendChild(row)
+        const row = newTableRow(Object.values(data[i]), 'td', true) //newTableRow([serialNo, ...Object.values(data[i])], 'td', true)
+        tablebody.appendChild(row)
     })
-
+    table.appendChild(tablebody)
+    table.style.cursor = "default"
     tableWrapper.appendChild(table)
     chartDiv.appendChild(tableWrapper)
     return undefined
@@ -529,19 +557,130 @@ function updateTableChart(key, data, labels) {
 }
 /////////////////////////////////////////////////////////////////////createTimelineChart
 function transformDataForPlan(dataIn) {
-    let data = []
-
+    const plandata = [], actualdata = [], milestones = [], points = []
+    const { reportDate } = $p.getConfig()
     Object.keys(dataIn).forEach(key => {
-        data.push({
-            x: key,
-            y: [
-                new Date(dataIn[key].start).getTime(),
-                new Date(dataIn[key].end).getTime()
-            ]
-        })
+        const { start, end, actualstart, actualend } = dataIn[key]
+        const isPresentAdndValid = (d) => {
+            if (!d) return false
+            if (d.trim() == "") return false
+            return isValidDate(d)
+        }
+
+        // if (!start) return
+        // let end = dataIn[key].end
+        // if (!isValidDate(start)) {
+        //     $l.log(`start not valida date`)
+        //     return
+        // }
+        // if (!isValidDate(end)) {
+        //     $l.log(`end not valida date`)
+        //     return
+        // }
+        // if (start > end) {
+        //     $l.log(`start date < end date`)
+        //     return
+        // }
+        const modifiedeend = (start, end) => {
+            if (start == end)
+                return addDays(start, 1, "days")
+            else
+                return end
+        }
+        const getcolor = (start, end, actualstart, actualend) => {
+            const red = RAG_COLORS[4]
+            const amber = RAG_COLORS[2]
+            const green = RAG_COLORS[0]
+            const blue = CHART_COLORS[0]
+            if (actualend <= reportDate) return undefined
+            const delay = dateTimeDiff(end, actualend, "Days")
+            // console.log({ delay, duration, ratio: delay / duration })
+            if (delay <= 0) return green //TO DO check complteted
+
+            const duration = dateTimeDiff(start, end, "Days")
+            if ((delay / duration) <= .15) return amber
+            return red
+
+        }
+
+        // if (start == end) {
+        //     end = addDays(start, 1, "days")
+        //     points.push({
+        //         x: new Date(start).getTime(),
+        //         y: key,
+        //         marker: {
+        //             size: 20,
+        //             fillColor: "#fff",
+        //             strokeColor: "#2698FF",
+        //             radius: 2
+        //         },
+        //     })
+        //     milestones.push({
+        //         x: key,
+        //         y: [
+        //             new Date(start).getTime(),
+        //             new Date(end).getTime()
+        //         ],
+        //         label: {
+        //             //   style: {
+        //             //     color: '#fff',
+        //             //   },
+        //             orientation: 'horizontal',
+        //             text: key
+        //         },
+        //         marker: {
+        //             size: 20,
+        //             fillColor: "#fff",
+        //             strokeColor: "#2698FF",
+        //             radius: 2
+        //         },
+        //     })
+        // }
+        // else
+        if (isPresentAdndValid(start) && isPresentAdndValid(end))
+            plandata.push({
+                x: key,
+                y: [
+                    new Date(start).getTime(),
+                    new Date(modifiedeend(start, end)).getTime()
+                ]
+            })
+        if (isPresentAdndValid(actualstart) && isPresentAdndValid(actualend))
+            actualdata.push({
+                x: key,
+                y: [
+                    new Date(actualstart).getTime(),
+                    new Date(modifiedeend(actualstart, actualend)).getTime()
+                ],
+                fillColor: getcolor(start, end, actualstart, actualend),
+                // stroke: { show: true, colors: [getcolor(start, end, actualstart, actualend),], width: 4}
+                //     show: true,
+                //     curve: 'smooth',
+                //     lineCap: 'butt',
+                //     colors: undefined,
+                //     width: 2,
+                //     dashArray: 0, 
+                // }
+                // color: getcolor(start, end, actualstart, actualend), 
+                // strokeColor: '#CD2F2A',
+                // strokeWidth: 2, 
+            })
+
     })
 
-    return data
+    if (plandata.length == 0) {
+        const { reportDate } = $p.getConfig()
+        plandata.push({
+            x: "key",
+            y: [
+                new Date(reportDate).getTime(),
+                new Date(reportDate).getTime()
+            ]
+        })
+    }
+    const series = [{ name: "Plan", data: plandata }]
+    if (actualdata.length > 0) series.push({ name: "Actual", data: actualdata })
+    return { series: series, points }
 }
 
 function createTimelineChart(id, col, data, labels, clickCallback) {
@@ -549,17 +688,19 @@ function createTimelineChart(id, col, data, labels, clickCallback) {
     const { title } = col
     const { reportDate } = $p.getConfig()
     const todaylabel = formatDate(reportDate, "DD-MMM")
-    console.log(reportDate)
-    //transform data
-    const dataSeries = transformDataForPlan(data)
+
+    const { series, points } = transformDataForPlan(data)
+
+    //if (series[0].data.length==0) return
 
     const options = {
-        series: [{ data: dataSeries }], //[{ data: data }],
+        series: series, //[{ data: dataSeries }], //[{ data: data }],
         colors: CHART_COLORS,
         chart: {
             id: id,
             height: CHART_HEIGHT,
             fontFamily: FONT_FAMILY,
+            foreColor: FONT_COLOR,
             type: 'rangeBar',
             toolbar: TOOLBAR,
         },
@@ -575,6 +716,7 @@ function createTimelineChart(id, col, data, labels, clickCallback) {
         },
         title: {
             text: title,
+            style: TITLE_STYLE,
         },
         yaxis: {
             show: false,
@@ -594,6 +736,7 @@ function createTimelineChart(id, col, data, labels, clickCallback) {
             //offsetX: 0,
         },
         annotations: {
+            points: points,
             xaxis: [
                 {
                     x: new Date(reportDate).getTime(),//new Date('23 Nov 2017').getTime(),
@@ -603,7 +746,12 @@ function createTimelineChart(id, col, data, labels, clickCallback) {
                         //     color: '#fff',
                         //   },
                         orientation: 'horizontal',
-                        text: todaylabel//'Report Date'
+                        text: todaylabel,//'Report Date'
+                        style: {
+                            // fontSize: '12px',
+                            color: _getCSSVar("--maas-font-color"),
+
+                        }
                     }
                 }
             ]
@@ -618,125 +766,50 @@ function createTimelineChart(id, col, data, labels, clickCallback) {
 function updateTimelineChart(key, data, labels) {
 
     const chart = getApexChart(getChartId(key))
-    const dataSeries = transformDataForPlan(data)
-    chart.updateSeries([{
-        data: dataSeries // data
-    }])
+    const { series, points } = transformDataForPlan(data)
+    chart.updateOptions({
+        series: series,
+        annotations: { points: points }
+    })
 }
 /////////////////////////////////////////////////////////////////////////////////// trends
-//open close is add for each open and subtract for each close for that date
-//need startdate for start of chart. now-start greater than 30 then weekly else daily 
-//need a start number (default 0)
-//plan straightline, sigmoid, plan-points  and target number
-//
-//forecast using x past data points and x% tolerance (10% assumed)
-// function getDataTrendOC(countData, forecastDays, forecastFactors, plan) {
-//     function createForecastData() {
-//         function getForcastFactors() {
-//             if (forecastFactors != "") {
-//                 const { isValid, dates } = parseDateOpenClose(forecastFactors)
-//                 if (!isValid) return
-//                 const datesAsceding = Object.keys(dates).sort()
-//                 //console.log(datesAsceding)
-//                 datesAsceding.forEach(v => {
-//                     const e = {}
-//                     e[v] = { open: dates[v].open, close: dates[v].close }
-//                     forecastchangepoints.push(e)
-//                 })
-//             }
-//         }
 
-//         const { open, close, forecastBasis } = countData.forecast
-//         if (forecastBasis == 0) return
-//         const forecast = []
+function getDataTrend(type, countData, forecast, plan) {
+    function getForecastData() { //////////////////////////////////////////////// forecast
+        function getForecastParams(forecast) {
+            const returnvalue = { hasForecast: false, forecastdays: 0, forecastchangepoints: [] }
 
-//         // let dailyOpened = countData.forecast.basis > 0 ? (countData.forecast.open - countData.forecast.close) / countData.forecast.basis : 0
-//         let dailyOpened = forecastBasis > 0 ? (open - close) / forecastBasis : 0
-//         console.log(dailyOpened)
-//         let forcastdate = reportDate
-//         forecast.push({ x: forcastdate, y: opencount })
-//         const forecastchangepoints = []
-//         getForcastFactors()
-//         console.log(forecastchangepoints)
-//         //forecastchangepoints.push({ date: reportDate, dailyOpened: dailyOpened })
+            if (forecast.trim() == "") return returnvalue
 
-//         let prevdailyOpened = dailyOpened
-//         for (let i = 0; i < forecastDays; i++) {
-//             forcastdate = addDays(forcastdate, 1)
-//             const index = forecastchangepoints.findIndex(v => Object.keys(v)[0] == forcastdate)
-//             if (index != -1) {
-//                 console.log(forecastchangepoints[index])
-//                 const openfactor = forecastchangepoints[index][forcastdate].open
-//                 const closefactor = forecastchangepoints[index][forcastdate].close
-//                 dailyOpened = forecastBasis > 0 ? (open + openfactor - close - closefactor) / forecastBasis : 0
-//                 console.log({ dailyOpened, forecastBasis, open, openfactor, close, closefactor })
-//             }
-//             //check if dailyOpened should change
-//             opencount += dailyOpened
-//             if (opencount < 0) {
-//                 opencount = 0
-//                 //dailyOpened = 0
-//             }
-//             if (dailyOpened != prevdailyOpened)
-//                 forecast.push({ x: forcastdate, y: Math.round(opencount) })
-//             prevdailyOpened = dailyOpened
-//         }
-//         forecast.push({ x: addDays(reportDate, forecastDays), y: Math.round(opencount) })
-
-//         if (forecast.length == 0) return
-//         returnValue.push({ name: "Forecast", data: forecast })
-//     }
-//     const { reportDate } = $p.getConfig()
-//     const data = []
-//     const labels = Object.keys(countData).sort()
-//     let opencount = 0
-//     //create data
-//     for (let i = 0; i < labels.length - 1; i++) {
-//         const v = labels[i]
-//         if (v == "forecast") continue
-//         if (v > reportDate) continue
-//         opencount += countData[v].open - countData[v].close
-//         data.push({ x: v, y: opencount })
-//     }
-//     if (data.length == 0) {
-//         data.push({ x: reportDate, y: 0 })
-//         return [{ name: "Open", data },]
-//     }
-//     const returnValue = []
-//     returnValue.push({ name: "Open", data })
-//     createForecastData()
-//     return returnValue//[{ name: "Open", data }, { name: "Forecast", data: forecast }]
-// }
-function getDataTrend(type, countData, forecastDays, forecastFactors, plan) {
-    function createForecastData() {
-        function getForcastFactors() {
-            if (forecastFactors == "") return []
-            // if (forecastFactors != "") {
             const grammar = type == "Trend OC" ? TRENDOC_FORECAST_GRAMMAR : TREND_FORECAST_GRAMMAR
-            const { isValid, output } = parseInput(forecastFactors, grammar) //parseDateOpenClose(forecastFactors)
-            console.assert(isValid, `Type: ${type}, grammar: ${grammar}`)
-            if (!isValid) return []
+            const { isValid, output } = parseInput(forecast, grammar)
+            if (!isValid) {
 
-            const datesAsceding = []
-            const { open, close, count, from } = output
-            const e = {}
-            e[from] = { open, close, count }
-            datesAsceding.push(e)
+                return forecastseries
+            }
 
-            // allow for multiple dates alter
-            // const datesAsceding = Object.keys(dates).sort() 
-            // datesAsceding.forEach(v => {
-            //     const e = {}
-            //     e[v] = { open: dates[v].open, close: dates[v].close }
-            //     forecastchangepoints.push(e)
-            // })
-            return datesAsceding
+            returnvalue.hasForecast = true
+            const { forecastdays, open, close, count, changefrom } = output
+            console.log(output)
+            returnvalue.forecastdays = forecastdays
+
+            //TO DO allow for multiple changes
+            if (changefrom != 0) {
+                const changeentry = {}
+                changeentry[changefrom] = { open, close, count }
+                returnvalue.forecastchangepoints.push(changeentry)
+            }
+
+            return returnvalue
         }
-        const { open, close, count, forecastBasis } = countData.forecast
 
+        const { hasForecast, forecastdays, forecastchangepoints } = getForecastParams(forecast)
+        
+        if (!hasForecast) return
+
+        const { open, close, count, forecastBasis } = countData.forecast
         if (forecastBasis == 0) return
         if (!countData.forecast) return
-
         const forecastdata = []
 
         let daily = 0
@@ -747,10 +820,9 @@ function getDataTrend(type, countData, forecastDays, forecastFactors, plan) {
 
         let forcastdate = reportDate
         forecastdata.push({ x: forcastdate, y: cumulativeCount })
-        const forecastchangepoints = getForcastFactors()
 
         let prevdaily = daily
-        for (let i = 0; i < forecastDays; i++) {
+        for (let i = 0; i < forecastdays; i++) {
             forcastdate = addDays(forcastdate, 1)
             const index = forecastchangepoints.findIndex(v => Object.keys(v)[0] == forcastdate)
             if (index != -1) {
@@ -772,35 +844,33 @@ function getDataTrend(type, countData, forecastDays, forecastFactors, plan) {
                 forecastdata.push({ x: forcastdate, y: Math.round(cumulativeCount) })
             prevdaily = daily
         }
-        forecastdata.push({ x: addDays(reportDate, forecastDays), y: Math.round(cumulativeCount) })
-        returnValue.push({ name: "Forecast", data: forecastdata })
+        forecastdata.push({ x: addDays(reportDate, forecastdays), y: Math.round(cumulativeCount) })
+        
+        return { name: "Forecast", data: forecastdata }
     }
-    function createPlanData() {
+    function getPlanData() { ////////////////////////////////////////////////plan
         if (!plan) return
         if (plan.trim() == "") return
 
         const { isValid, error, output } = parseInput(plan, PLAN_GRAMMAR)
-        if (!isValid) {
-            console.assert(true, error)
-            return
-        }
+
         const { start, end, scopefrom, scopeto, points } = output
         const data = []
         const deltaScope = scopeto - scopefrom
-        const dateSteps = dateTimeDiff(start, end, "Days") / points.length
+        const dateSteps = dateTimeDiff(start, end, "Days") / (points.length - 1)
         for (let i = 0; i < points.length; i++) {
             const x = addDays(start, Math.round(i * dateSteps))
             const y = Math.round(scopefrom + deltaScope * points[i])
             data.push({ x, y })
         }
-        console.log(data, points, points.length)
-        returnValue.push({ name: "Plan", data })
+
+        return { name: "Plan", data }
     }
 
     const { reportDate } = $p.getConfig()
     const data = []
     const labels = Object.keys(countData).sort()
-    const returnValue = []
+    const series = []
     let cumulativeCount = 0
     //create data
     for (let i = 0; i < labels.length - 1; i++) {
@@ -818,20 +888,22 @@ function getDataTrend(type, countData, forecastDays, forecastFactors, plan) {
 
     if (data.length == 0) {
         data.push({ x: reportDate, y: 0 })
-        return [{ name, data },] //return [{ name: "Open", data },]
+        return [{ name, data },] 
     }
 
-    returnValue.push({ name, data })
-    createForecastData()
-    createPlanData()
-    return returnValue
+    series.push({ name, data })
+    const planseries = getPlanData()
+    if (planseries) series.push(planseries)
+    const forecastseries = getForecastData()
+    if (forecastseries) series.push(forecastseries)
+    return series
 }
 function createTrendChart(id, col, countData, xl) {
 
-    const { countType, title, forecastDays, forecastFactors, type, plan } = col
+    const { countType, title, forecastDays, forecast, type, plan } = col
     const { reportDate } = $p.getConfig()
-    const series = getDataTrend(type, countData, forecastDays, forecastFactors, plan)
-    
+    const series = getDataTrend(type, countData, forecast, plan)
+
     var options = {
         series: series,
         colors: CHART_COLORS,
@@ -839,6 +911,7 @@ function createTrendChart(id, col, countData, xl) {
             id: id,
             height: CHART_HEIGHT,
             fontFamily: FONT_FAMILY,
+            foreColor: FONT_COLOR,
             type: 'line',
             zoom: {
                 enabled: false
@@ -858,7 +931,7 @@ function createTrendChart(id, col, countData, xl) {
         // },
         title: {
             text: title,
-            align: 'left'
+            style: TITLE_STYLE,
         },
         // grid: {
         //     row: {
@@ -878,10 +951,10 @@ function createTrendChart(id, col, countData, xl) {
 
 function updateTrendChart(key, countData, labels) {
     const chart = getApexChart(getChartId(key))
-    const { type, forecastDays, forecastFactors, plan } = $p.getColProperties(key)
+    const { type, forecastDays, forecast, plan } = $p.getColProperties(key)
 
-    const series = getDataTrend(type, countData, forecastDays, forecastFactors, plan)
-    
+    const series = getDataTrend(type, countData, /* forecastDays, */ forecast, plan)
+
     chart.updateOptions({
         series: series,
     })
