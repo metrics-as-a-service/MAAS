@@ -68,7 +68,7 @@
                         onclick="toggleNav()">&#9776;</a>
                 </div>
 
-                <div id="nav" class="w3-bar-block maas-dark w3-hide w3-hide-large w3-hide-medium">
+                <div id="nav" class="w3-bar-block maas-dark w3-hide w3-hide-large w3-hide-medium w3-show">
                     <!-- create links here as follows
                     <a href="#" class="w3-bar-item w3-button">Link 1</a>
                 -->
@@ -413,10 +413,10 @@
     function toggleNav() {
         const nav = document.getElementById("nav");
         if (nav.className.indexOf("w3-show") == -1) {
-            nav.className += " w3-show";
-        } else {
-            nav.className = nav.className.replace(" w3-show", "");
+            nav.className += " w3-show"
+            return
         }
+        nav.className = nav.className.replace(" w3-show", "");
     }
     function setupMTML() {
         function loadmenu(menus) {
@@ -437,7 +437,7 @@
 
                 const aNav = getanaelement()
                 aNav.setAttribute("class", "w3-bar-item w3-button")
-                // nav.appendChild(aNav)
+                nav.appendChild(aNav)
             })
         }
 
@@ -468,18 +468,10 @@
         if (demo) {
             loadmenu(demoMenu)
             document.title += " Demo"
-        } else
-            loadmenu(mainMenu)
+            return
+        }
+        loadmenu(mainMenu)
         loadmenu(commonMenu)
-        // return
-        // if (demo) {
-        //     demobuttons.style.display = "block"
-        //     normalbuttons.style.display = "none"
-        //     loadDemoFile('Introduction')
-        //     return
-        // }
-        // demobuttons.style.display = "none"
-        // normalbuttons.style.display = "block"
     }
 
 </script>
