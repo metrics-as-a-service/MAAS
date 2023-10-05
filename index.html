@@ -42,75 +42,124 @@
     <script src="./js/dialog.js" charset="utf-8" defer></script>
     <script src="./js/store.js" charset="utf-8" defer></script>
     <script src="./js/logger.js" charset="utf-8" defer></script>
+    <script src="./js/grammar.js" charset="utf-8" defer></script>
+    <script src="./js/help.js" charset="utf-8" defer></script>
+    <script src="./js/readwrite.js" charset="utf-8" defer></script>
 
     <script src="https://cdn.jsdelivr.net/npm/apexcharts" defer></script>
     <!-- <script src="https://unpkg.com/website-carbon-badges@1.1.3/b.min.js" defer></script> -->
 
 </head>
 
-<body>
-    <div class="w3-container">
-        <input type="file" class="w3-input label" name="file" id="file" style='display:none;' accept=".csv"
-            onchange="loadNewFile()">
-        <div class="maas-noprint">
-            <div id="normalMenu" class="w3-bar maas-dark">
-                <!-- create links here as follows
+<body onload="allloaded();">
+    <input type="file" class="w3-input label" name="file" id="file" style='display:none;' accept=".csv"
+        onchange="loadNewFile()">
+    <input type="file" class="w3-input label" name="file" id="filejson" style='display:none;' accept=".json"
+        onchange="loadJSONFile(this)">
+    <a id="download" style='display:none;' download></a>
+    <div class="w3-container w3-padding">
+        <div id="main">
+            <div class="maas-noprint">
+                <div id="normalMenu" class="w3-bar maas-dark">
+                    <!-- create links here as follows
                     <a href="#" class="w3-bar-item w3-button w3-hide-small">Link 1</a>  
                 -->
-                <a href="javascript:void(0)" class="w3-bar-item w3-button w3-hide-large w3-hide-medium"
-                    onclick="toggleNav()">&#9776;</a>
-            </div>
+                    <a href="javascript:void(0)" class="w3-bar-item w3-button w3-hide-large w3-hide-medium"
+                        onclick="toggleNav()">&#9776;</a>
+                </div>
 
-            <div id="nav" class="w3-bar-block maas-dark w3-hide w3-hide-large w3-hide-medium">
-                <!-- create links here as follows
+                <div id="nav" class="w3-bar-block maas-dark w3-hide w3-hide-large w3-hide-medium">
+                    <!-- create links here as follows
                     <a href="#" class="w3-bar-item w3-button">Link 1</a>
                 -->
+                </div>
             </div>
-        </div>
 
-        <div id="reportTitles">
-            <h2 style="font-weight: bolder;" id="mainTitle">No file loaded</h2>
-            <h4 id="subTitle"></h4>
-        </div>
-        <div class="maas-printonly">
-            <h4>Table of Content</h4>
-            <div id="toc">
+            <div id="reportTitles">
+                <h3 style="font-weight: bolder;" id="mainTitle">No file loaded</h3>
+                <p id="subTitle"></p>
             </div>
-        </div>
-        <br>
-        <div id="data-source"></div>
-        <br>
-        <div id="filter-value"></div>
-        <br>
-        <div class="maas-page-break"></div>
-        <div class="maas-noprint">
-            <div id="log"></div>
-        </div>
-        <br>
-        <div class="maas-chart-container" id="wrapper"></div>
-        <br>
-        <div class="maas-page-break"></div>
-        <footer>
-            <p>metrics-as-a-service (Version Beta, July-2023)</p>
-            <p>Copyright &#169; July 2023 Abhijit Majumdar</p>
-            <p>Powered by HTML5, CSS3, JS,
-                <!-- </a><img src="icons/html5.svg" style= "opacity: 50%;" width="15"><a>, </a>
+            <div class="maas-printonly">
+                <h4>Table of Content</h4>
+                <div id="toc">
+                </div>
+            </div>
+            <br>
+            <div id="data-source"></div>
+            <br>
+            <div id="filter-value"></div>
+            <br>
+            <div class="maas-page-break"></div>
+            <div class="maas-noprint">
+                <div id="log"></div>
+            </div>
+            <br>
+            <div class="maas-chart-container" id="wrapper"></div>
+            <br>
+            <div class="maas-page-break"></div>
+            <footer>
+                <p>metrics-as-a-service (Version Beta, August-2023)</p>
+                <p>Copyright &#169; August 2023 Abhijit Majumdar</p>
+                <p>Powered by HTML5, CSS3, JS,
+                    <!-- </a><img src="icons/html5.svg" style= "opacity: 50%;" width="15"><a>, </a>
                 <img src="icons/css3-alt.svg" style= "opacity: 50%;" width="15"><a>, </a>
                 <img src="icons/js.svg" style= "opacity: 50%;" width="15"><a>, </a> -->
-                <a href="https://www.papaparse.com" target="_blank">papaparse</a><a>, </a>
-                <a href="https://apexcharts.com" target="_blank">apexchart</a>
-                <a> and a lot of elbow grease</a>
-            </p>
-            <p>Tested on Macbook (Safari and Chrome) and iPhone X (Safari)</p>
-            <!-- <div id="wcb" class="carbonbadge"></div> -->
-        </footer>
+                    <a href="https://www.papaparse.com" target="_blank">papaparse</a><a>, </a>
+                    <a href="https://apexcharts.com" target="_blank">apexchart</a>
+                    <a> and a lot of elbow grease</a>
+                </p>
+                <p>Tested on Safari, Chrome and Edge</p>
+                <!-- <div id="wcb" class="carbonbadge"></div> -->
+            </footer>
+        </div>
+        <div class="w3-container w3-padding" id="help"></div>
+
+        <template id="checkbox-template">
+            <input type="checkbox" class="w3-check">
+            <label>Label on right</label>
+            <br>
+        </template>
+        <template id="input-template">
+            <div>
+                <label>Label</label>
+                <input class="w3-input maas-input">
+            </div>
+        </template>
+        <!-- <div>
+            <label class="w3-label">Label on left
+                <span> </span>
+                <input type="checkbox" class="w3-check">
+            </label>
+            <label>
+                <input type="checkbox" class="w3-check">
+                <span> </span>
+                Label on ight
+            </label>
+            <br>
+            <label>
+                Label on left
+                <input type="text">
+            </label>
+            <label>
+                <input type="text">
+                Label on right
+            </label>
+        </div> -->
     </div>
 </body>
 <script>
     'use strict'
     setupMTML()
+    function allloaded() {
+        const url = new URL(window.location.toLocaleString());
+        const demo = url.searchParams.get("demo")
+        // console.log('loaded')
+        if (demo) loadDemoFile('Introduction')
+    }
 
     async function loadDemoFile(demotype) {
+        toggleNav()
+        if (!demotype) return
         $l.clear()
         try {
             const { configString, reportDate, filename } = $demo.getConfigJSON(demotype)
@@ -176,13 +225,13 @@
     function showFilters() {
         const filterValueDiv = document.querySelector('#filter-value')
         filterValueDiv.innerHTML = ""
-        const { totalRows, filteredRows } = $c.getCountSummary()
+        const { totalRowCounts, filteredRowCounts } = $c.getCountSummary()
 
-        if (filteredRows != totalRows)
-            filterValueDiv.appendChild(createTag(`${filteredRows} out of ${totalRows} rows of data shown`, "w3-pale-blue"))
+        if (filteredRowCounts != totalRowCounts)
+            filterValueDiv.appendChild(createTag(`${filteredRowCounts} out of ${totalRowCounts} rows of data shown`, "w3-pale-blue"))
 
         else
-            filterValueDiv.appendChild(createTag(`All ${totalRows} rows of data shown`, "w3-pale-blue"))
+            filterValueDiv.appendChild(createTag(`All ${totalRowCounts} rows of data shown`, "w3-pale-blue"))
 
         const allCounts = getCounts()
 
@@ -305,6 +354,7 @@
     }
 
     function menu(action) {
+        toggleNav()
         if (action == "printPDF") {
             window.print()
             return
@@ -317,21 +367,23 @@
             return
         }
         if (action == "loadconfig") {
-            loadConfigDialog()
+            const fileInput = document.getElementById('filejson')
+            fileInput.value = "" //forces a reload of same file
+            fileInput.click()
             return
         }
 
         if (action == "copyconfig") {
-            navigator.clipboard.writeText($p.getConfigJSON())
+            const json = $p.getConfigJSON()
+            if (json == "{}") return
+            navigator.clipboard.writeText(json)
+            downloadfile(json, "config.json")
             return
         }
 
         if (action == "layout") return showLayoutDialog()
         if (action == "help") {
-            window.open(
-                'help.html',
-                '_blank' // <- This is what makes it open in a new window.
-            )
+            showhelp()
             return
         }
         if (action == "feedback") {
@@ -371,19 +423,21 @@
             const nav = document.getElementById("nav")
             const main = document.getElementById("normalMenu")
             menus.forEach(v => {
-                const a = document.createElement('a')
-                a.setAttribute("class", "w3-bar-item w3-button w3-hide-small")
-                a.setAttribute("href", "#")
-                a.setAttribute("onclick", v.onclick)
-                a.textContent = v.label
-                main.appendChild(a)
+                const getanaelement = () => {
+                    const a = document.createElement('button')
+                    a.setAttribute("href", "#")
+                    a.setAttribute("onclick", v.onclick)
+                    a.setAttribute("tabindex", "0")
+                    a.textContent = v.label
+                    return a
+                }
+                const aDiv = getanaelement()
+                aDiv.setAttribute("class", "w3-bar-item w3-button w3-hide-small")
+                main.appendChild(aDiv)
 
-                const aNav = document.createElement('a')
+                const aNav = getanaelement()
                 aNav.setAttribute("class", "w3-bar-item w3-button")
-                aNav.setAttribute("href", "#")
-                aNav.setAttribute("onclick", v.onclick)
-                aNav.textContent = v.label
-                nav.appendChild(aNav)
+                // nav.appendChild(aNav)
             })
         }
 
@@ -393,34 +447,39 @@
             { onclick: "menu('feedback')", label: "Feedback" },
         ]
         const demoMenu = [
+            // { onclick: "loadDemoFile('Introduction')", label: "Introduction" },
+            { onclick: "loadDemoFile('Basic')", label: "Demo: Basic" },
+            { onclick: "loadDemoFile('Modified Basic')", label: "Demo: Modified Basic" },
+            { onclick: "loadDemoFile('Test Execution')", label: "Demo: Test Execution" },
             { onclick: "loadDemoFile('State Change')", label: "Demo: State Change" },
-            { onclick: "loadDemoFile('Stories')", label: "Demo: Stories" },
-            { onclick: "loadDemoFile('')", label: "Demo: Incidents" },
+            { onclick: "loadDemoFile('Risk')", label: "Demo: Risk" },
+            { onclick: "loadDemoFile('Plan')", label: "Demo: Plan" },
         ]
         const mainMenu = [
             { onclick: "menu('loaddata')", label: "Load Data" },
             { onclick: "menu('layout')", label: "Modify Layout" },
-            { onclick: "menu('copyconfig')", label: "Copy Main Config" },
-            { onclick: "menu('loadconfig')", label: "Paste Main Config" },
+            { onclick: "menu('copyconfig')", label: "Download Main Config" },
+            { onclick: "menu('loadconfig')", label: "Upload Main Config" },
 
         ]
         const url = new URL(window.location.toLocaleString());
         const demo = url.searchParams.get("demo")
-        
+
         if (demo) {
             loadmenu(demoMenu)
-            document.title += " Demo" 
+            document.title += " Demo"
         } else
             loadmenu(mainMenu)
         loadmenu(commonMenu)
-        return
-        if (demo) {
-            demobuttons.style.display = "block"
-            normalbuttons.style.display = "none"
-            return
-        }
-        demobuttons.style.display = "none"
-        normalbuttons.style.display = "block"
+        // return
+        // if (demo) {
+        //     demobuttons.style.display = "block"
+        //     normalbuttons.style.display = "none"
+        //     loadDemoFile('Introduction')
+        //     return
+        // }
+        // demobuttons.style.display = "none"
+        // normalbuttons.style.display = "block"
     }
 
 </script>
