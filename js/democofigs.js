@@ -7,25 +7,25 @@ const $demo = (function () {
         `Charts in the demo have been created using the metrics-as-service App.
         The App takes a CSV file as input and creates charts that can be sliced and diced for analysis. You can click on the bar charts to filter (i.e. slice and dice) the data.
         The charts can customised using the menu located at top right of each chart. In this demo you can modify the charts but not save the modifications. 
-        The data used is atrificial but created based on experince and is represtative of the real world`
+        The data used is artificial but created based on experience and is representative of the real world`
 
     const INTRODUCTION_TO_DEMO =
-        `Following demos are available::
-        1. Basic.  This demos shows the 'default' metrics i.e before any configuration.  More on the basic in the next note.
+        `Following demos are available: 
+        1. Basic.  This demo shows the 'default' metrics i.e before any configuration.  More on the basic in the next note.
         2. Modified Basic.  This demo shows how the 'default' is reconfigured to make better metrics.
-        3. Test Execution. This demos shows typical test execution metrics.  
-        4. State Change. This demos shows how state changes can be converted to useful metrics.  
-        5. Risk. This demos shows standard 5x5 risk metrics.     
-        6. Plan. This demos shows a plan that can be easily sliced and diced.`
+        3. Test Execution. This demo shows typical test execution metrics.  
+        4. State Change. This demo shows how state changes can be converted to useful metrics.  
+        5. Risk. This demo shows standard 5x5 risk metrics.     
+        6. Plan. This demo shows a plan that can be easily sliced and diced.`
 
     const INTRODUCTION_TO_BASIC =
-        `As menitionef before the "Basic" demo hows the metrics before any configuration.
+        `As mentioned before the "Basic" demo shows the metrics before any configuration.
         Based on the input the App automatically generates the following metrices:
         1. A note listing all headers found in the input.  
         2 ... N. A set of "bar charts", one for each of the header found
-        N+1. A data table shoing first 10 rows of the data read    
+        N+1. A data table showing first 10 rows of the data read    
         N+2. A data description that shows types of data, max, min etc for each row of data
-        The basic chart can then be configured in varous ways as shown in the demos`
+        The basic chart can then be configured in various ways as shown in the demos`
 
 
     const demoConfigs = {
@@ -57,14 +57,14 @@ const $demo = (function () {
                 "callouts": [],
                 "cols": [
                     { "title": "AUTO GENERATED NOTE", "type": "Note", "chartSize": "Small", "message": "The input has the following data headers (value in bracket indicates type assumed):\n1. ID (String)\n2. CREATE DATE (Date)\n3. STATUS (String)\n4. PRIORITY (String)\n5. GEORAPHY (String)\n6. CLOSE DATE (String)\n7. AGE (Number)\n8. Description (String)" },
-                    { "title": "COUNT BY ID", "autoTitle": false, "chartSize": "Small", "colname": "ID", "countif": "", "countType": "Count", "autoType": "String", "type": "String" },
-                    { "title": "COUNT BY CREATE DATE", "autoTitle": false, "chartSize": "Small", "colname": "CREATE DATE", "countif": "", "countType": "Count", "autoType": "Date", "type": "Date", "dateFormat": "MMM" },
-                    { "title": "COUNT BY STATUS", "autoTitle": false, "chartSize": "Small", "colname": "STATUS", "countif": "", "countType": "Count", "autoType": "String", "type": "String" },
-                    { "title": "COUNT BY PRIORITY", "autoTitle": false, "chartSize": "Small", "colname": "PRIORITY", "countif": "", "countType": "Count", "autoType": "String", "type": "String" },
-                    { "title": "COUNT BY GEORAPHY", "autoTitle": false, "chartSize": "Small", "colname": "GEORAPHY", "countif": "", "countType": "Count", "autoType": "String", "type": "String" },
-                    { "title": "COUNT BY CLOSE DATE", "autoTitle": false, "chartSize": "Small", "colname": "CLOSE DATE", "countif": "", "countType": "Count", "autoType": "String", "type": "String" },
-                    { "title": "COUNT BY AGE", "autoTitle": false, "chartSize": "Small", "colname": "AGE", "countif": "", "countType": "Count", "autoType": "Number", "type": "Number" },
-                    { "title": "COUNT BY DESCRIPTION", "autoTitle": false, "chartSize": "Small", "colname": "Description", "countif": "", "countType": "Count", "autoType": "String", "type": "String" },
+                    { "title": "COUNT BY ID", "autoTitle": true, "chartSize": "Small", "colname": "ID", "countif": "", "countType": "Count", "autoType": "String", "type": "String" },
+                    { "title": "COUNT BY CREATE DATE", "autoTitle": true, "chartSize": "Small", "colname": "CREATE DATE", "countif": "", "countType": "Count", "autoType": "Date", "type": "Date", "dateFormat": "MMM" },
+                    { "title": "COUNT BY STATUS", "autoTitle": true, "chartSize": "Small", "colname": "STATUS", "countif": "", "countType": "Count", "autoType": "String", "type": "String" },
+                    { "title": "COUNT BY PRIORITY", "autoTitle": true, "chartSize": "Small", "colname": "PRIORITY", "countif": "", "countType": "Count", "autoType": "String", "type": "String" },
+                    { "title": "COUNT BY GEORAPHY", "autoTitle": true, "chartSize": "Small", "colname": "GEORAPHY", "countif": "", "countType": "Count", "autoType": "String", "type": "String" },
+                    { "title": "COUNT BY CLOSE DATE", "autoTitle": true, "chartSize": "Small", "colname": "CLOSE DATE", "countif": "", "countType": "Count", "autoType": "String", "type": "String" },
+                    { "title": "COUNT BY AGE", "autoTitle": true, "chartSize": "Small", "colname": "AGE", "countif": "", "countType": "Count", "autoType": "Number", "type": "Number" },
+                    { "title": "COUNT BY DESCRIPTION", "autoTitle": true, "chartSize": "Small", "colname": "Description", "countif": "", "countType": "Count", "autoType": "String", "type": "String" },
                     { "col": "ID", "title": "DATA TABLE", "autoType": "String", "type": "Data Table", "countType": "Count", "chartSize": "Small", "maxEntries": 10 },
                     { "col": "ID", "title": "DATA DESCRIPTION", "autoType": "String", "type": "Data Description", "countType": "Count", "chartSize": "Small" }
                 ]
@@ -73,7 +73,7 @@ const $demo = (function () {
         },
         "Modified Basic": {
             config: {
-                "reportDate": "2023-06-15",
+                "reportDate": "2023-08-01",
                 "reportTitle": "Modified Auto-generated Metrics",
                 "maxValues": 30,
                 "file": {},
@@ -81,7 +81,7 @@ const $demo = (function () {
                 "colTypes": ["String", "Date", "String", "String", "String", "String", "Number", "String"],
                 "callouts": [],
                 "cols": [
-                    { "title": "INTRODUCTION", "type": "Note", "chartSize": "Small", "message": "The is a modied verion of the Basic Demo.\nIn this version:\nThis INTRODUCTION is added to summarise the changes,\nchart showing data on ID has been removed as it does not provide any insight\nfurthers notes are added where changes are made." },
+                    { "title": "INTRODUCTION", "type": "Note", "chartSize": "Small", "message": "The is a modified version of the Basic Demo.\nIn this version:\nThis INTRODUCTION is added to summarise the changes,\nchart showing data on ID has been removed as it does not provide any insight\nfurther notes are added where changes are made." },
                     // { "title": "COUNT BY ID", "autoTitle": false, "chartSize": "Small", "colname": "ID", "countif": "", "countType": "Count", "autoType": "String", "type": "String" },
                     { "title": "COUNT BY CREATE DATE", "autoTitle": false, "chartSize": "Small", "colname": "CREATE DATE", "countif": "", "countType": "Count", "autoType": "Date", "type": "Date", "dateFormat": "MMM" },
                     { "title": "STATUS ORDER", "type": "Note", "chartSize": "Small", "message": "The default chart showed the x-axis in default asceding order (Closed, New, WIP). Order values are added to display the status in more logical sequence." },
@@ -108,7 +108,7 @@ const $demo = (function () {
                 "colTypes": ["String", "Date", "String", "String", "String", "String", "Number", "String", "Number", "Number", "Date"],
                 "callouts": [],
                 "cols": [
-                    { "title": "INTRODUCTION", "type": "Note", "chartSize": "Small", "message": "This demo shows metrics on risk.\nThe charts can be easily configured to prsent a 5x5 view of data." },
+                    { "title": "INTRODUCTION", "type": "Note", "chartSize": "Small", "message": "This demo shows metrics on risk.\nThe charts can be easily configured to present a 5x5 view of data." },
                     { "title": "RISK COUNT", "autoTitle": false, "chartSize": "Small", "countif": "", "countType": "Count", "type": "Risk", "colOver": "", "impactCol": "Impact", "impactValues": ["Very Low", "Low", "Medium", "High", "Very High"], "likelihoodCol": "Likelihood", "likelihoodValues": ["Rare", "Unlikely", "Likely", "Very Likely", "Most Likely"] },
                     { "title": "RISK (AV AGE)", "autoTitle": false, "chartSize": "Small", "countif": "", "countType": "Average", "type": "Risk", "colOver": "AGE", "impactCol": "Impact", "impactValues": ["Very Low", "Low", "Medium", "High", "Very High"], "likelihoodCol": "Likelihood", "likelihoodValues": ["Rare", "Unlikely", "Likely", "Very Likely", "Most Likely"] },
                     { "title": "TREND USING OPEN/CLOSE DATES", "autoTitle": false, "chartSize": "Small", "countif": "", "type": "Trend OC", "trendStartDate": "2023-01-04", "openDateCol": "CREATE DATE", "closeDateCol": "CLOSE DATE", "forecast": "" },
@@ -136,7 +136,7 @@ const $demo = (function () {
                 "callouts": [],
                 "cols": [
                     // { "colname": "", "title": "INTRODUCTION", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small",  "order": [], "message": INTRODUCTION },
-                    { "colname": "Priority", "title": "INTRODUCTION", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small", "order": [], "message": "This demo shows the data on \"plan\"\nCharts 2 and 3 shows the plan.  Renaining charts show other attributes of the plan.  Click on these bar charts to see how the display for the plan changes.\nThese charts are useful in identifying possible areas of the plan that needs attention." },
+                    { "colname": "Priority", "title": "INTRODUCTION", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small", "order": [], "message": "This demo shows the data on \"plan\"\nCharts 2 and 3 shows the plan.  Remaining charts show other attributes of the plan.  Click on these bar charts to see how the display for the plan changes.\nThese charts are useful in identifying possible areas of the plan that needs attention." },
                     { "title": "LEVEL 1 PLAN", "autoTitle": false, "chartSize": "Medium", "countif": "includeif level contains [1]", "type": "Plan", "descriptionCol": "Desc", "startDateCol": "Start", "endDateCol": "End", "actualStartDateCol": "Actual start", "actualEndDateCol": "Actual/estimated end" },
                     { "title": "OVERall PLAN", "autoTitle": false, "chartSize": "Medium", "countif": "", "type": "Plan", "descriptionCol": "Desc", "startDateCol": "Start", "endDateCol": "End", "actualStartDateCol": "Actual start", "actualEndDateCol": "Actual/estimated end" },
                     { "title": "COUNT BY LEVEL", "autoTitle": false, "chartSize": "Small", "colname": "Level", "countif": "", "countType": "Count", "autoType": "Number", "type": "Number" },
