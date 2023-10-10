@@ -30,6 +30,7 @@
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="./css/main.css">
     <link rel="stylesheet" href="./css/print.css">
+    
     <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300&display=swap" rel="stylesheet"> -->
@@ -68,7 +69,7 @@
                         onclick="toggleNav()">&#9776; Menu</a>
                 </div>
 
-                <div id="nav" class="w3-bar-block maas-dark w3-hide w3-hide-large w3-hide-medium w3-show">
+                <div id="nav" class="w3-bar-block maas-dark w3-hide w3-hide-large w3-hide-medium">
                     <!-- create links here as follows
                     <a href="#" class="w3-bar-item w3-button">Link 1</a>
                 -->
@@ -97,9 +98,9 @@
             <div class="maas-chart-container" id="wrapper"></div>
             <br>
             <div class="maas-page-break"></div>
-            <footer>
-                <p>metrics-as-a-service (Version September-2023)</p>
-                <p>Copyright &#169; September 2023 Abhijit Majumdar</p>
+            <footer style="font-size: x-small;">
+                <p>metrics-as-a-service (Version October-2023)</p>
+                <p>Copyright &#169; October-2023 Abhijit Majumdar</p>
                 <p>Powered by HTML5, CSS3, JS,
                     <!-- </a><img src="icons/html5.svg" style= "opacity: 50%;" width="15"><a>, </a>
                 <img src="icons/css3-alt.svg" style= "opacity: 50%;" width="15"><a>, </a>
@@ -107,9 +108,9 @@
                     <a href="https://www.papaparse.com" target="_blank">papaparse</a><a>, </a>
                     <a href="https://apexcharts.com" target="_blank">apexchart</a>
                     <a> and a lot of elbow grease</a>
-                </p>
+                <!-- 
                 <p>Tested on Safari, Chrome and Edge</p>
-                <!-- <div id="wcb" class="carbonbadge"></div> -->
+                <div id="wcb" class="carbonbadge"></div> -->
             </footer>
         </div>
         <div class="w3-container w3-padding" id="help"></div>
@@ -149,11 +150,10 @@
 </body>
 <script>
     'use strict'
-    setupMTML()
     function allloaded() {
+        setupMTML()
         const url = new URL(window.location.toLocaleString());
         const demo = url.searchParams.get("demo")
-        // console.log('loaded')
         if (demo) loadDemoFile('Introduction')
     }
 
@@ -446,15 +446,8 @@
             { onclick: "menu('help')", label: "Help" },
             { onclick: "menu('feedback')", label: "Feedback" },
         ]
-        const demoMenu = [
-            // { onclick: "loadDemoFile('Introduction')", label: "Introduction" },
-            { onclick: "loadDemoFile('Basic')", label: "Demo: Basic" },
-            { onclick: "loadDemoFile('Modified Basic')", label: "Demo: Modified Basic" },
-            { onclick: "loadDemoFile('Test Execution')", label: "Demo: Test Execution" },
-            { onclick: "loadDemoFile('State Change')", label: "Demo: State Change" },
-            { onclick: "loadDemoFile('Risk')", label: "Demo: Risk" },
-            { onclick: "loadDemoFile('Plan')", label: "Demo: Plan" },
-        ]
+        const demoMenu = $demo.getMenuItems()
+        
         const mainMenu = [
             { onclick: "menu('loaddata')", label: "Load Data" },
             { onclick: "menu('layout')", label: "Modify Layout" },
@@ -467,7 +460,9 @@
 
         if (demo) {
             loadmenu(demoMenu)
+            loadmenu(commonMenu)
             document.title += " Demo"
+            toggleNav()
             return
         }
         loadmenu(mainMenu)
