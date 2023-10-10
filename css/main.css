@@ -443,3 +443,52 @@ h6 {
     overflow: hidden;
     max-height: 0;
 } */
+
+
+.maas-outline-primary {
+    border: 1px solid var(--maas-color-primary)
+}
+
+.maas-outline-dark {
+    border: 1px solid var(--maas-color-dark)
+}
+    
+.maas-outline-light {
+    border: 1px solid var(--maas-color-light)
+}
+
+.maas-outline-info {
+    border: 1px solid var(--maas-color-info)
+}
+
+.maas-outline-warning {
+    border: 1px solid var(--maas-color-warning)
+}
+
+.maas-outline-danger {
+    border: 1px solid var(--maas-color-danger)
+}
+
+.maas-fill-primary {
+    background-color: var(--maas-color-primary)
+}
+
+.maas-fill-dark {
+    background-color: var(--maas-color-dark)
+}
+
+.maas-fill-light {
+    background-color: var(--maas-color-light)
+}
+
+.maas-fill-info {
+    background-color: var(--maas-color-info)
+}
+
+.maas-fill-warning {
+    background-color: (--maas-color-warning)
+}
+
+.maas-fill-danger {
+    background-color: var(--maas-color-danger)
+}
