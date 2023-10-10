@@ -466,8 +466,8 @@ var $c = (function () {
 
 
             const closeDate = row.data[closeDateCol]
-            const isClosed = closeDate.trim() == ""
-            if (!isClosed) {
+            const isClosed = closeDate.trim() != ""
+            if (isClosed) {
                 if (closeDate == undefined) {
                     $l.log(`Close col (${closeDateCol}) does not exist`, "Error", Number(key))
                     errorFound = true

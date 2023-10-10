@@ -43,12 +43,12 @@ const $demo = (function () {
                     { "title": "DEMO CHARTS", "type": "Note", "chartSize": "Small", "message": INTRODUCTION_TO_DEMO },
                     { "title": "BASIC", "type": "Note", "chartSize": "Small", "message": INTRODUCTION_TO_BASIC },
                 ]
-            },  
+            },
             file: "https://raw.githubusercontent.com/abhijitmajumdar2020/MAAS/main/datafiles/notes.csv",
         },
         "Basic": {
             config: {
-                "reportDate": "2023-08-01",
+                "reportDate": "2023-06-12",
                 "reportTitle": "Auto-generated Metrics",
                 "maxValues": 30,
                 "file": {},
@@ -73,7 +73,7 @@ const $demo = (function () {
         },
         "Modified Basic": {
             config: {
-                "reportDate": "2023-08-01",
+                "reportDate": "2023-06-12",
                 "reportTitle": "Modified Auto-generated Metrics",
                 "maxValues": 30,
                 "file": {},
@@ -81,14 +81,16 @@ const $demo = (function () {
                 "colTypes": ["String", "Date", "String", "String", "String", "String", "Number", "String"],
                 "callouts": [],
                 "cols": [
-                    { "title": "INTRODUCTION", "type": "Note", "chartSize": "Small", "message": "The is a modified version of the Basic Demo.\nIn this version:\nThis INTRODUCTION is added to summarise the changes,\nchart showing data on ID has been removed as it does not provide any insight\nfurther notes are added where changes are made." },
+                    { "title": "INTRODUCTION", "type": "Note", "chartSize": "Small", "message": "The is a modified version of the Basic Demo. In this version:\nThis INTRODUCTION is added to summarise the changes,\nTrend charts have been added.\nSome charts have been removed (e.g. one showing data on ID)\nFurther notes are added where changes are made." },
                     // { "title": "COUNT BY ID", "autoTitle": false, "chartSize": "Small", "colname": "ID", "countif": "", "countType": "Count", "autoType": "String", "type": "String" },
-                    { "title": "COUNT BY CREATE DATE", "autoTitle": false, "chartSize": "Small", "colname": "CREATE DATE", "countif": "", "countType": "Count", "autoType": "Date", "type": "Date", "dateFormat": "MMM" },
-                    { "title": "STATUS ORDER", "type": "Note", "chartSize": "Small", "message": "The default chart showed the x-axis in default asceding order (Closed, New, WIP). Order values are added to display the status in more logical sequence." },
-                    { "title": "COUNT BY STATUS", "autoTitle": false, "chartSize": "Small", "colname": "STATUS", "countif": "", "countType": "Count", "autoType": "String", "type": "String", "order": ["New", "WIP", "Closed"] },
+                    // { "title": "COUNT BY CREATE DATE", "autoTitle": false, "chartSize": "Small", "colname": "CREATE DATE", "countif": "", "countType": "Count", "autoType": "Date", "type": "Date", "dateFormat": "MMM" },
+                    { "title": "TREND BY CREATE DATE", "autoTitle": false, "chartSize": "Small", "countif": "", "type": "Trend", "dateCol": "CREATE DATE", "trendStartDate": "2023-01-12", "forecast": "", "plan": "" },
+                    { "title": "TREND OF OPEN", "autoTitle": false, "chartSize": "Small", "countif": "", "type": "Trend OC", "trendStartDate": "2023-01-12", "forecast": "", "openDateCol": "CREATE DATE", "closeDateCol": "CLOSE DATE" },
+                    { "title": "STATUS ORDER", "type": "Note", "chartSize": "Small", "message": "The default chart showed the x-axis in default asceding order (Closed, In Test, New, WIP). Order values are added to display the status in more logical sequence." },
+                    { "title": "COUNT BY STATUS", "autoTitle": false, "chartSize": "Small", "colname": "STATUS", "countif": "", "countType": "Count", "autoType": "String", "type": "String", "order": ["New", "WIP", "In Test", "Closed"] },
                     { "title": "COUNT BY PRIORITY", "autoTitle": false, "chartSize": "Small", "colname": "PRIORITY", "countif": "", "countType": "Count", "autoType": "String", "type": "String" },
                     { "title": "COUNT BY GEORAPHY", "autoTitle": false, "chartSize": "Small", "colname": "GEORAPHY", "countif": "", "countType": "Count", "autoType": "String", "type": "String" },
-                    { "title": "COUNT BY CLOSE DATE", "autoTitle": false, "chartSize": "Small", "colname": "CLOSE DATE", "countif": "", "countType": "Count", "autoType": "String", "type": "String" },
+                    // { "title": "COUNT BY CLOSE DATE", "autoTitle": false, "chartSize": "Small", "colname": "CLOSE DATE", "countif": "", "countType": "Count", "autoType": "String", "type": "String" },
                     { "title": "BIN", "type": "Note", "chartSize": "Small", "message": "Bin values are added to the next chart which improves its readibility." },
                     { "title": "COUNT BY AGE", "autoTitle": false, "chartSize": "Small", "colname": "AGE", "countif": "", "countType": "Count", "autoType": "Number", "type": "Number", "bin": [1, 10, 20, 30, 40] },
                     // { "title": "COUNT BY DESCRIPTION", "autoTitle": false, "chartSize": "Small", "colname": "Description", "countif": "", "countType": "Count", "autoType": "String", "type": "String" },
@@ -138,7 +140,7 @@ const $demo = (function () {
                     // { "colname": "", "title": "INTRODUCTION", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small",  "order": [], "message": INTRODUCTION },
                     { "colname": "Priority", "title": "INTRODUCTION", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small", "order": [], "message": "This demo shows the data on \"plan\"\nCharts 2 and 3 shows the plan.  Remaining charts show other attributes of the plan.  Click on these bar charts to see how the display for the plan changes.\nThese charts are useful in identifying possible areas of the plan that needs attention." },
                     { "title": "LEVEL 1 PLAN", "autoTitle": false, "chartSize": "Medium", "countif": "includeif level contains [1]", "type": "Plan", "descriptionCol": "Desc", "startDateCol": "Start", "endDateCol": "End", "actualStartDateCol": "Actual start", "actualEndDateCol": "Actual/estimated end" },
-                    { "title": "OVERALL PLAN", "autoTitle": false, "chartSize": "Medium", "countif": "", "type": "Plan", "descriptionCol": "Desc", "startDateCol": "Start", "endDateCol": "End", "actualStartDateCol": "Actual start", "actualEndDateCol": "Actual/estimated end" },
+                    { "title": "OVERall PLAN", "autoTitle": false, "chartSize": "Medium", "countif": "", "type": "Plan", "descriptionCol": "Desc", "startDateCol": "Start", "endDateCol": "End", "actualStartDateCol": "Actual start", "actualEndDateCol": "Actual/estimated end" },
                     { "title": "COUNT BY LEVEL", "autoTitle": false, "chartSize": "Small", "colname": "Level", "countif": "", "countType": "Count", "autoType": "Number", "type": "Number" },
                     { "title": "COUNT BY CRIITICAL", "autoTitle": false, "chartSize": "Small", "colname": "Criitical", "countif": "", "countType": "Count", "type": "String", "colOver": "", "order": [] },
                     { "title": "COUNT BY RESPONSIBILITY", "autoTitle": false, "chartSize": "Small", "colname": "Responsibility", "countif": "", "countType": "Count", "type": "String", "colOver": "", "order": [] },
@@ -212,6 +214,14 @@ const $demo = (function () {
     //     //const file = demoConfigs[type].file
     //     return demoConfigs[type].file
     // }
+
+    // { onclick: "loadDemoFile('Introduction')", label: "Introduction" },
+    $.getMenuItems = function () {
+        const menuitems = []
+        for (const key in demoConfigs) menuitems.push({ onclick: `loadDemoFile("${key}")`, label: 'Demo: ' + key })
+        return menuitems
+    }
+
     $.getConfigJSON = function (type) {
         if (!type) {
             $l.log(`Type: "${type}" incorrectr`, "Error")
@@ -266,3 +276,4 @@ function testDemo() {
     console.log(JSON.parse(json))
 
 }
+

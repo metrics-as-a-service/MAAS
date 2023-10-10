@@ -349,29 +349,14 @@ let $p = (function () {
                 return returnValue
             },
             formatValue: (v, col) => {
-                const datasteps = 30
-                const { trendStartDate } = col
-                const trendEndDate = config.reportDate
-                if (!isValidDate(v)) {
-                    return { formatedValue: DISPLAY_INVALID, unFormatedValue: DISPLAY_INVALID }
-                }
-                // let date = dateparts[4]
-                if (v <= trendStartDate) return { formatedValue: trendStartDate, unFormatedValue: trendStartDate }
-                if (v > trendEndDate) return { formatedValue: trendEndDate, unFormatedValue: trendEndDate }
-
-                const dateDiference = dateTimeDiff(trendStartDate, trendEndDate, "Days") + 1
-                const deltaMilliseconds = (24 * 60 * 60 * 1000) * (dateDiference > datasteps ? dateDiference / datasteps : 1)
-
-                const startToMapMilliseconds = (dateTimeDiff(trendStartDate, v, "Days") + 1) * (24 * 60 * 60 * 1000)
-                const datastep = Math.floor(startToMapMilliseconds / deltaMilliseconds) + 1
-                const date = new Date(trendStartDate)
-                date.setMilliseconds(date.getMilliseconds() + datastep * deltaMilliseconds)
-                //return date.toISOString.substring(0, 10)
-                return { formatedValue: date.toISOString().substring(0, 10), unFormatedValue: date.toISOString().substring(0, 10) }
+                const dateArray = chartTypes['Trend OC'].orderedValues(col)
+                const fvIndex = dateArray.findIndex(d => v <= d)
+                // if (fvIndex == -1) return { formatedValue: DISPLAY_INVALID, unFormatedValue: DISPLAY_INVALID }
+                const date = fvIndex != -1 ? dateArray[fvIndex] : DISPLAY_INVALID
+                return { formatedValue: date, unFormatedValue: date }
             }
         }
     }
-
     //////////////////////////////////////chartTypes Functionbs
     $.getChartTypes = function () {
         return Object.keys(chartTypes).sort()
