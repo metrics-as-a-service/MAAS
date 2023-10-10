@@ -100,6 +100,58 @@ const $demo = (function () {
             },
             file: "https://raw.githubusercontent.com/abhijitmajumdar2020/MAAS/main/datafiles/incidents.csv",
         },
+        "Test Execution": { //final
+            config: {
+                "reportDate": "2023-08-07",
+                "reportTitle": "Test Execution Metrics",
+                "maxValues": 30,
+                "file": {},
+                "colNames": ["ID", "Create Date", "Execution Date", "STATUS", "PRIORITY", "Responsibility", "Description", "Linked Defects"],
+                "colTypes": ["String", "Date", "Date", "String", "String", "String", "String", "String"],
+                "callouts": [], "validations": [],
+                "cols": [
+                    // { "colname": "", "title": "INTRODUCTION", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small",  "order": [], "message": INTRODUCTION },
+                    { "colname": "ID", "title": "NOTE ON TEST EXECUTION", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small", "autoTitle": false, "message": "This specific demo is on Test Execution.\nThe next two charts show the trend for test creation and test execution. Both charts show a planned line which can be customised.  The plan shows that while the Trest Creation was done ahead of plan, the Test Execution is behind.\nThe Test Execution trend chart also has forecast which shows that unless the pace of execution is increased the plan is likely to be missed.\nAt current pace the scope will complete about 6 weeks late." },
+                    { "colname": "Create Date", "title": "TEST CREATION TREND", "autoType": "Date", "type": "Trend", "countType": "Count", "chartSize": "Medium", "dateFormat": "MMM", "autoTitle": false, "plan": "start 2023-02-01 end 2023-06-27 scopeto 1008 points [0, 1]", "dateCol": "Create Date", "countif": "", "trendStartDate": "2023-01-14", "forecast": "" },
+                    { "colname": "Execution Date", "title": "TEST EXECUTION TREND (FORECAST BASED ON PAST 2 WEEKS)", "autoType": "Date", "type": "Trend", "countType": "Count", "chartSize": "Medium", "dateFormat": "MMM", "autoTitle": false, "plan": "start 2023-05-01 end 2023-09-01 scopeto 1008 points [0, 0.02, 0.05, 0.12, 0.27, 0.5, 0.73, 0.88, 0.95, 0.98, 1]", "dateCol": "Execution Date", "countif": "includeif status contains [pass, fail]", "trendStartDate": "2023-01-14", "forecast": "basisdays 14 forecastDays 65" },
+                    { "colname": "Description", "title": "NOTE ON PLAN", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small", "autoTitle": false, "message": "A planned line makes the metrics actionable.\nThe plan line is easily configurable.\nNote that the plan is a straight line in Chart 2 while Chart 3 has a plan based on sigmoid function (which sounds fancy but often test execution follow this path: slow start due to team/ infratsucture build up, rapid middle and slow end where difficult defects are fixed)." },
+                    { "colname": "Description", "title": "NOTE ON FORECAST", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small", "autoTitle": false, "message": "In the next chart the forecast is changed to use executions from past week. This shows that forecast is much nearer the plan than before. \nIt can also be concluded that if the pace of excution is slightly increased  then plan could be met. " },
+                    { "colname": "Execution Date", "title": "TEST EXECUTION TREND (FORECAST BASED ON PAST WEEK)", "autoType": "Date", "type": "Trend", "countType": "Count", "chartSize": "Medium", "dateFormat": "MMM", "autoTitle": false, "plan": "start 2023-05-01 end 2023-09-01 scopeto 1008 points [0, 0.02, 0.05, 0.12, 0.27, 0.5, 0.73, 0.88, 0.95, 0.98, 1]", "dateCol": "Execution Date", "countif": "includeif status contains [pass, fail]", "trendStartDate": "2023-01-14", "forecast": "basisdays 7 forecastDays 35" },
+                    { "colname": "Linked Defects", "title": "COUNT OF SCRIPTS BY LINKED DEFECTS", "autoType": "String", "type": "List Count", "countType": "Count", "chartSize": "Small", "autoTitle": false, "separator": "," },
+                    { "colname": "Linked Defects", "title": "COUNT OF DEFECTS IN LINKED DEFECTS", "autoType": "String", "type": "List Members", "countType": "Count", "chartSize": "Small", "autoTitle": false, "separator": "," },
+                    { "colname": "STATUS", "title": "COUNT BY STATUS", "autoType": "String", "type": "String", "countType": "Count", "chartSize": "Small" },
+                    { "colname": "PRIORITY", "title": "COUNT BY PRIORITY", "autoType": "String", "type": "String", "countType": "Count", "chartSize": "Small" },
+                    { "colname": "Responsibility", "title": "COUNT BY RESPONSIBILITY", "autoType": "String", "type": "String", "countType": "Count", "chartSize": "Small" },
+                    { "colname": "ID", "title": "DATA TABLE", "autoType": "String", "type": "Data Table", "countType": "Count", "chartSize": "Medium", "maxEntries": 10, },
+                    { "colname": "ID", "title": "DATA DESCRIPTION", "autoType": "String", "type": "Data Description", "countType": "Count", "chartSize": "Medium", },
+                ]
+            },
+            file: "https://raw.githubusercontent.com/abhijitmajumdar2020/MAAS/main/datafiles/testexecution.csv",
+
+        },
+        "State Change": { //final
+            config: {
+                "reportDate": "2023-08-01",
+                "reportTitle": "State Change Metrics",
+                "maxValues": 30,
+                "file": {},
+                "colNames": ["ID", "When", "From", "To", "Priority", "Responsibilty"],
+                "colTypes": ["String", "Date", "String", "String", "String", "String"],
+                "cols": [
+                    // { "colname": "", "title": "INTRODUCTION", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small",  "order": [], "message": "This is a metrics-as-as-service demo.\nThese charts have been created using the metrics-as-service App that takes a CSV file and creates charts that can be sliced and diced for analysis. You can click on the bar charts to filter (i.e. slice and dice) the data.\nThe charts can customised using the menu located at top right of each chart. In this demo you can modify the charts. Since this is demo the modifications cannot be saved\nThe data used is atrificial but created based on experince and is represtative of the real world" },
+                    // { "colname": "", "title": "INTRODUCTION", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small",  "order": [], "message": INTRODUCTION },
+                    { "colname": "Priority", "title": "NOTE ON STATE CHANGE", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small", "order": [], "message": "This specific demo shows the data on \"state change\"\nChart 3 shows the number of transitions in status items (typically defects or incidents or stories).  Charts 4 and 5 show the data in total and average duration.\nThese charts are useful in identifying possible areas of improvements. It may be worth considering actions to reduce the average durations where they are high.\nThe last chart shows the data in a table." },
+                    { "colname": "ID", "title": "COUNT OF TRANSITIONS", "autoType": "String", "type": "State Change", "countType": "Count", "chartSize": "Small", "stateChangeCountType": "Count of Transitions", "idCol": "ID", "toCol": "To", "fromCol": "From", "timestampCol": "When" },
+                    { "colname": "ID", "title": "SUM OF TRANSITION DURATION", "autoType": "String", "type": "State Change", "countType": "Count", "chartSize": "Small", "stateChangeCountType": "Sum of Transition Duration", "idCol": "ID", "toCol": "To", "fromCol": "From", "timestampCol": "When" },
+                    { "colname": "ID", "title": "AVERAGE OF TRANSITION DURATION", "autoType": "String", "type": "State Change", "countType": "Count", "chartSize": "Small", "stateChangeCountType": "Average of Transition Duration", "idCol": "ID", "toCol": "To", "fromCol": "From", "timestampCol": "When" },
+                    { "colname": "Priority", "title": "COUNT BY PRIORITY", "autoType": "String", "type": "String", "countType": "Count", "chartSize": "Small", "order": [] },
+                    { "colname": "Responsibilty", "title": "COUNT BY RESPONSIBILTY", "autoType": "String", "type": "String", "countType": "Count", "chartSize": "Small", "order": [] },
+                    { "colname": "ID", "title": "DATA TABLE", "autoType": "String", "type": "Data Table", "countType": "Count", "chartSize": "Medium", "maxEntries": 10, },
+                    { "colname": "ID", "title": "DATA DESCRIPTION", "autoType": "String", "type": "Data Description", "countType": "Count", "chartSize": "Medium", },
+                ]
+            },
+            file: "https://raw.githubusercontent.com/abhijitmajumdar2020/MAAS/main/datafiles/statuschange.csv",
+        },
         "Risk": {
             config: {
                 "reportDate": "2023-08-01",
@@ -155,58 +207,8 @@ const $demo = (function () {
             file: "https://raw.githubusercontent.com/abhijitmajumdar2020/MAAS/main/datafiles/plan.csv",
         },
 
-        "State Change": { //final
-            config: {
-                "reportDate": "2023-08-01",
-                "reportTitle": "State Change Metrics",
-                "maxValues": 30,
-                "file": {},
-                "colNames": ["ID", "When", "From", "To", "Priority", "Responsibilty"],
-                "colTypes": ["String", "Date", "String", "String", "String", "String"],
-                "cols": [
-                    // { "colname": "", "title": "INTRODUCTION", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small",  "order": [], "message": "This is a metrics-as-as-service demo.\nThese charts have been created using the metrics-as-service App that takes a CSV file and creates charts that can be sliced and diced for analysis. You can click on the bar charts to filter (i.e. slice and dice) the data.\nThe charts can customised using the menu located at top right of each chart. In this demo you can modify the charts. Since this is demo the modifications cannot be saved\nThe data used is atrificial but created based on experince and is represtative of the real world" },
-                    // { "colname": "", "title": "INTRODUCTION", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small",  "order": [], "message": INTRODUCTION },
-                    { "colname": "Priority", "title": "NOTE ON STATE CHANGE", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small", "order": [], "message": "This specific demo shows the data on \"state change\"\nChart 3 shows the number of transitions in status items (typically defects or incidents or stories).  Charts 4 and 5 show the data in total and average duration.\nThese charts are useful in identifying possible areas of improvements. It may be worth considering actions to reduce the average durations where they are high.\nThe last chart shows the data in a table." },
-                    { "colname": "ID", "title": "COUNT OF TRANSITIONS", "autoType": "String", "type": "State Change", "countType": "Count", "chartSize": "Small", "stateChangeCountType": "Count of Transitions", "idCol": "ID", "toCol": "To", "fromCol": "From", "timestampCol": "When" },
-                    { "colname": "ID", "title": "SUM OF TRANSITION DURATION", "autoType": "String", "type": "State Change", "countType": "Count", "chartSize": "Small", "stateChangeCountType": "Sum of Transition Duration", "idCol": "ID", "toCol": "To", "fromCol": "From", "timestampCol": "When" },
-                    { "colname": "ID", "title": "AVERAGE OF TRANSITION DURATION", "autoType": "String", "type": "State Change", "countType": "Count", "chartSize": "Small", "stateChangeCountType": "Average of Transition Duration", "idCol": "ID", "toCol": "To", "fromCol": "From", "timestampCol": "When" },
-                    { "colname": "Priority", "title": "COUNT BY PRIORITY", "autoType": "String", "type": "String", "countType": "Count", "chartSize": "Small", "order": [] },
-                    { "colname": "Responsibilty", "title": "COUNT BY RESPONSIBILTY", "autoType": "String", "type": "String", "countType": "Count", "chartSize": "Small", "order": [] },
-                    { "colname": "ID", "title": "DATA TABLE", "autoType": "String", "type": "Data Table", "countType": "Count", "chartSize": "Medium", "maxEntries": 10, },
-                    { "colname": "ID", "title": "DATA DESCRIPTION", "autoType": "String", "type": "Data Description", "countType": "Count", "chartSize": "Medium", },
-                ]
-            },
-            file: "https://raw.githubusercontent.com/abhijitmajumdar2020/MAAS/main/datafiles/statuschange.csv",
-        },
-        "Test Execution": { //final
-            config: {
-                "reportDate": "2023-08-07",
-                "reportTitle": "Test Execution Metrics",
-                "maxValues": 30,
-                "file": {},
-                "colNames": ["ID", "Create Date", "Execution Date", "STATUS", "PRIORITY", "Responsibility", "Description", "Linked Defects"],
-                "colTypes": ["String", "Date", "Date", "String", "String", "String", "String", "String"],
-                "callouts": [], "validations": [],
-                "cols": [
-                    // { "colname": "", "title": "INTRODUCTION", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small",  "order": [], "message": INTRODUCTION },
-                    { "colname": "ID", "title": "NOTE ON TEST EXECUTION", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small", "autoTitle": false, "message": "This specific demo is on Test Execution.\nThe next two charts show the trend for test creation and test execution. Both charts show a planned line which can be customised.  The plan shows that while the Trest Creation was done ahead of plan, the Test Execution is behind.\nThe Test Execution trend chart also has forecast which shows that unless the pace of execution is increased the plan is likely to be missed.\nAt current pace the scope will complete about 6 weeks late." },
-                    { "colname": "Create Date", "title": "TEST CREATION TREND", "autoType": "Date", "type": "Trend", "countType": "Count", "chartSize": "Medium", "dateFormat": "MMM", "autoTitle": false, "plan": "start 2023-02-01 end 2023-06-27 scopeto 1008 points [0, 1]", "dateCol": "Create Date", "countif": "", "trendStartDate": "2023-01-14", "forecast": "" },
-                    { "colname": "Execution Date", "title": "TEST EXECUTION TREND (FORECAST BASED ON PAST 2 WEEKS)", "autoType": "Date", "type": "Trend", "countType": "Count", "chartSize": "Medium", "dateFormat": "MMM", "autoTitle": false, "plan": "start 2023-05-01 end 2023-09-01 scopeto 1008 points [0, 0.02, 0.05, 0.12, 0.27, 0.5, 0.73, 0.88, 0.95, 0.98, 1]", "dateCol": "Execution Date", "countif": "includeif status contains [pass, fail]", "trendStartDate": "2023-01-14", "forecast": "basisdays 14 forecastDays 65" },
-                    { "colname": "Description", "title": "NOTE ON PLAN", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small", "autoTitle": false, "message": "A planned line makes the metrics actionable.\nThe plan line is easily configurable.\nNote that the plan is a straight line in Chart 2 while Chart 3 has a plan based on sigmoid function (which sounds fancy but often test execution follow this path: slow start due to team/ infratsucture build up, rapid middle and slow end where difficult defects are fixed)." },
-                    { "colname": "Description", "title": "NOTE ON FORECAST", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small", "autoTitle": false, "message": "In the next chart the forecast is changed to use executions from past week. This shows that forecast is much nearer the plan than before. \nIt can also be concluded that if the pace of excution is slightly increased  then plan could be met. " },
-                    { "colname": "Execution Date", "title": "TEST EXECUTION TREND (FORECAST BASED ON PAST WEEK)", "autoType": "Date", "type": "Trend", "countType": "Count", "chartSize": "Medium", "dateFormat": "MMM", "autoTitle": false, "plan": "start 2023-05-01 end 2023-09-01 scopeto 1008 points [0, 0.02, 0.05, 0.12, 0.27, 0.5, 0.73, 0.88, 0.95, 0.98, 1]", "dateCol": "Execution Date", "countif": "includeif status contains [pass, fail]", "trendStartDate": "2023-01-14", "forecast": "basisdays 7 forecastDays 35" },
-                    { "colname": "Linked Defects", "title": "COUNT OF SCRIPTS BY LINKED DEFECTS", "autoType": "String", "type": "List Count", "countType": "Count", "chartSize": "Small", "autoTitle": false, "separator": "," },
-                    { "colname": "Linked Defects", "title": "COUNT OF DEFECTS IN LINKED DEFECTS", "autoType": "String", "type": "List Members", "countType": "Count", "chartSize": "Small", "autoTitle": false, "separator": "," },
-                    { "colname": "STATUS", "title": "COUNT BY STATUS", "autoType": "String", "type": "String", "countType": "Count", "chartSize": "Small" },
-                    { "colname": "PRIORITY", "title": "COUNT BY PRIORITY", "autoType": "String", "type": "String", "countType": "Count", "chartSize": "Small" },
-                    { "colname": "Responsibility", "title": "COUNT BY RESPONSIBILITY", "autoType": "String", "type": "String", "countType": "Count", "chartSize": "Small" },
-                    { "colname": "ID", "title": "DATA TABLE", "autoType": "String", "type": "Data Table", "countType": "Count", "chartSize": "Medium", "maxEntries": 10, },
-                    { "colname": "ID", "title": "DATA DESCRIPTION", "autoType": "String", "type": "Data Description", "countType": "Count", "chartSize": "Medium", },
-                ]
-            },
-            file: "https://raw.githubusercontent.com/abhijitmajumdar2020/MAAS/main/datafiles/testexecution.csv",
 
-        },
+
     }
     // $.getFile = function (type) {
     //     if (!type) return
