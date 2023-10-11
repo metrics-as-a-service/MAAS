@@ -356,7 +356,7 @@ dialog>div {
 
 .maas-chart:hover {
     background-color: var(--maas-color-light);
-    transform: scale(1.05);
+    /* transform: scale(1.05); */
 }
 
 @media (min-width: 600px) {
