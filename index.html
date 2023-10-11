@@ -30,7 +30,7 @@
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="./css/main.css">
     <link rel="stylesheet" href="./css/print.css">
-    
+
     <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300&display=swap" rel="stylesheet"> -->
@@ -108,7 +108,7 @@
                     <a href="https://www.papaparse.com" target="_blank">papaparse</a><a>, </a>
                     <a href="https://apexcharts.com" target="_blank">apexchart</a>
                     <a> and a lot of elbow grease</a>
-                <!-- 
+                    <!-- 
                 <p>Tested on Safari, Chrome and Edge</p>
                 <div id="wcb" class="carbonbadge"></div> -->
             </footer>
@@ -120,32 +120,13 @@
             <label>Label on right</label>
             <br>
         </template>
+
         <template id="input-template">
             <div>
                 <label>Label</label>
                 <input class="w3-input maas-input">
             </div>
         </template>
-        <!-- <div>
-            <label class="w3-label">Label on left
-                <span> </span>
-                <input type="checkbox" class="w3-check">
-            </label>
-            <label>
-                <input type="checkbox" class="w3-check">
-                <span> </span>
-                Label on ight
-            </label>
-            <br>
-            <label>
-                Label on left
-                <input type="text">
-            </label>
-            <label>
-                <input type="text">
-                Label on right
-            </label>
-        </div> -->
     </div>
 </body>
 <script>
@@ -447,7 +428,7 @@
             { onclick: "menu('feedback')", label: "Feedback" },
         ]
         const demoMenu = $demo.getMenuItems()
-        
+
         const mainMenu = [
             { onclick: "menu('loaddata')", label: "Load Data" },
             { onclick: "menu('layout')", label: "Modify Layout" },
@@ -468,6 +449,13 @@
         loadmenu(mainMenu)
         loadmenu(commonMenu)
     }
+
+    // function testdemo() {
+    //     const demoMenu = $demo.getMenuItems()
+    //     demoMenu.forEach(e => {
+    //         loadDemoFile(e.key).then()
+    //     })
+    // }
 
 </script>
 
