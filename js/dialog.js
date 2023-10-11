@@ -1205,15 +1205,26 @@ const $dialog = (function () {
 
             // return div
 
-            const div = document.createElement('div')
-            const l = getlabel(label)
-            const input = document.createElement("input")
+            // const div = document.createElement('div')
+            // const l = getlabel(label)
+            // const input = document.createElement("input")
+            // const inputType = type.replace("input ", "")
+            // input.type = inputType
+            // setCommonAttributes(input)
+            // div.appendChild(l)
+            // div.appendChild(input)
+            // return div
+
+            const tempalte = document.querySelector("#input-template")
+            const inputntry = tempalte.content.cloneNode(true)
+
+            const input = inputntry.querySelector("input")
             const inputType = type.replace("input ", "")
             input.type = inputType
+            // if (returnvalue) input.setAttribute("returnvalue", returnvalue)
             setCommonAttributes(input)
-            div.appendChild(l)
-            div.appendChild(input)
-            return div
+            inputntry.querySelector("label").textContent = label
+            return inputntry
         }
 
         if (type == "textarea") {

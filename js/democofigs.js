@@ -102,7 +102,7 @@ const $demo = (function () {
         },
         "Test Execution": { //final
             config: {
-                "reportDate": "2023-08-07",
+                "reportDate": "2023-08-01",
                 "reportTitle": "Test Execution Metrics",
                 "maxValues": 30,
                 "file": {},
@@ -115,8 +115,8 @@ const $demo = (function () {
                     { "colname": "Create Date", "title": "TEST CREATION TREND", "autoType": "Date", "type": "Trend", "countType": "Count", "chartSize": "Medium", "dateFormat": "MMM", "autoTitle": false, "plan": "start 2023-02-01 end 2023-06-27 scopeto 1008 points [0, 1]", "dateCol": "Create Date", "countif": "", "trendStartDate": "2023-01-14", "forecast": "" },
                     { "colname": "Execution Date", "title": "TEST EXECUTION TREND (FORECAST BASED ON PAST 2 WEEKS)", "autoType": "Date", "type": "Trend", "countType": "Count", "chartSize": "Medium", "dateFormat": "MMM", "autoTitle": false, "plan": "start 2023-05-01 end 2023-09-01 scopeto 1008 points [0, 0.02, 0.05, 0.12, 0.27, 0.5, 0.73, 0.88, 0.95, 0.98, 1]", "dateCol": "Execution Date", "countif": "includeif status contains [pass, fail]", "trendStartDate": "2023-01-14", "forecast": "basisdays 14 forecastDays 65" },
                     { "colname": "Description", "title": "NOTE ON PLAN", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small", "autoTitle": false, "message": "A planned line makes the metrics actionable.\nThe plan line is easily configurable.\nNote that the plan is a straight line in Chart 2 while Chart 3 has a plan based on sigmoid function (which sounds fancy but often test execution follow this path: slow start due to team/ infratsucture build up, rapid middle and slow end where difficult defects are fixed)." },
-                    { "colname": "Description", "title": "NOTE ON FORECAST", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small", "autoTitle": false, "message": "In the next chart the forecast is changed to use executions from past week. This shows that forecast is much nearer the plan than before. \nIt can also be concluded that if the pace of excution is slightly increased  then plan could be met. " },
-                    { "colname": "Execution Date", "title": "TEST EXECUTION TREND (FORECAST BASED ON PAST WEEK)", "autoType": "Date", "type": "Trend", "countType": "Count", "chartSize": "Medium", "dateFormat": "MMM", "autoTitle": false, "plan": "start 2023-05-01 end 2023-09-01 scopeto 1008 points [0, 0.02, 0.05, 0.12, 0.27, 0.5, 0.73, 0.88, 0.95, 0.98, 1]", "dateCol": "Execution Date", "countif": "includeif status contains [pass, fail]", "trendStartDate": "2023-01-14", "forecast": "basisdays 7 forecastDays 35" },
+                    { "colname": "Description", "title": "NOTE ON FORECAST", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small", "autoTitle": false, "message": "In the next chart the forecast is changed to use executions from past week instead of two weeks. This shows that forecast is much nearer the plan than before. " },
+                    { "colname": "Execution Date", "title": "TEST EXECUTION TREND (FORECAST BASED ON PAST WEEK)", "autoType": "Date", "type": "Trend", "countType": "Count", "chartSize": "Medium", "dateFormat": "MMM", "autoTitle": false, "plan": "start 2023-05-01 end 2023-09-01 scopeto 1008 points [0, 0.02, 0.05, 0.12, 0.27, 0.5, 0.73, 0.88, 0.95, 0.98, 1]", "dateCol": "Execution Date", "countif": "includeif status contains [pass, fail]", "trendStartDate": "2023-01-14", "forecast": "basisdays 7 forecastDays 32" },
                     { "colname": "Linked Defects", "title": "COUNT OF SCRIPTS BY LINKED DEFECTS", "autoType": "String", "type": "List Count", "countType": "Count", "chartSize": "Small", "autoTitle": false, "separator": "," },
                     { "colname": "Linked Defects", "title": "COUNT OF DEFECTS IN LINKED DEFECTS", "autoType": "String", "type": "List Members", "countType": "Count", "chartSize": "Small", "autoTitle": false, "separator": "," },
                     { "colname": "STATUS", "title": "COUNT BY STATUS", "autoType": "String", "type": "String", "countType": "Count", "chartSize": "Small" },
@@ -220,7 +220,7 @@ const $demo = (function () {
     // { onclick: "loadDemoFile('Introduction')", label: "Introduction" },
     $.getMenuItems = function () {
         const menuitems = []
-        for (const key in demoConfigs) menuitems.push({ onclick: `loadDemoFile("${key}")`, label: 'Demo: ' + key })
+        for (const key in demoConfigs) menuitems.push({ onclick: `loadDemoFile("${key}")`, label: 'Demo: ' + key, key })
         return menuitems
     }
 
