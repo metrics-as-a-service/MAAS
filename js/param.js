@@ -346,6 +346,7 @@ let $p = (function () {
                     returnValue.push(date.toISOString().substring(0, 10))
                     date.setMilliseconds(date.getMilliseconds() + deltaMilliseconds)
                 }
+                returnValue[returnValue.length-1] = trendEndDate
                 return returnValue
             },
             formatValue: (v, col) => {
