@@ -44,7 +44,7 @@ function isValidDate(date) {// checks for "YYYY-MM-DD" or DD-MMM-YY {
     if (!date) return false
 
     // const dateWithHyphen = date.toUpperCase().replaceAll("/", "-") // allow for / as a separater 
-    const dateWithHyphen = date
+    const dateWithHyphen = date.toUpperCase()
 
     const YYYY_MM_DD = /[0-9]{4}-[0-9]{2}-[0-9]{2}/g;
     if (dateWithHyphen.search(YYYY_MM_DD) == 0) {
