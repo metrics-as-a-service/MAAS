@@ -1,11 +1,11 @@
 Level,Desc,Start,End,Criitical,Actual start,Actual/estimated end,Responsibility,RAG
-1,L1 Task 1,14-May-23,13-Jul-23,Yes,19-Jun-23,10-Aug-23,US,A
+1,L1 Task 1,14-May-23,13-Jul-23,Yes,19-Jun-23,10-Aug-23,US,R
 2,L2 Task 2,14-May-23,24-May-23,Yes,20-Jun-23,28-Jun-23,US,B
 2,L2 Task 3,24-May-23,13-Jun-23,Yes,28-Jun-23,16-Jul-23,US,B
 2,L2 Task 4,13-Jun-23,02-Jul-23,No,16-Jul-23,30-Jul-23,US,B
 2,L2 Task 5,02-Jul-23,13-Jul-23,Yes,30-Jul-23,10-Aug-23,US,R
-1,Milestone 1,13-Jul-23,13-Jul-23,Yes,10-Aug-23,10-Aug-23,US,A
-1,L1 Task 7,13-Jul-23,23-Sep-23,Yes,07-Jul-23,27-Oct-23,Europe,A
+1,Milestone 1,13-Jul-23,13-Jul-23,Yes,10-Aug-23,10-Aug-23,US,R
+1,L1 Task 7,13-Jul-23,23-Sep-23,Yes,07-Jul-23,27-Oct-23,Europe,R
 2,L2 Task 8,13-Jul-23,30-Jul-23,Yes,10-Aug-23,26-Aug-23,Europe,R
 2,L2 Task 9,30-Jul-23,16-Aug-23,No,26-Aug-23,16-Sep-23,Europe,R
 2,L2 Task 10,16-Aug-23,29-Aug-23,No,16-Sep-23,03-Oct-23,Europe,R
@@ -15,7 +15,7 @@ Level,Desc,Start,End,Criitical,Actual start,Actual/estimated end,Responsibility,
 1,L1 Task 14,08-Jul-23,03-Sep-23,No,24-Jul-23,07-Sep-23,Asia,A
 2,L2 Task 15,08-Jul-23,22-Jul-23,No,23-Jul-23,09-Aug-23,Asia,R
 2,L2 Task 16,22-Jul-23,06-Aug-23,No,09-Aug-23,26-Aug-23,Asia,R
-2,L2 Task 17,06-Aug-23,24-Aug-23,No,26-Aug-23,07-Sep-23,Asia,A
+2,L2 Task 17,06-Aug-23,24-Aug-23,No,26-Aug-23,07-Sep-23,Asia,R
 2,L2 Task 18,24-Aug-23,03-Sep-23,No,17-Aug-23,07-Sep-23,Asia,A
 1,Milestone 3,03-Sep-23,03-Sep-23,No,07-Sep-23,07-Sep-23,Asia,A
 1,L1 Task 20,03-Sep-23,17-Oct-23,No,03-Sep-23,17-Oct-23,US,G
