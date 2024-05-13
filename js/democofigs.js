@@ -185,8 +185,8 @@ const $demo = (function () {
                 "reportTitle": "Plan Metrics",
                 "maxValues": 30,
                 "file": {},
-                "colNames": ["Level", "Desc", "Start", "End", "Criitical", "Actual start", "Actual/estimated end", "Responsibility"],
-                "colTypes": ["Number", "String", "Date", "Date", "String", "Date", "Date", "String"],
+                "colNames": ["Level", "Desc", "Start", "End", "Criitical", "Actual start", "Actual/estimated end", "Responsibility", "RAG"],
+                "colTypes": ["Number", "String", "Date", "Date", "String", "Date", "Date", "String","String"],
                 "callouts": [],
                 "cols": [
                     // { "colname": "", "title": "INTRODUCTION", "autoType": "String", "type": "Note", "countType": "Count", "chartSize": "Small",  "order": [], "message": INTRODUCTION },
