@@ -1,4 +1,4 @@
-Level,Desc,Start,End,Criitical,Actual start,Actual/estimated end,Responsibility,RAG,Age,Comment
+Level,Desc,Start,End,Critical,Actual start,Actual/estimated end,Responsibility,RAG,Age,Comment
 1,L1 Task 1,14-May-23,13-Jul-23,Yes,19-Jun-23,10-Aug-23,US,A,1,
 2,L2 Task 2,,,Yes,20-Jun-23,28-Jun-23,US,B,2,Start end spaces
 2,L2 Task 3,24-May-23,13-Jun-23,Yes,28-Jun-23,16-Jul-23,US,B,3,
