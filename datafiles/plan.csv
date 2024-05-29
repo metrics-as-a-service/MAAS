@@ -1,4 +1,4 @@
-Level,Desc,Start,End,Criitical,Actual start,Actual/estimated end,Responsibility,RAG
+Level,Desc,Start,End,Critical,Actual start,Actual/estimated end,Responsibility,RAG
 1,L1 Task 1,14-May-23,13-Jul-23,Yes,19-Jun-23,10-Aug-23,US,R
 2,L2 Task 2,14-May-23,24-May-23,Yes,20-Jun-23,28-Jun-23,US,B
 2,L2 Task 3,24-May-23,13-Jun-23,Yes,28-Jun-23,16-Jul-23,US,B
