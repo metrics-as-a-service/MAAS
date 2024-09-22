@@ -384,7 +384,7 @@ var $c = (function () {
             let errorFound = false
 
             const date = row.data[dateCol]
-            console.assert(date != undefined, `Col (${dateCol}) invalid`)
+            if (!date) return //console.assert(date != undefined, `Col (${dateCol}) invalid`)
             if (date.trim() == "") return
             if (!isValidDate(date)) {
                 $l.log(`Col (${dateCol}) is not date`, "warning", Number(key))
