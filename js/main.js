@@ -466,6 +466,7 @@ var $c = (function () {
 
 
             const closeDate = row.data[closeDateCol]
+            ///FIX concole.log(row.data)
             const isClosed = !closeDate && closeDate.trim() != ""
             if (isClosed) {
                 if (closeDate == undefined) {
