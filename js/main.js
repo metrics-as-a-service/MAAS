@@ -67,6 +67,7 @@ var $c = (function () {
                 delimiter: ",",
                 download: true,
                 header: true,
+                skipEmptyLines: true,
                 step: function (row) {
                     rowCount++
                     if (rowCount == 1) {
@@ -466,7 +467,6 @@ var $c = (function () {
 
 
             const closeDate = row.data[closeDateCol]
-            concole.log(row.data) //Fix
             const isClosed = !closeDate && closeDate.trim() != ""
             if (isClosed) {
                 if (closeDate == undefined) {
