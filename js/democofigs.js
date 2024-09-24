@@ -185,7 +185,7 @@ const $demo = (function () {
                 "reportTitle": "Plan Metrics",
                 "maxValues": 30,
                 "file": {},
-                "colNames": ["Level", "Desc", "Start", "End", "Criitical", "Actual start", "Actual/estimated end", "Responsibility", "RAG"],
+                "colNames": ["Level", "Desc", "Start", "End", "Critical", "Actual start", "Actual/estimated end", "Responsibility", "RAG"],
                 "colTypes": ["Number", "String", "Date", "Date", "String", "Date", "Date", "String","String"],
                 "callouts": [],
                 "cols": [
@@ -194,7 +194,7 @@ const $demo = (function () {
                     { "title": "LEVEL 1 PLAN", "autoTitle": false, "chartSize": "Medium", "countif": "includeif level contains [1]", "type": "Plan", "descriptionCol": "Desc", "startDateCol": "Start", "endDateCol": "End", "actualStartDateCol": "Actual start", "actualEndDateCol": "Actual/estimated end" },
                     { "title": "OVERall PLAN", "autoTitle": false, "chartSize": "Medium", "countif": "", "type": "Plan", "descriptionCol": "Desc", "startDateCol": "Start", "endDateCol": "End", "actualStartDateCol": "Actual start", "actualEndDateCol": "Actual/estimated end" },
                     { "title": "COUNT BY LEVEL", "autoTitle": false, "chartSize": "Small", "colname": "Level", "countif": "", "countType": "Count", "autoType": "Number", "type": "Number" },
-                    { "title": "COUNT BY CRIITICAL", "autoTitle": false, "chartSize": "Small", "colname": "Criitical", "countif": "", "countType": "Count", "type": "String", "colOver": "", "order": [] },
+                    { "title": "COUNT BY CRIITICAL", "autoTitle": false, "chartSize": "Small", "colname": "Critical", "countif": "", "countType": "Count", "type": "String", "colOver": "", "order": [] },
                     { "title": "COUNT BY RESPONSIBILITY", "autoTitle": false, "chartSize": "Small", "colname": "Responsibility", "countif": "", "countType": "Count", "type": "String", "colOver": "", "order": [] },
                     { "title": "COUNT BY START", "autoTitle": false, "chartSize": "Small", "colname": "Start", "countif": "", "countType": "Count", "autoType": "Date", "type": "Date", "dateFormat": "MMM" },
                     { "title": "COUNT BY END", "autoTitle": false, "chartSize": "Small", "colname": "End", "countif": "", "countType": "Count", "autoType": "Date", "type": "Date", "dateFormat": "MMM" },
