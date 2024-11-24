@@ -1,0 +1,54 @@
+:root {
+    /* brand font */
+    --maas-font-family: "Trebuchet MS", system-ui, -apple-system, Segoe UI,
+        Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
+
+    --color-brand: #0939aaff;
+    --color-blue: #0d0df2ff;
+    --color-red: #f20d0dff;
+    --color-amber: #f2a10dff;
+    --color-green: #0ac20aff;
+    --color-90-90: #aa098aff;
+    --color-90-180: #aa7a09ff;
+    --color-90-270: #09aa2aff;
+    --color-120-120: #aa0939ff;
+    --color-120-240: #39aa09ff;
+    /* brand colors */
+    --h: 222;
+    --s: 90%;
+    --l: 35%;
+    --maas-color-primary: var(--color-brand);
+    --brand: var(--color-brand);
+
+    /* RAG etc colors */
+    --maas-color-info: var(--color-blue);
+    --maas-color-success: var(--color-green);
+    --maas-color-warning: var(--color-amber);
+    --maas-color-danger: var(--color-red);
+
+    /* --maas-green: var(--maas-color-success);
+    --maas-amber: var(--maas-color-warning);
+    --maas-red: var(--maas-color-danger); */
+
+    /* --maas-green-amber: color-mix(in lch, var(--maas-green), var(--maas-amber));
+    --maas-amber-red: color-mix(in lch, var(--maas-amber), var(--maas-red)); */
+    --color-green-amber: color-mix(
+        in lch,
+        var(--color-green),
+        var(--color-amber)
+    );
+    --color-amber-red: color-mix(in lch, var(--color-amber), var(--color-red));
+
+    /* --maas-color-3-0: hsl(222, 45%, 45%);
+    --maas-color-3-1: var(--color-60-120);
+    --maas-color-3-2: var(--color-120-120);
+
+    --maas-color-4-0: var(--maas-color-3-0);
+    --maas-color-4-1: var(--color-90-90);
+    --maas-color-4-2: var(--color-90-180);
+    --maas-color-4-3: var(--color-90-270); */
+
+    --fluid-base-size: 1rem; /*clamp(0.75rem, 1.5vw, 1rem);/* /* 12px in 16px base*/
+
+    --chart-footer: No-code-dashboard;
+}

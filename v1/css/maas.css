@@ -1,0 +1,536 @@
+/* html {
+    color-scheme: only light;
+} */
+* {
+    font-family: var(--maas-font-family);
+}
+
+body {
+    --is-print: false;
+    background-image: url("../images/back.svg");
+    /* background-image: url("../images/testback.svg"); */
+    background-size: cover;
+    padding: 1rem 4rem;
+
+    @media print {
+        --is-print: true;
+        background: none;
+        line-height: 1.5;
+        margin: 2.5cm;
+        padding: 0;
+    }
+}
+
+:where(h1, h2, h3, h4, p) {
+    font-size: revert; /* reset Open Prop */
+    max-inline-size: revert; /* reset Open Prop */
+}
+
+#loader {
+    position: fixed;
+    width: 100%;
+    z-index: 999;
+    margin: auto;
+    background-color: var(--surface-2);
+
+    & h1 {
+        animation: var(--animation-blink);
+    }
+    @media print {
+        visibility: hidden;
+        display: none;
+    }
+}
+
+nav {
+    background-color: var(--color-brand);
+    overflow: auto;
+    white-space: nowrap;
+    scroll-behavior: auto;
+
+    & img {
+        padding: 5px;
+        margin: 0;
+        display: inline-block;
+        vertical-align: middle;
+        width: calc(var(--fluid-base-size) * 3);
+        width: 2.5rem;
+    }
+    & button {
+        background-color: var(--color-brand);
+        color: white;
+        margin: 0;
+        border: none; /* reset Open Prop */
+        box-shadow: none; /* reset Open Prop */
+        font-weight: normal; /* reset Open Prop */
+
+        &:hover,
+        &:focus {
+            background-color: black;
+        }
+    }
+    & #dropdown-toc a {
+        color: white;
+        padding: 0.5rem 1rem;
+        &:hover {
+            background-color: black;
+        }
+    }
+    @media print {
+        visibility: hidden;
+        display: none;
+    }
+}
+
+/****************************************************************d section */
+
+section {
+    padding-bottom: 1rem;
+
+    @media print {
+        padding-bottom: 0rem;
+        page-break-before: always;
+    }
+}
+
+/**************************************************************** ncd */
+.ncd {
+    & .fill-info {
+        background-color: var(--color-blue);
+        color: black;
+    }
+    & .fill-warning {
+        background-color: var(--color-amber);
+        color: black;
+    }
+    & .fill-red {
+        background-color: var(--color-red);
+        color: white;
+    }
+    & .border-info {
+        border: 1px solid var(--color-blue);
+    }
+    & .border-warning {
+        border: 1px solid var(--color-amber);
+    }
+    & .border-info {
+        border: 1px solid var(--color-red);
+    }
+}
+/**************************************************************** maas */
+
+.maas-small,
+.maas-medium,
+.maas-large {
+    grid-column: span 1;
+}
+
+.maas-callOut-container,
+.maas-chart-container {
+    display: grid;
+    margin: 0 auto;
+    gap: 1rem;
+    columns: 400px;
+}
+.maas-callOut-container {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    text-align: center;
+    /* overflow: hidden;
+    font-size: small; */
+    & button {
+        background: none;
+        border: none;
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+    }
+    & button:hover {
+        scale: 1.2;
+        color: var(--color-brand);
+    }
+}
+.maas-chart-container {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    animation: var(--animation-fade-in) forwards;
+    @media print {
+        grid-template-columns: 1fr;
+    }
+}
+
+.maas-call-out,
+.maas-chart {
+    background-color: var(--surface-2);
+    /* border-radius: 0.4rem; */
+    box-shadow: var(--shadow-4);
+    color: var(--text-2);
+    padding: 1rem; /*var(--fluid-base-size);*/
+    transition: 1.5s;
+    position: relative;
+    cursor: default;
+    overflow-x: auto;
+    animation: appear-on-scroll linear;
+    animation-timeline: view();
+    animation-range: entry 0%, cover 40%;
+
+    & p {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+
+    &.selected,
+    &:hover {
+        outline: 2px solid var(--color-brand);
+        & rect {
+            opacity: 1;
+        }
+    }
+    /* & rect {
+        animation: animation var(--animation-fade-in-bloom) 1s;
+    }
+    & rect:hover {
+        opacity: 0.5;
+    } */
+    @media print {
+        box-shadow: none;
+        overflow: visible;
+    }
+}
+/* .maas-chart:hover rect {
+    opacity: 0.5;
+}
+.maas-chart rect:hover {
+    opacity: 1;
+} */
+/* TODO make appear-on-scroll work */
+@keyframes appear-on-scroll {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+@-webkit-keyframes appear-on-scroll {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.maas-callOut #value {
+    font-size: x-large;
+}
+
+@media (min-width: 600px) {
+    .maas-callOut-container {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .maas-chart-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .maas-small {
+        grid-column: span 1;
+    }
+
+    .maas-medium {
+        grid-column: span 2;
+    }
+
+    .maas-large {
+        grid-column: span 2;
+    }
+}
+
+@media (min-width: 900px) {
+    .maas-callOut-container {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+    .maas-chart-container {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .maas-small {
+        grid-column: span 1;
+    }
+
+    .maas-medium {
+        grid-column: span 2;
+    }
+
+    .maas-large {
+        grid-column: span 3;
+    }
+}
+
+.maas-chart button {
+    /* height: 0.5rem; */ /* if height is included it looks live oval! */
+    width: 1rem;
+    border-radius: 50%;
+    background-color: transparent;
+    border: none;
+    /* padding: var(--fluid-base-size) / 2; */
+    /* &:focus-visible {
+        outline: 2px solid var(--maas-color-primary);
+    } */
+}
+
+#go-to-top {
+    --size: 3rem;
+    /* background-color: red; */
+    height: var(--size); /* if height is included it looks live oval! */
+    width: var(--size);
+    border-radius: 50%;
+    position: fixed;
+    left: calc(50% - var(--size) / 2);
+    bottom: 0.5rem;
+    z-index: 999;
+    display: none;
+    place-items: center;
+    /* background: linear-gradient(
+        0deg,
+        rgba(19, 5, 245, 1) attr(data-value),
+        rgba(255, 255, 255, 1) 100%
+    ); */
+    /* &::after {
+        content: "";
+        background-color: red;
+        display: grid;
+        place-items: center;
+    } */
+}
+
+.maas-chart-footer {
+    font-size: x-small;
+    margin-bottom: 0.5rem; /*var(--fluid-base-size) / 2;*/
+    /* & ::after {
+        content: var(--chart-footer);
+    } */
+    position: absolute;
+    bottom: 0;
+}
+/*************************************************************** tooltip*/
+[data-title]:hover:after {
+    opacity: 1;
+    transition: all 0.1s ease 0.5s;
+    visibility: visible;
+    z-index: 99999;
+}
+[data-title]:after {
+    content: attr(data-title);
+    /* width: max-content; */
+    /* max-width: 100%; */
+    /* background-color: white; */
+    /* color: #111; */
+    font: inherit;
+    position: absolute;
+    padding: 1px 5px 2px 5px;
+    bottom: -1.6em;
+    /* display: flex; */
+    /* left: 100%; */
+
+    /* white-space: nowrap; */
+    /* box-shadow: 1px 1px 3px #222222; */
+    box-shadow: var(--shadow-4);
+    opacity: 0;
+    border: 1px solid;
+    /* z-index: 99999; */
+    visibility: hidden;
+    & .left {
+        right: 0;
+    }
+}
+[data-title] {
+    position: relative;
+}
+/**************************************************************** tags */
+.maas-tags {
+    display: flex;
+    flex-wrap: wrap;
+    line-height: 1;
+    padding: 1px;
+    cursor: default;
+}
+
+.maas-tags a {
+    margin: 0;
+    margin-right: 0.5%;
+    margin-bottom: 0.5%;
+    padding: 0.5%;
+}
+
+.maas-tag-info {
+    margin: 0.25rem;
+    padding: 0.25rem;
+    border: 2px solid var(--color-blue);
+}
+.maas-tag-warning {
+    margin: 0.25rem;
+    padding: 0.25rem;
+    border: 2px solid var(--color-amber);
+}
+.maas-tag-error {
+    margin: 0.25rem;
+    padding: 0.25rem;
+    border: 2px solid var(--color-red);
+    background-color: var(--color-red);
+    color: white;
+}
+.maas-chart-footer {
+    & .maas-tag-warning {
+        height: 1ch;
+        width: 1ch;
+        margin: 0;
+        padding: 0;
+        background-color: var(--color-amber);
+    }
+    & .maas-tag-danger {
+        background-color: var(--color-red);
+    }
+}
+
+/**************************************************************** dialog */
+
+.maas-dialog[open] {
+    /* open prop animation */
+    animation: var(--animation-slide-in-up) forwards;
+
+    &.medium {
+        width: 600px;
+    }
+    & button {
+        margin: 0.25rem;
+    }
+    &.small {
+        & button {
+            width: 100%;
+            margin: 0.25rem 0;
+        }
+    }
+
+    & p {
+        padding: 0.3rem 0;
+        display: flex;
+
+        & label::after {
+            content: "\00a0";
+        }
+        & :where(input[type="text"], textarea) {
+            flex-grow: 1;
+        }
+    }
+
+    & legend {
+        font-weight: 700;
+    }
+    & :where(input[type="checkbox"]) {
+        margin-right: 0.5rem;
+    }
+    & error {
+        color: var(--color-red);
+        display: block;
+    }
+    & hr {
+        margin: 0.5rem;
+    }
+}
+
+/**************************************************************** help */
+
+#help {
+    & mark {
+        font-family: "Courier New", Courier, monospace;
+        font-weight: 700;
+    }
+
+    & p {
+        padding-bottom: 2rem; /*calc(var(--size-fluid-1) * 2);*/
+    }
+
+    & summary {
+        font-size: larger;
+    }
+}
+/********************************************************************* print */
+.maas-only-print {
+    visibility: hidden;
+    display: none;
+}
+/* @page {
+    margin: 2cm; margin work for left/right and top (first), and bottom (last)
+    & :first {
+        margin-top: 10cm;
+    }
+} */
+
+/* @page :first {
+    margin-top: 10cm;
+} */
+@media print {
+    /* @page {
+        margin: 2cm;
+        & :first {
+            margin-top: auto;
+        }
+    } */
+    /* @page {
+        size: landscape;
+        margin: 10%;
+
+        @bottom-center {
+            content: "Page " counter(page) " of " counter(pages);
+        }
+    }
+
+    @page: left {
+        @bottom-left {
+            content: "Page " counter(page) " of " counter(pages);
+        }
+    } */
+
+    .maas-only-print {
+        visibility: visible;
+        display: block;
+    }
+
+    .maas-page-break {
+        display: block;
+        page-break-before: always;
+    }
+
+    .maas-chart-container {
+        display: block;
+        /* max-width: 1200px; */
+        margin: 0 auto;
+        padding: 0.5rem;
+    }
+
+    .maas-chart {
+        border: 1px solid gray;
+        padding: 1rem;
+        /* height: 100%; */
+        /* width: 400px;  */
+        /* max-height: 15cm; */
+        page-break-after: always;
+        /* break-inside: avoid-page;
+        break-before: auto; */
+        /* scale: "90%"; */
+    }
+
+    .maas-small .maas-medium .maas-large {
+        grid-column: span 1;
+    }
+
+    button,
+    .maas-noPrint {
+        visibility: hidden;
+        display: none;
+    }
+
+    .maas-onlyPrint {
+        visibility: visible;
+        display: block;
+    }
+}
