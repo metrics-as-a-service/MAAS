@@ -1,0 +1,16 @@
+<html>
+    <head>
+        <meta name="color-scheme" content="light dark" />
+    </head>
+    <body>
+        <pre style="word-wrap: break-word; white-space: pre-wrap"></pre>
+    </body>
+</html>
+<script>
+    window.addEventListener("load", () => {
+        const pre = document.querySelector("pre")
+        console.log(pre)
+        pre.textContent = localStorage.getItem("data")
+        localStorage.clear("data")
+    })
+</script>

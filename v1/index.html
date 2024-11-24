@@ -1,11 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h1>V1 of Metrics</h1>
-</body>
+    <head>
+        <title>No-code-dashboard</title>
+        <meta name="description" content="Dashboard for IT Projects" />
+        <meta name="keywords" content="Metrics, Project, Program, Governance" />
+        <meta name="author" content="Abhijit Majumdar" />
+
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <link rel="icon" type="image/svg+xml" href="./images/favicon.svg" />
+        <link rel="icon" type="image/png" href="./images/favicon.png" />
+
+        <link rel="icon" type="image/x-icon" href="./images/favicon.ico" />
+        <link rel="icon" href="./images/favicon.ico?v=M44lzPylqQ" />
+        <link
+            rel="mask-icon"
+            href="./images/favicon.ico?v=M44lzPylqQ"
+            color="#000000"
+        />
+        <link
+            rel="shortcut icon"
+            href="images/favicon.ico"
+            type="image/x-icon"
+        />
+        <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="./images/apple-touch-icon.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="32x32"
+            href="./images/favicon-32x32.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="16x16"
+            href="./images/favicon-16x16.png"
+        />
+        <link rel="webmanifest" href="./images/site.webmanifest" />
+        <link
+            rel="mask-icon"
+            href="./images/safari-pinned-tab.svg"
+            color="#5bbad5"
+        />
+        <meta name="msapplication-TileColor" content="#da532c" />
+        <meta name="theme-color" content="#ffffff" />
+
+        <!-- the props -->
+        <link rel="stylesheet" href="https://unpkg.com/open-props" />
+
+        <!-- optional imports that use the props -->
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/open-props/normalize.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/open-props/buttons.min.css"
+        />
+
+        <link rel="stylesheet" href="./css/maas.css" />
+        <link rel="stylesheet" href="./css/brand.css" />
+
+        <script src="./js/index.js" charset="utf-8" defer></script>
+        <script src="./js/common.js" charset="utf-8" defer></script>
+        <script src="./js/main.js" charset="utf-8" defer></script>
+        <script src="./js/param.js" charset="utf-8" defer></script>
+        <script src="./js/preset.js" charset="utf-8" defer></script>
+        <script src="./js/papaparse.js" charset="utf-8" defer></script>
+        <script src="./js/chart.js" charset="utf-8" defer></script>
+        <script src="./js/dialog.js" charset="utf-8" defer></script>
+        <script src="./js/logger.js" charset="utf-8" defer></script>
+        <script src="./js/grammar.js" charset="utf-8" defer></script>
+        <script src="./js/readwrite.js" charset="utf-8" defer></script>
+
+        <script src="./js/preset-config.js" charset="utf-8" defer></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/d3@7" defer></script>
+        <script
+            src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6"
+            defer
+        ></script>
+    </head>
+
+    <body>
+        <input type="file" id="file" style="display: none" />
+        <main>
+            <nav id="top-nav">
+                <img src="./images/apple-touch-icon.png" alt="Logo" />
+                <button id="menu-toc" tabindex="0" onclick="toggleDropdown()">
+                    TOC
+                </button>
+                <span id="not-preset">
+                    <button tabindex="0" onclick="menu('loadData')">
+                        Load Data
+                    </button>
+                    <button tabindex="0" onclick="menu('layout')">
+                        Modify Layout
+                    </button>
+                    <button tabindex="0" onclick="menu('downloadConfig')">
+                        Download Config
+                    </button>
+                    <button tabindex="0" onclick="menu('uploadConfig')">
+                        Upload Config
+                    </button>
+                </span>
+                <span id="preset"></span>
+                <span id="common">
+                    <button tabindex="0" onclick="menu('print')">Print</button>
+                    <button tabindex="0" onclick="menu('help')">
+                        Show Help
+                    </button>
+                    <button tabindex="0" onclick="menu('feedback')">
+                        Give Feedback
+                    </button>
+                </span>
+                <div id="dropdown-toc" style="display: none"></div>
+            </nav>
+            <div id="loader">
+                <h1>Loading ...</h1>
+                <br />
+            </div>
+            <div id="report-titles">
+                <h1 id="main-title">No file loaded</h1>
+                <h2 id="sub-title">Data as of</h2>
+            </div>
+            <div class="maas-page-break"></div>
+            <div class="maas-only-print">
+                <h2>Table of Content</h2>
+                <br />
+                <div id="toc"></div>
+            </div>
+            <br />
+            <section>
+                <div id="data-source" class="maas-tags"></div>
+                <br />
+                <div id="filter-value" class="maas-tags"></div>
+                <br />
+                <div id="log" class="maas-tags"></div>
+            </section>
+            <section>
+                <div class="maas-callOut-container" id="call-out-wrapper"></div>
+            </section>
+            <section>
+                <div class="maas-chart-container" id="wrapper"></div>
+            </section>
+            <footer>
+                <p>No-code-dashboard</p>
+                <p>Copyright &#169; December-2024 Abhijit Majumdar</p>
+                <p>
+                    Powered by
+                    <a href="https://www.w3schools.com" target="_blank"
+                        >HTML5, CSS3, JS,</a
+                    >
+                    <a href="https://www.papaparse.com" target="_blank"
+                        >Papaparse,
+                    </a>
+                    <a href="https://observablehq.com/plot/" target="_blank"
+                        >Observable Plot,</a
+                    >
+                    <a href="https://open-props.style" target="_blank"
+                        >Open Prop,</a
+                    >
+                    <a> and a lot of elbow grease</a>
+                </p>
+                <br />
+                <button onclick="smokeTest()">Smoke Test</button>
+            </footer>
+            <button
+                id="go-to-top"
+                tabindex="0"
+                onclick="document.documentElement.scrollTop=10"
+            >
+                <span>&#x2191;</span>
+            </button>
+        </main>
+    </body>
+    <script>
+        "use strict"
+        window.addEventListener("load", (event) => {
+            showHideLoader("hide")
+            const url = new URL(window.location.toLocaleString())
+            const search = url.search
+            if (!search) return
+
+            const preset = search.replace("?", "").trim()
+            if (preset === "") {
+                $dialog.alert(`Preset "${preset}" invalid`, ["Close"])
+                return
+            }
+            if (presetConfigs && presetConfigs[preset]) {
+                createPresetMenus(presetConfigs[preset]).click()
+                return
+            }
+            $dialog.alert(`Preset "${preset}" not found`, ["Close"])
+        })
+
+        window.addEventListener("scroll", (e) => {
+            const goToTop = _select("#go-to-top")
+            const docEl = document.documentElement
+            const pos = docEl.scrollTop
+            const h = docEl.scrollHeight - docEl.clientHeight
+            const scrollValue = Math.round((pos * 100) / h)
+
+            if (scrollValue < 20) goToTop.style.display = "none"
+            else {
+                goToTop.style.display = "grid"
+                goToTop.setAttribute("data-value", scrollValue)
+            }
+
+            // console.log(scrollValue)
+        })
+    </script>
 </html>
