@@ -354,15 +354,15 @@ const $p = (function () {
                 chartSize: "Small",
             })
 
-            const message = config.columnNames.reduce(
-                (message, chartProp, i) =>
-                    `${message}\n${i + 1}. ${chartProp} (${
-                        config.columnTypes[i]
-                    })`,
-                "The input has the following data headers (value in bracket indicates chart type assumed):"
-            )
+            const message =
+                "The input has the following data headers (value in bracket indicates chart type assumed):" +
+                config.columnNames.reduce(
+                    (list, column, i) =>
+                        `${list}\n${i + 1}. ` +
+                        `${column} (${config.columnTypes[i]})`,
+                    ""
+                )
             chartProperties.unshift({
-                chartTitle: "AUTO GENERATED NOTE",
                 chartType: "Note",
                 chartSize: "Small",
                 message: message,
@@ -426,52 +426,23 @@ const $p = (function () {
             return json
         } catch (e) {
             console.error(
-                `Error while JSON.stringify(config). Cofig not copied. Error: ${e}`
+                `Error while JSON.stringify(config). Config not copied. Error: ${e}`
             )
             return
         }
     }
 
-    self.setConfigJSON = function (configText) {
-        if (config.chartProperties) return
+    self.setConfigJSON = function (configText, isPreset = false) {
+        if (!isPreset) if (config.chartProperties) return
         try {
             config = JSON.parse(configText)
-            $dialog.alert("File loaded successfully", ["OK"])
-            return true
         } catch (error) {
             const errorMessage = `Config parse failed. Error: ${error}`
             console.log(false, errorMessage)
             return false
         }
-    }
-
-    self.setPresetConfig = function (configJSON, filename, date) {
-        if (!configJSON) {
-            $l.log("Config missing", "Error")
-            return false
-        }
-        if (!filename) {
-            $l.log("File name missing", "Error")
-            return false
-        }
-        if (!date || date == "") {
-            $l.log("Date missing", "Error")
-            return false
-        }
-        try {
-            config = JSON.parse(configJSON)
-            config.file = filename
-            config.presetDate = date
-            config.demoDaysOffset = dateTimeDiff(
-                config.presetDate,
-                config.reportDate,
-                "Days"
-            )
-            return true
-        } catch (error) {
-            $l.log("Config parse failed", "Error")
-            return false
-        }
+        if (!isPreset) $dialog.alert("File loaded successfully", ["OK"])
+        return true
     }
 
     self.setItem = function (key, value) {

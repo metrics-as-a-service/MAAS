@@ -43,41 +43,64 @@
 
 const $c = (function () {
     "use strict"
-    const self = {} // public object - returned at end of module
+    const SYMBOL_OTHERS = Symbol()
+    const SYMBOL_INVALID = Symbol()
+    const SYMBOL_INVALID_NUMBER = Symbol()
+    const SYMBOL_INVALID_DATE = Symbol()
+    const SYMBOL_SPACES = Symbol()
+    const SYMBOL_LESS = Symbol()
+    const SYMBOL_MORE = Symbol()
 
+    function covertSymbolToDisplay(v) {
+        if (v === SYMBOL_OTHERS) return DISPLAY_OTHERS
+        if (v === SYMBOL_INVALID) return DISPLAY_INVALID
+        if (v === SYMBOL_INVALID_NUMBER) return DISPLAY_INVALID_NUMBER
+        if (v === SYMBOL_INVALID_DATE) return DISPLAY_INVALID_DATE
+        if (v === SYMBOL_SPACES) return DISPLAY_SPACES
+        if (v === SYMBOL_LESS) return DISPLAY_LESS
+        if (v === SYMBOL_MORE) return DISPLAY_MORE
+    }
+    const self = {} // public object - returned at end of module
     function getDisplayValue(countType, v) {
         const count = v.count != undefined ? v.count : v.filteredCount
         const sum = v.sum != undefined ? v.sum : v.filteredSum
-        if (countType == "Sum" || countType == "Sum of Transition Duration")
-            return sum
-        if (
-            countType == "Average" ||
-            countType == "Average of Transition Duration"
-        ) {
-            return count > 0 ? Number((sum / count).toFixed(1)) : 0
-        }
+
+        if (countType.substring(0, 3) == "Sum") return sum
+
+        const av = count > 0 ? Number((sum / count).toFixed(1)) : 0
+        if (countType.substring(0, 7) == "Average") return av
+
         return count
+        // if (countType == "Sum" || countType == "Sum of Transition Duration")
+        // return sum
+        // if (
+        //     countType == "Average" ||
+        //     countType == "Average of Transition Duration"
+        // )
+        // return count > 0 ? Number((sum / count).toFixed(1)) : 0
     }
     async function readCSV(
-        file,
-        stepFunction,
-        errorFunction,
-        completeFunction,
-        resolveValue
+        resolveValue,
+        {
+            file,
+            stepFunction,
+            errorFunction,
+            completeFunction,
+            preview = 0,
+            token,
+        }
     ) {
         const isRemoteFile = typeof file === "string"
-        const isPrivate = isRemoteFile ? file.includes("?private") : false
-        function parseTokenFile(file) {
-            if (typeof file !== "string") return file
-            const splitURL = file.split("?private")
-            if (splitURL.length == 1) return file
-            return splitURL[0]
-        }
-        const stream = parseTokenFile(file)
-        const token =
-            "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"
-
-        const downloadRequestHeaders = isPrivate
+        // const isPrivate = isRemoteFile ? file.includes("?private") : false
+        // function parseTokenFile(file) {
+        //     if (typeof file !== "string") return file
+        //     const splitURL = file.split("?private")
+        //     if (splitURL.length == 1) return file
+        //     return splitURL[0]
+        // }
+        // const stream = parseTokenFile(file)
+        // const token = "xxx"
+        const downloadRequestHeaders = token
             ? {
                   Authorization: `token ${token}`,
                   Accept: "application/vnd.github.v3.raw",
@@ -85,13 +108,14 @@ const $c = (function () {
             : undefined
 
         const p = await new Promise((resolve) => {
-            Papa.parse(stream, {
+            Papa.parse(file, {
                 delimiter: ",",
                 download: isRemoteFile,
                 worker: isRemoteFile,
                 header: true,
                 skipEmptyLines: true,
                 downloadRequestHeaders,
+                preview,
                 step: (row) => stepFunction(row),
                 error: (err, file) => errorFunction(err, file),
                 complete: (result, file) => {
@@ -116,6 +140,17 @@ const $c = (function () {
         return []
     }
 
+    self.getFirstRecord = async function (file) {
+        let firstRow
+        return await readCSV(firstRow, {
+            file,
+            stepFunction: (row) => {
+                firstRow = row
+            },
+            errorFunction: (err, file) => console.error({ err, file }),
+            completeFunction: () => {},
+        })
+    }
     //let input be {file, dataDescription, filter, config, }
     //  file required
     //  dataDescription config  filter  action
@@ -123,17 +158,11 @@ const $c = (function () {
     //  yes             yes     any     skip pass 1 (TO DO)
     //  no              no      amy     return data description (done)
 
-    self.processCSVFile = async function (inputJSON, f) {
-        const SYMBOL_OTHERS = Symbol()
-        const SYMBOL_INVALID = Symbol()
-        const SYMBOL_INVALID_NUMBER = Symbol()
-        const SYMBOL_INVALID_DATE = Symbol()
-        const SYMBOL_SPACES = Symbol()
-        const SYMBOL_LESS = Symbol()
-        const SYMBOL_MORE = Symbol()
+    self.processCSVFile = async function (inputJSON, localFile) {
         const SYMBOL_PREV_STATE = Symbol()
         let totalRowCounts = 0,
             filteredRowCounts = 0,
+            isStartOfFile = true,
             dataDescription = {}
 
         totalRowCounts = 0
@@ -144,9 +173,8 @@ const $c = (function () {
         //TO DO FIX THIS MAJOR FUDGE on file !!!!!!!!!!!!!!!!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         //if remote file then it is in config else it is f
         //also later in client server we cant pass f (can we?)
-        const isEmptyObject = (o) => JSON.stringify(o) === "{}"
 
-        const file = isEmptyObject(inputParams.file) ? f : inputParams.file
+        const file = localFile ? localFile : inputParams.config.files[0]
 
         if (!config) {
             await passOne(file, 0)
@@ -160,32 +188,85 @@ const $c = (function () {
 
         if (hasFilterInInput) zeroCounters(allCounts)
 
-        const { demoDaysOffset } = config
+        const { presetOffsetDays } = config
         // TO DO too many async awaits - simplify
 
         ////////////////////////////////////////////////////////////////////////// pass 1
         if (filter === undefined) {
-            await passOne(file, demoDaysOffset)
+            await passOne(file, presetOffsetDays)
             allCounts.memo.dataDescription = dataDescription
         }
         ////////////////////////////////////////////////////////////////////////// pass 2
-        const response = await readCSV(
+        clearLog()
+
+        const response = await readCSV(allCounts, {
             file,
-            (uncleanRow) => {
+            stepFunction: (uncleanRow) => {
                 if (uncleanRow.errors.length > 0) {
                     console.error(errors)
                 }
-                const row = cleanRow(uncleanRow.data, demoDaysOffset)
+                const row = cleanRow(uncleanRow.data, presetOffsetDays)
                 countRecords(allCounts, row)
             },
-            (err, file) => console.error({ err, file }),
-            () => wrapUp(allCounts),
-            allCounts
-        )
+            errorFunction: (err, file) => console.error({ err, file }),
+            completeFunction: () => wrapUp(allCounts),
+        })
         return response
         /////////////////////////////////////////////////////////////////
         function countRecords(allCounts, row) {
-            const EOFReached = !row
+            const isEndOfFile = !row
+            if (isEndOfFile) {
+                if (!allCounts.memo.global) allCounts.memo.global = {}
+
+                Object.assign(allCounts.memo.global, {
+                    totalRowCounts,
+                    filteredRowCounts,
+                })
+
+                for (const key in allCounts.counts) countBasedOnType(key)
+
+                return
+            }
+            totalRowCounts++
+
+            let rowForFilter = new Array(config.chartProperties.length).fill(
+                undefined
+            )
+
+            for (const key in rowForFilter) {
+                if (!allCounts.counts[key]) allCounts.counts[key] = {}
+                countBasedOnType(key, false)
+            }
+            isStartOfFile = false
+
+            let includeRowInReport = true
+            for (const key in rowForFilter) {
+                // if (!includeRowInChart(key, row)) continue //is this really required??????
+                const { chartType } = getChartProps(key)
+                if (cannotFilter(chartType)) continue
+                const value = rowForFilter[key]
+                if (value === undefined) continue
+                if (!allCounts.counts[key][value])
+                    console.log({
+                        key,
+                        value,
+                        totalRowCounts,
+                        rowForFilter,
+                        count: allCounts.counts[key],
+                    })
+                // action:include, where: [priority, eq, P1]
+                if (!allCounts.counts[key][value].include) {
+                    includeRowInReport = false
+                    break
+                }
+            }
+            if (!includeRowInReport) return
+
+            filteredRowCounts++
+
+            for (const key in rowForFilter) {
+                if (includeRowInChart(key, row)) countBasedOnType(key, true)
+            }
             function getSumValue(key, countColumn) {
                 if (!countColumn) return 0
                 const value = row[countColumn]
@@ -193,7 +274,7 @@ const $c = (function () {
                 return Number(value)
             }
             function countTable(key, oneCount, isFiltered) {
-                if (EOFReached) return
+                if (isEndOfFile) return
                 const { maxEntries } = getChartProps(key)
                 if (!isFiltered) return
                 if (Object.keys(oneCount).length >= maxEntries) {
@@ -225,7 +306,7 @@ const $c = (function () {
                         }
                     }
                 }
-                if (EOFReached) return
+                if (isEndOfFile) return
                 if (!isFiltered) return
                 if (filteredRowCounts == 1) initCounter()
 
@@ -268,7 +349,7 @@ const $c = (function () {
                 }
             }
             function countPlan(key, oneCount, isFiltered) {
-                if (EOFReached) return
+                if (isEndOfFile) return
                 if (!isFiltered) return
                 if (!includeRowInChart(key, row)) return
 
@@ -321,7 +402,7 @@ const $c = (function () {
                     errorFound = true
 
                 if (start > end) {
-                    log(`Start > end`, "warning", key)
+                    log(`Start > end`, key)
                     errorFound = true
                 }
                 if (secondStartDate)
@@ -340,16 +421,16 @@ const $c = (function () {
 
                 if (secondStartDate && secondEndDate) {
                     if (secondStartDate > secondEndDate) {
-                        log(`Second start > end`, "warning", key)
+                        log(`Second start > end`, key)
                         errorFound = true
                     }
                 }
                 if (secondStartDate && !secondEndDate) {
-                    log(`Second start but no end`, "warning", key)
+                    log(`Second start but no end`, key)
                     errorFound = true
                 }
                 if (!secondStartDate && secondEndDate) {
-                    log(`Second end but no start`, "warning", key)
+                    log(`Second end but no start`, key)
                     errorFound = true
                 }
 
@@ -379,14 +460,16 @@ const $c = (function () {
                     chartType,
                     trendStartDate,
                     x_column, //for Trend
-                    openDateCol, //for Trend OC
-                    closeDateCol, //for Trend OC
+                    openDateCol, //for Trend OC, same as x_column???
+                    closeDateCol, //for Trend OC, rename as x_column_2???
                     forecast,
                     plan,
                 } = chartProp
-                if (totalRowCounts === 1 && !isFiltered) init()
+                if (isStartOfFile) init()
                 const memo = allCounts.memo[key]
-                if (EOFReached) {
+                if (isEndOfFile) {
+                    //addForecast?
+                    //addPlan ?
                     memo.totalRowCounts = totalRowCounts
                     memo.filteredRowCounts = filteredRowCounts
                     return
@@ -445,7 +528,7 @@ const $c = (function () {
                     if (forecast.trim() === "") return
                     const output = parseGrammar(forecast, TREND_GRAMMAR)
                     if (typeof output === "string") {
-                        log(`Invalid forecast`, "warning", key)
+                        log(`Invalid forecast`, key)
                         return
                     }
                     const { lookBack } = output
@@ -461,7 +544,6 @@ const $c = (function () {
                         lookBackValues: new Array(lookBack).fill(0),
                         cutoffDate,
                     }
-                    // console.log(memo.forecast)
                 }
                 function updateCounter() {
                     if (chartType == "Trend OC") updateOpenClose()
@@ -574,7 +656,7 @@ const $c = (function () {
                     readyPrevious({})
                 }
                 const prev = oneCount[SYMBOL_PREV_STATE]
-                if (EOFReached) {
+                if (isEndOfFile) {
                     calculatePrevious()
                     delete oneCount[SYMBOL_PREV_STATE]
                     return
@@ -592,7 +674,7 @@ const $c = (function () {
                     timestamp = 0
 
                 if (prev.id && id < prev.id)
-                    log(`Id not in ascending order`, "warning", key)
+                    log(`Id not in ascending order`, key)
 
                 if (id !== prev.id) calculatePrevious()
                 else calculateCurrent()
@@ -617,11 +699,7 @@ const $c = (function () {
                             "Days"
                         )
                         if (delta < 0)
-                            log(
-                                `Timestamp not in ascending order`,
-                                "warning",
-                                key
-                            )
+                            log(`Timestamp not in ascending order`, key)
                         update2X2Counts(oneCount, "<Now>", prev.to, {
                             filteredCount: 1,
                             filteredSum: delta,
@@ -631,11 +709,7 @@ const $c = (function () {
                 function calculateCurrent() {
                     if (prev.to) {
                         if (!prev.to !== from)
-                            log(
-                                `"from" not same as previous "to"`,
-                                "warning",
-                                key
-                            )
+                            log(`"from" not same as previous "to"`, key)
                         const delta = dateTimeDiff(
                             prev.timestamp,
                             timestamp,
@@ -646,16 +720,12 @@ const $c = (function () {
                             filteredSum: delta,
                         })
                         if (delta < 0)
-                            log(
-                                `Timestamp not in ascending order`,
-                                "warning",
-                                key
-                            )
+                            log(`Timestamp not in ascending order`, key)
                     }
                 }
             }
             function count2X2(key, oneCount, isFiltered) {
-                if (EOFReached) {
+                if (isEndOfFile) {
                     return
                 }
                 if (!includeRowInChart(key, row)) return
@@ -670,25 +740,6 @@ const $c = (function () {
                     filteredCount: isFiltered ? 1 : 0,
                 })
             }
-            // function countRisk(key, oneCount, isFiltered) {
-            //     if (EOFReached) {
-            //         return
-            //     }
-            //     if (!includeRowInChart(key, row)) return
-            //     const { colOver, x_column, y_column, x_labels, y_labels } =
-            //         getChartProps(key)
-
-            //     const sum = getSumValue(key, colOver)
-
-            //     update2X2Counts(oneCount, row[x_column], row[y_column], {
-            //         totalSum: !isFiltered ? sum : 0,
-            //         filteredSum: isFiltered ? sum : 0,
-            //         totalCount: !isFiltered ? 1 : 0,
-            //         filteredCount: isFiltered ? 1 : 0,
-            //     })
-            //     oneCount.x = x_labels[row[x_column]]
-            //     oneCount.y = y_labels[row[y_column]]
-            // }
             function countBar(key, oneCount, isFiltered) {
                 const {
                     countType,
@@ -700,26 +751,22 @@ const $c = (function () {
                     x_dateFormat,
                     x_separator,
                 } = getChartProps(key)
-                if (totalRowCounts === 1 && !isFiltered) init()
+                // if (totalRowCounts === 1 && !isFiltered) init()
+                if (isStartOfFile) init()
                 const memo = allCounts.memo[key]
-                if (EOFReached) {
-                    console.log(key, memo)
+
+                if (isEndOfFile) {
+                    //console.log(key, memo)
                     wrapUp()
                     return
                 }
                 if (!isValidData(row[x_column], "any", x_column, key)) return
                 updateCounts()
-                // if (!isFiltered) updateTotalCounts()
-                // else updateFilteredCounts()
-                ////////////////////////////////////////////////////
+
                 function wrapUp() {}
                 function init() {
                     if (!allCounts.memo[key]) allCounts.memo[key] = {}
-                    if (allCounts.memo[key].initialized)
-                        return allCounts.memo[key]
                     const memo = allCounts.memo[key]
-                    log("xxxx", "warning", key)
-                    memo.initialized = true
                     if (x_bin) {
                         const binCount = Number(x_bin.trim())
                         if (isNaN(binCount))
@@ -746,7 +793,6 @@ const $c = (function () {
                     if (x_separator) memo.separator = x_separator
                     return memo
                 }
-
                 function updateCounts() {
                     if (!oneCount) oneCount = {}
                     const maxCats = 2 * MAX_BAR_CATS
@@ -757,21 +803,22 @@ const $c = (function () {
 
                     if (x_dataType == "List Members") {
                         if (Array.isArray(v)) v.forEach((lm) => countAValue(lm))
-                        transformedRow[key] = undefined
+                        rowForFilter[key] = undefined
                         return
                     }
 
-                    transformedRow[key] = countAValue(v)
+                    rowForFilter[key] = countAValue(v)
 
                     function countAValue(originalCat) {
                         const cat = oneCount[originalCat]
                             ? originalCat
                             : Object.keys(oneCount).length < maxCats
                             ? originalCat
-                            : DISPLAY_OTHERS
+                            : SYMBOL_OTHERS //DISPLAY //_OTHERS
 
-                        if (cat === DISPLAY_OTHERS)
-                            log(`Over ${maxCats} categories`, "warning", key)
+                        if (cat === SYMBOL_OTHERS)
+                            //_OTHERS)
+                            log(`Over ${maxCats} categories`, key)
 
                         if (!oneCount[cat])
                             oneCount[cat] = {
@@ -781,7 +828,6 @@ const $c = (function () {
                                 totalCount: 0, // count without filter
                                 filteredCount: 0, // count when filtered
                             }
-
                         if (includeRowInChart(key, row)) {
                             const sum = getSumValue(key, colOver)
                             if (!isFiltered) {
@@ -830,72 +876,19 @@ const $c = (function () {
                         console.error(`Invalid chartType: ${chartType}`)
                 }
             }
-            /////////////////////////////////////////// start of countRecords
-            clearLog()
-            if (EOFReached) {
-                if (!allCounts.memo.global) allCounts.memo.global = {}
-
-                Object.assign(allCounts.memo.global, {
-                    totalRowCounts,
-                    filteredRowCounts,
-                })
-
-                for (const key in allCounts.counts) countBasedOnType(key)
-
-                return
-            }
-            totalRowCounts++
-
-            let transformedRow = transformRow(row)
-
-            for (const [key, value] of Object.entries(transformedRow)) {
-                if (!allCounts.counts[key]) allCounts.counts[key] = {}
-
-                // if (includeRowInChart(key, row))
-                countBasedOnType(key, false /* value */)
-            }
-
-            // update filtered counts
-
-            let includeRowInReport = true
-            for (const key in transformedRow) {
-                // if (!includeRowInChart(key, row)) continue //is this really required??????
-                const { chartType } = getChartProps(key)
-                if (cannotFilter(chartType)) continue
-                const value = transformedRow[key]
-                if (value === undefined) continue
-                if (!allCounts.counts[key][value])
-                    console.log({
-                        key,
-                        value,
-                        totalRowCounts,
-                        transformedRow,
-                        count: allCounts.counts[key],
-                    })
-                // action:include, where: [priority, eq, P1]
-                if (!allCounts.counts[key][value].include) {
-                    includeRowInReport = false
-                    break
-                }
-            }
-            if (!includeRowInReport) return
-
-            filteredRowCounts++
-
-            for (const [key, value] of Object.entries(transformedRow)) {
-                if (includeRowInChart(key, row))
-                    countBasedOnType(key, true /* value */)
-            }
         }
         function wrapUp(allCounts) {
             countRecords(allCounts)
-            if (allCounts.memo["1"]) console.log(allCounts.memo["1"].log)
             makeChartData(allCounts, config)
             makeCallOuts(allCounts, config)
         }
         function getChartProps(index) {
             if (!config.chartProperties[index]) {
-                log(`Invalid call to getChartProps; index= ${index}`, "error")
+                log(
+                    `Invalid call to getChartProps; index= ${index}`,
+                    undefined,
+                    "error"
+                )
                 return
             }
             return config.chartProperties[index]
@@ -928,19 +921,8 @@ const $c = (function () {
             for (const key in allCounts.memo)
                 if (allCounts.memo[key].log) delete allCounts.memo[key].log
         }
-        function log(message, severity, key) {
-            // console.log({ message, severity, key })
-            if (!allCounts.memo[key]) allCounts.memo[key] = {}
-            if (!allCounts.memo[key].log) allCounts.memo[key].log = {}
-
-            const memoLog = allCounts.memo[key].log
-            if (!memoLog[message])
-                memoLog[message] = { first: filteredRowCounts, count: 0 }
-
-            const ml = memoLog[message]
-            ml.severity = severity
-            ml.last = filteredRowCounts //totalRowCounts)
-            ml.count++
+        function log(message, key, severity = "warning") {
+            logMessage(message, severity, key, allCounts, filteredRowCounts)
         }
         function gatherDataDescription(row, descriptions) {
             function initCounter() {
@@ -1004,10 +986,10 @@ const $c = (function () {
                 description.stringCount++
             }
         }
-        function cleanRow(row, demoDaysOffset) {
+        function cleanRow(row, presetOffsetDays) {
             const getModifiedDate = (date) => {
-                const newDate = demoDaysOffset
-                    ? addDays(date, demoDaysOffset)
+                const newDate = presetOffsetDays
+                    ? addDays(date, presetOffsetDays)
                     : date
                 return formatDate(newDate, "YYYY-MM-DD")
             }
@@ -1019,18 +1001,19 @@ const $c = (function () {
             }
             return cleanedRow
         }
-        async function passOne(file, demoDaysOffset) {
+        async function passOne(file, presetOffsetDays) {
             dataDescription = {}
-            await readCSV(
+            // resolveValue,
+            // { file, stepFunction, errorFunction, completeFunction, preview = 0 }
+            await readCSV(true, {
                 file,
-                (row) => {
-                    const cleanedRow = cleanRow(row.data, demoDaysOffset)
+                stepFunction: (row) => {
+                    const cleanedRow = cleanRow(row.data, presetOffsetDays)
                     gatherDataDescription(cleanedRow, dataDescription)
                 },
-                (err, file) => console.error({ err, file }),
-                (result, file) => {},
-                true
-            )
+                errorFunction: (err, file) => console.error({ err, file }),
+                completeFunction: (result, file) => {},
+            })
         }
         function includeRowInChart(key, row) {
             init()
@@ -1050,7 +1033,7 @@ const $c = (function () {
                         CHART_FILTER_GRAMMAR
                     )
                     if (typeof output === "string") {
-                        log(`Chart filter invalid: ${output}`, "warning", key)
+                        log(`Chart filter invalid: ${output}`, key)
                         return
                     }
                     allCounts.memo[key].chartFilter = output
@@ -1077,27 +1060,23 @@ const $c = (function () {
 
                 function getConditionResult({ columnName, op, operand }) {
                     if (!columnName) {
-                        log(`Chart filter column name invalid`, "warning", key)
+                        log(`Chart filter column name invalid`, key)
                         return false
                     }
                     const value = row[columnName]
                     if (value == undefined) {
-                        log(
-                            `Chart filter column (${columnName}) invalid`,
-                            "warning",
-                            key
-                        )
+                        log(`Chart filter column (${columnName}) invalid`, key)
                         return false
                     }
                     if (!op) {
-                        log(`Chart filter op invalid`, "warning", key)
+                        log(`Chart filter op invalid`, key)
                         return false
                     }
                     if (!operand) {
-                        log(`Chart filter operand invalid`, "warning", key)
+                        log(`Chart filter operand invalid`, key)
                         return false
                     }
-                    //TO DO reintroduce?  log(`Some rows skipped due to 'chart filter' in the chart`, "info", Number(key))
+                    //TO DO reintroduce?  log(`Some rows skipped due to 'chart filter' in the chart`, key,"info")
                     const compareAsNumbers = op.includes("(n)")
                     const isEq = compareAsNumbers
                         ? isEqual("number")
@@ -1125,85 +1104,26 @@ const $c = (function () {
             if (!chartTypes[chartType].cannotFilter) return false
             return chartTypes[chartType].cannotFilter
         }
-        function transformRow(row) {
-            function addNewColumns() {
-                //include insertion of calculated columns
-            }
-            const getFormattedValue = function (chartProp, value, param) {
-                // console.log({ chartProp, value, param })
-                const { chartType } = chartProp
-                const values = (returnValue) => {
-                    const { i } = param
-
-                    if (isInvalidDisplay(returnValue))
-                        log(`${returnValue} found`, "info", i)
-
-                    return returnValue
-                }
-                //should not happen
-                if (!chartType) return DISPLAY_INVALID
-                //should not happen
-                if (chartType !== "Risk") {
-                    ///<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< dodgy fix
-                    if (typeof value !== "string") return value
-
-                    if (value.trim() == "") return DISPLAY_SPACES
-                }
-                if (chartType === "Bar") {
-                    return value
-                    // const { xType } = chartProp
-                    // if (chartTypes[xType].formatValue)
-                    //     return values    (
-                    //         chartTypes[xType].formatValue(value, chartProp, param)
-                    //     )
-                }
-                // if (!chartTypes[chartType]) return values(invalidValues)
-                // if (chartType == "Risk") console.log(chartTypes[chartType]) //.formatValue(value, chartProp, param))
-                if (chartTypes[chartType].formatValue)
-                    return values(
-                        chartTypes[chartType].formatValue(
-                            value,
-                            chartProp,
-                            param
-                        )
-                    )
-
-                return value
-            }
-            addNewColumns()
-            const transformedRow = {}
-            config.chartProperties.forEach((e, i) => {
-                const param = { row, i, reportDate: config.reportDate }
-                const colName = e.x_column
-
-                transformedRow[i] = getFormattedValue(e, row[colName], param)
-            })
-            return transformedRow
-        }
         function isValidData(value, dataType, prefix, key = "global") {
             if (value == undefined) {
-                log(`Column: "${prefix}" missing`, "error", key)
+                log(`Column: "${prefix}" missing`, key, "error")
                 return false
             }
 
             if (typeof dataType !== "string") {
-                log(`Data type not string`, "error", key)
+                log(`Data type not string`, key, "error")
                 return false
             }
 
             const dataTypeTlc = dataType.trim().toLowerCase()
             if (dataTypeTlc == "number")
                 if (isNaN(value)) {
-                    log(
-                        `${prefix} is ${DISPLAY_INVALID_NUMBER}`,
-                        "warning",
-                        key
-                    )
+                    log(`${prefix} is ${DISPLAY_INVALID_NUMBER}`, key)
                     return false
                 }
             if (dataTypeTlc == "date")
                 if (!_isValidDate(value)) {
-                    log(`${prefix} is ${DISPLAY_INVALID_DATE}`, "warning", key)
+                    log(`${prefix} is ${DISPLAY_INVALID_DATE}`, key)
                     return false
                 }
             return true
@@ -1380,23 +1300,24 @@ const $c = (function () {
         Risk: {
             cannotFilter: true,
             //formatValue chartProp must have all values to check y_column, x_column
-            formatValue: (v, chartProp, param) => {
-                const { row } = param
-                function reformat(x) {
-                    if (!x) return DISPLAY_INVALID
-                    if (isNaN(x)) return DISPLAY_INVALID
-                    if (Number(x) < 1 || Number(x) > 5) return DISPLAY_INVALID
-                    return x.toString()
-                }
-                //validate chartProp row earlier
-                if (!chartProp || !row) return DISPLAY_INVALID
-                const { y_column, x_column } = chartProp
-                //validate y_column, x_column?
-                const impact = row[y_column]
-                const likelihood = row[x_column]
-                const xy = reformat(likelihood) + "|" + reformat(impact)
-                return xy
-            },
+            // formatValue: (v, chartProp, param) => {
+            //     console.log(v)
+            //     const { row } = param
+            //     function reformat(x) {
+            //         if (!x) return DISPLAY_INVALID
+            //         if (isNaN(x)) return DISPLAY_INVALID
+            //         if (Number(x) < 1 || Number(x) > 5) return DISPLAY_INVALID
+            //         return x.toString()
+            //     }
+            //     //validate chartProp row earlier
+            //     if (!chartProp || !row) return DISPLAY_INVALID
+            //     const { y_column, x_column } = chartProp
+            //     //validate y_column, x_column?
+            //     const impact = row[y_column]
+            //     const likelihood = row[x_column]
+            //     const xy = reformat(likelihood) + "|" + reformat(impact)
+            //     return xy
+            // },
             validate: (properties) => {
                 const {
                     countType,
@@ -1451,16 +1372,16 @@ const $c = (function () {
         "2X2": {
             cannotFilter: true,
             //formatValue chartProp must have all values to check x_column and y_column
-            formatValue: (v, chartProp, param) => {
-                const { row } = param
-                //validate chartProp row before calling?
-                if (!chartProp || !row) return DISPLAY_INVALID
-                const { x_column, y_column } = chartProp
-                const x = row[x_column].trim()
-                const y = row[y_column].trim()
-                const xy = x + "|" + y
-                return xy
-            },
+            // formatValue: (v, chartProp, param) => {
+            //     const { row } = param
+            //     //validate chartProp row before calling?
+            //     if (!chartProp || !row) return DISPLAY_INVALID
+            //     const { x_column, y_column } = chartProp
+            //     const x = row[x_column].trim()
+            //     const y = row[y_column].trim()
+            //     const xy = x + "|" + y
+            //     return xy
+            // },
             validate: (properties) => {
                 const {
                     countType,
@@ -1609,17 +1530,17 @@ const $c = (function () {
             cannotFilter: true,
             // hasSpecialCounter: true,
             //formatValue chartProp must have all values to check y_column and x_column timestampcol can it be xCol and yCol?
-            formatValue: (v, chartProp, param) => {
-                const { row } = param
-                //validate chartProp row before calling?
-                if (!chartProp || !row) return DISPLAY_INVALID
-                const { y_column, x_column } = chartProp
-                //validate y_column and x_column?
-                const to = row[x_column].trim()
-                const from = row[y_column].trim()
-                const toFrom = to + "|" + from
-                return toFrom
-            },
+            // formatValue: (v, chartProp, param) => {
+            //     const { row } = param
+            //     //validate chartProp row before calling?
+            //     if (!chartProp || !row) return DISPLAY_INVALID
+            //     const { y_column, x_column } = chartProp
+            //     //validate y_column and x_column?
+            //     const to = row[x_column].trim()
+            //     const from = row[y_column].trim()
+            //     const toFrom = to + "|" + from
+            //     return toFrom
+            // },
             validate: (properties) => {
                 const {
                     x_column,
@@ -1738,12 +1659,6 @@ const $c = (function () {
                 const isValid = Object.keys(errors).length === 0
                 return { isValid, errors }
             },
-            getCallout: (properties, chartProperties, data) => {
-                return {
-                    top: "NYI",
-                    bottom: `Not yet implemented for chart type "Plan"`,
-                }
-            },
         },
         Trend: {
             cannotFilter: true,
@@ -1814,53 +1729,42 @@ const $c = (function () {
                 if (_isValidDate(firstCat)) return {}
                 return { error }
             },
-            getCallout: (properties, chartProperties, data) => {
-                //validate when available
-                const { errors } =
-                    chartTypes["Trend"].validateCallout(properties)
-                if (errors) {
-                    const bottom = Object.keys(errors)
-                        .map((key) => key + " " + errors[key])
-                        .join(", ")
-                    return { top: "ERR", bottom }
-                }
-                const { chartType, x_column, x_label } = chartProperties
-                const { value, category, message } = properties
-                // if (value === "category") {
-                //     const cats = category
-                //         .split(",")
-                //         .map((v) => v.trim())
-                //         .filter((v) => v !== "")
-                //     // if (!Array.isArray(cats)) return error
-                //     // if (cats.length !== 2) return error
-                //     const x = cats[0]
-                //     const y = cats[1]
-                //     const d = data.find(
-                //         (v) => v.x.trim() === x && v.y.trim() === y
-                //     )
-                //     const top = d ? d.v : "NA"
-                //     const bottom =
-                //         message ??
-                //         `Value for ${x_column} = ${x} | ${y_column} = ${y}`
-                //     return { top, bottom }
-                // }
-                // console.log(data)
-                // const extent = d3.extent(data, (d) => d.v)
-                // const top = value === "max" ? extent[1] : extent[0]
-                // const cats = data
-                //     .filter((v) => v.v === top)
-                //     .map((v) => `${x_column} = ${v.x} | ${y_column} = ${v.y}`)
-                // const bottom =
-                //     message ??
-                //     (value === "max" ? "Maximum" : "Minimum") +
-                //         ` at ${cats.join(", ")}`
+            // getCallout: (properties, chartProperties, data) => {
+            //     //validate when available
+            //     const { errors } =
+            //         chartTypes["Trend"].validateCallout(properties)
+            //     if (errors) {
+            //         const bottom = Object.keys(errors)
+            //             .map((key) => key + " " + errors[key])
+            //             .join(", ")
+            //         return { top: "ERR", bottom }
+            //     }
+            //     const { chartType, x_column, x_label } = chartProperties
+            //     const { chartNumber, value, category, message } = properties
+            //     if (value === "category") {
+            //         const cat = category
+            //         const d = data.find((v) => v.x === cat)
+            //         const top = d ? d.v : "NA"
+            //         const bottom =
+            //             message ?? `${d.type} Value for ${x_column} = ${cat}`
+            //         return { top, bottom }
+            //     }
+            //     const extent = d3.extent(data, (d) => d.v)
+            //     const top = value === "max" ? extent[1] : extent[0]
+            //     const cats = data.filter((v) => v.v === top).map((v) => v.x)
+            //     const bottom =
+            //         message ??
+            //         (value === "max" ? "Maximum" : "Minimum") +
+            //             ` at ${x_column} = ${cats[0]}`
+            //     // ` at ${x_column} = ${cats.join(", ")}`
 
-                // return { top, bottom }
-                return {
-                    top: "NYI",
-                    bottom: `Not yet implemented for chart type "${chartType}"`,
-                }
-            },
+            //     return { top, bottom }
+            //     return {
+            //         top: chartNumber,
+            //         // bottom: `Not yet implemented for chart type "${chartType}"`,
+            //         bottom: value,
+            //     }
+            // },
         },
         "Trend OC": {
             cannotFilter: true,
@@ -2041,7 +1945,19 @@ const $c = (function () {
         return JSON.stringify({ dataTypes, chartTypes })
     }
     //////////////////////////////////////chartTypes functions
-
+    function logMessage(message, severity, key, allCounts, filteredRowCounts) {
+        if (!allCounts.memo[key]) allCounts.memo[key] = {}
+        const memo = allCounts.memo[key]
+        if (!memo.log) memo.log = {}
+        const memoLog = memo.log
+        if (!memoLog[message]) {
+            memoLog[message] = { first: filteredRowCounts, count: 0 }
+        }
+        const ml = memoLog[message]
+        ml.severity = severity
+        ml.last = filteredRowCounts
+        ml.count++
+    }
     function makeChartData(allCounts, config) {
         allCounts.data = {}
         for (let i = 0; i < config.chartProperties.length; i++) {
@@ -2054,18 +1970,19 @@ const $c = (function () {
             const memo = allCounts.memo[i]
             const { countType, chartType } = oneConfig
             if (chartType === "Note") return
-            if (chartType === "Bar" || chartType === "List Members") {
+            if (chartType === "Bar" /* || chartType === "List Members" */) {
                 // x_sortOn : category | value, x_sortOrder: ascending | descending
                 //available only for dataType = String or number without bin
                 const { x_dataType } = oneConfig
                 const cats = memo
                     ? dataTypes[x_dataType].getCategories(memo)
                     : []
+
                 const specialCats = [
                     DISPLAY_SPACES,
                     DISPLAY_INVALID_DATE,
                     DISPLAY_INVALID_NUMBER,
-                    DISPLAY_OTHERS,
+                    SYMBOL_OTHERS,
                 ]
 
                 const mustCats = cats.map((v) => {
@@ -2073,7 +1990,6 @@ const $c = (function () {
                     const sum = oneCount[v] ? oneCount[v].filteredSum : 0
                     return { x: v, count, sum }
                 })
-
                 const specials = specialCats
                     .map((v) => {
                         const includeInCount = (v) => {
@@ -2081,14 +1997,13 @@ const $c = (function () {
                             if (oneCount[v].totalCount == 0) return false
                             return true
                         }
-
                         const count = includeInCount(v)
                             ? oneCount[v].filteredCount
                             : 0
                         const sum = includeInCount(v)
                             ? oneCount[v].filteredSum
                             : 0
-                        return { x: v, count, sum }
+                        return { x: covertSymbolToDisplay(v), count, sum }
                     })
                     .filter((v) => v.count > 0)
 
@@ -2372,13 +2287,15 @@ const $c = (function () {
                     let endXModified = endX
                     const fallback = 100
                     if (endX > 0 && endX > fallback) {
-                        log(`Forecast reduced to ${fallback}`, "warning", i)
+                        logMessage(
+                            `Forecast limited to ${fallback} days`,
+                            "warning",
+                            i,
+                            allCounts,
+                            0
+                        )
                         endXModified = fallback
                     }
-
-                    // if (endX < 0 && endX < -fallback)
-                    //     log(`Forecast reduced to `, "warning", key)
-
                     const endPoint = () => {
                         const endDate =
                             forecastTo === "max"
@@ -2457,22 +2374,6 @@ const $c = (function () {
                 data
             )
             allCounts.callOuts[i] = { top, bottom }
-            continue
-            //move code to chartType getCallout() that validates as well
-            // const data = allCounts.data[chartNumber]?.data
-            if (!data) {
-                allCounts.callOuts[i] = {
-                    top: i,
-                    bottom: `No data`,
-                }
-                continue
-            }
-
-            allCounts.callOuts[i] = {
-                chartNo: i,
-                top: "NYI",
-                bottom: `Not yet implemented for ${chartType}`,
-            }
         }
     }
     return self

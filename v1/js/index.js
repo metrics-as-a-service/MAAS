@@ -21,25 +21,22 @@ function showLoading() {
 
 async function loadPresetFile(presetType) {
     if (!presetType) return
-    // showHideLoader("show")
     hideDropdown()
     highlightPresetMenu(presetType)
     showLoading()
     try {
         showHideLoader("show")
-        const { configJSON, reportDate, filename } =
-            $preset.getConfigJSON(presetType)
-
-        $p.setPresetConfig(configJSON, filename, reportDate)
-
+        const configJSON = $preset.getConfigJSON(presetType)
+        const { files } = JSON.parse(configJSON)
+        $p.setConfigJSON(configJSON, true) //$p.setPresetConfig(configJSON)
         clearCounts()
         destroyAllCharts()
-        await countNow(filename, undefined, false)
-        updateDataSource(filename)
+        await countNow(files[0], undefined, false)
+        updateDataSource(files)
         showHideLoader("hide")
     } catch (error) {
-        destroyAllCharts()
         console.log(error)
+        destroyAllCharts()
         $l.show()
     }
 }
@@ -52,6 +49,7 @@ async function loadNewFile() {
         return
     }
     const file = files[0]
+    console.log(files)
 
     const configAction = await $p.configAction(file)
 
@@ -61,12 +59,12 @@ async function loadNewFile() {
     clearCounts()
     destroyAllCharts()
     if (configAction == "Reset Config") {
-        const dd = await $c.processCSVFile(JSON.stringify({ file }), file)
+        const dd = await $c.processCSVFile("{}", file)
         $p.autoCreateConfig(file, undefined, "Reset Config", dd)
     }
 
     await countNow(file, undefined, false)
-    updateDataSource(file.name) //files[0].name)
+    updateDataSource([file.name]) //files[0].name)
     showHideLoader("hide")
 }
 async function countNow(file, filter, update = true) {
@@ -74,7 +72,7 @@ async function countNow(file, filter, update = true) {
     $l.start()
     // _clearHTML("#call-out-wrapper")
     // _clearHTML("#wrapper")
-    const json = JSON.stringify({ file, filter, config: $p.getTheConfig() })
+    const json = JSON.stringify({ filter, config: $p.getTheConfig() })
     const allCounts = await $c.processCSVFile(json, file)
 
     saveCounts(allCounts)
@@ -363,10 +361,9 @@ function menu(action) {
     $dialog.alert(error)
 }
 
-function updateDataSource(sourceName, clear = true) {
+function updateDataSource(sources, clear = true) {
     const dataSource = _select("#data-source")
-    const isHTTPS = sourceName.substring(0, 8) === "https://"
-    const name = (sourceName) => sourceName.split("?")[0]
+    const isHTTPS = (source) => source.substring(0, 8) === "https://"
     const nameBeforeLastSlash = (fileName) => {
         const slashPosition = fileName.lastIndexOf("/")
         if (slashPosition == -1) return fileName
@@ -377,16 +374,26 @@ function updateDataSource(sourceName, clear = true) {
         dataSource.innerHTML = ""
         dataSource.appendChild(createTag(`Data source`, "maas-tag-info"))
     }
-    const a = _createElements({ a: { class: "maas-tag-info" } })
+    for (const source of sources) {
+        const a = _createElements({ a: { class: "maas-tag-info" } })
+        if (isHTTPS(source)) {
+            // const nameBeforeQuestionMark = name(sourceName) //find different solution for private file
+            a.href = source //nameBeforeQuestionMark
+            a.target = "_blank"
+            a.text = nameBeforeLastSlash(source) //(nameBeforeQuestionMark)
+            a.setAttribute("data-title", source) //(nameBeforeQuestionMark)
+        } else a.text = nameBeforeLastSlash(source) //sourceName)
+        dataSource.appendChild(a)
+    }
 
-    if (isHTTPS) {
-        const nameBeforeQuestionMark = name(sourceName)
-        a.href = nameBeforeQuestionMark
-        a.target = "_blank"
-        a.text = nameBeforeLastSlash(nameBeforeQuestionMark)
-        a.setAttribute("data-title", nameBeforeQuestionMark)
-    } else a.text = nameBeforeLastSlash(sourceName)
-    dataSource.appendChild(a)
+    // if (isHTTPS) {
+    //     const nameBeforeQuestionMark = name(sourceName)
+    //     a.href = nameBeforeQuestionMark
+    //     a.target = "_blank"
+    //     a.text = nameBeforeLastSlash(nameBeforeQuestionMark)
+    //     a.setAttribute("data-title", nameBeforeQuestionMark)
+    // } else a.text = nameBeforeLastSlash(sourceName)
+    // dataSource.appendChild(a)
 }
 ///////////////////////////menu bar functions
 function hideDropdown() {
@@ -418,7 +425,6 @@ function createPresetMenus(preset) {
     const presetDiv = _select("#top-nav #preset")
     const notPresetDiv = _select("#top-nav #not-preset")
     loadMenu(presetMenu)
-    document.title += ": " + preset
     return _selectAll("button", presetDiv)[0]
 
     function loadMenu(menus) {

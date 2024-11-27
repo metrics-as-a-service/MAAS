@@ -20,24 +20,21 @@ const $preset = (function () {
             $l.log(`Type: "${type}" incorrect`, "Error")
             return
         }
-        if (!presetConfig[type]) {
-            $l.log(`Config missing for type: "${type}"`, "Error")
-            return
-        }
-        const { config, filename } = presetConfig[type]
+
+        const config = presetConfig[type]
+
         if (!config) {
             $l.log(`Config missing for type: "${type}"`, "Error")
             return
         }
-        // const filename = presetConfig[type].file
-        if (!filename) {
-            $l.log(`File name missing`, "Error")
+        const { files } = config
+        if (!files) {
+            $l.log(`File name(s) missing`, "Error")
             return
         }
 
         try {
             const { reportDate } = config
-
             if (!reportDate) {
                 $l.log(`reportDate missing`, "Error")
                 return
@@ -48,18 +45,35 @@ const $preset = (function () {
             }
             const today = new Date().toISOString().substring(0, 10)
             const daysToAdd = dateTimeDiff(reportDate, today, "Days")
-
+            config.presetOffsetDays = daysToAdd
+            //to do fix date conversion for any valid date
             const datePattern = /[0-9]{4}-[0-9]{2}-[0-9]{2}/g //pattern for date YYYY-MM-DD
+            // console.log(replaceDates(config))
             let configJSON = JSON.stringify(config)
-            configJSON = configJSON.replace(datePattern, (date) =>
-                addDays(date, daysToAdd)
-            )
+            if (daysToAdd !== 0)
+                configJSON = configJSON.replace(datePattern, (date) =>
+                    addDays(date, daysToAdd)
+                )
             const x = JSON.parse(configJSON)
-            return { configJSON, reportDate, filename }
+            return configJSON
         } catch (e) {
             const msg = `Error in $.getConfigJSON. Type: "${type}" Error: ${e}`
             $l.log(msg, "Error")
             return
+        }
+        function replaceDates(arg) {
+            if (typeof arg === "string") {
+                return { x: arg }
+            }
+
+            // handle wrong types and null
+            if (typeof arg !== "object" || !arg) {
+                return {}
+            }
+
+            return Object.keys(arg).reduce((acc, key) => {
+                return { ...acc, ...replaceDates({ key: arg[key] }) }
+            }, {})
         }
     }
     return $
