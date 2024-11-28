@@ -36,22 +36,6 @@ function drawChart(chartId, memo, data, clickCallback) {
     createBarChart(key, memo, data, clickCallback)
 }
 
-function updateChart(key, memo, data) {
-    const { chartType } = $p.getChartProps(key)
-
-    if (_is2X2(chartType)) return updateHeatMapChart(key, memo, data)
-
-    if (_isTable(chartType)) return updateTableChart(key, memo, data)
-
-    if (chartType == "Note") return updateMessageChart(key, memo, data)
-
-    if (chartType == "Plan") return updatePlanChart(key, memo, data)
-
-    if (_isTrend(chartType)) return createTrendChart(key, memo, data)
-
-    updateBarChart(key, memo, data)
-}
-///////////////////////////////////////////////////////////////// common Plot functions
 function bounce(element, type, scales) {
     //https://observablehq.com/@fil/plot-animate-a-bar-chart/2
     // https://observablehq.com/@recifs/plot-fade-in-bar-chart
@@ -190,10 +174,6 @@ function createBarChart(key, memo, { data }, clickCallback) {
     div.append(_createElements({ data: { json: JSON.stringify(data) } }))
     return
 }
-
-function updateBarChart(key, memo, data) {
-    createBarChart(key, memo, data, chartClick)
-}
 ///////////////////////////////////////////////////////////////////////////////////////////////heatmap
 
 function createHeatMapChart(key, memo, chartData, clickCallback) {
@@ -290,10 +270,6 @@ function createHeatMapChart(key, memo, chartData, clickCallback) {
     div.append(plot)
     // return
 }
-
-function updateHeatMapChart(key, memo, data) {
-    createHeatMapChart(key, memo, data)
-}
 ////////////////////////////////////////////////////////Message
 function createMessageChart(key) {
     const id = getChartId(key)
@@ -341,9 +317,6 @@ function createMessageChart(key) {
     return
 }
 
-function updateMessageChart(key) {
-    createMessageChart(key)
-}
 //////////////////////////////////////////////////////Call outs
 const callOutId = (key) => "call-out-" + key
 function createCallout(key, callOut) {
@@ -354,9 +327,6 @@ function createCallout(key, callOut) {
     const { chartNo, top, bottom } = callOut
     topE.textContent = top
     bottomE.textContent = bottom
-}
-function updateCallout(key, callOut) {
-    createCallout(key, callOut)
 }
 //////////////////////////////////////////////////////Table
 function createTableChart(key, memo, { data, labels }) {
@@ -401,9 +371,6 @@ function createTableChart(key, memo, { data, labels }) {
     return
 }
 
-function updateTableChart(key, memo, data) {
-    createTableChart(key, memo, data)
-}
 /////////////////////////////////////////////////////////////////////createPlanChart
 
 function getAnnotations(annotations) {
@@ -611,10 +578,6 @@ function createPlanChart(key, memo, { data }, clickCallback) {
         onHover(event, key, true)
     }
     div.append(p)
-}
-
-function updatePlanChart(key, memo, data) {
-    createPlanChart(key, memo, data)
 }
 
 /////////////////////////////////////////////////////////////////////////////////// trends

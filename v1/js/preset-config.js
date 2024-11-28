@@ -197,8 +197,8 @@ const presetConfigs = {
                 "String",
             ],
             callOuts: [
-                { chartNumber: "1", value: "max" },
-                { chartNumber: "2", value: "min" },
+                // { chartNumber: "1", value: "max" },
+                // { chartNumber: "2", value: "min" },
                 { chartNumber: "4", value: "min" },
                 { chartNumber: "5", value: "max" },
                 { chartNumber: "6", value: "min" },
@@ -581,7 +581,7 @@ const presetConfigs = {
             callOuts: [
                 { chartNumber: "1", value: "max" },
                 { chartNumber: "2", value: "min" },
-                { chartNumber: "3", value: "max" },
+                // { chartNumber: "3", value: "max" },
                 { chartNumber: "4", value: "min" },
                 { chartNumber: "5", value: "max" },
                 { chartNumber: "6", value: "min" },
@@ -707,6 +707,8 @@ const presetConfigs = {
             reportTitle: "Plan Dashboard",
             maxValues: 30,
             files: [
+                // "https://github.com/metrics-as-a-service/Private/blob/5e8982446e5cd5d2093951e1745ce4c75abcd52e/datafiles/plan.csv",
+                //"https://raw.githubusercontent.com/metrics-as-a-service/Private/datafiles/plan.csv",
                 "https://raw.githubusercontent.com/abhijitmajumdar2020/MAAS/main/datafiles/plan.csv",
                 // "https://api.github.com/repos/metrics-as-a-service/Private/contents/datafiles/plan.csv", //private
             ],

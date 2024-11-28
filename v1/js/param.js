@@ -40,7 +40,18 @@ const $p = (function () {
             (Number(index) + 1).toString() + ". " + title
         return flatten ? _flatten(returnCol) : returnCol
     }
+    function arrayMove(arr, from, to) {
+        if (from === to) return
+        const l = arr.length
+        if (from < 0 || from >= l) return
+        if (to < 0 || to >= l) return
+        let a = [...arr]
+        a[from] = undefined
+        const delta = from < to ? 1 : 0
+        a.splice(to + delta, 0, arr[from])
 
+        return a.filter((v) => v !== undefined)
+    }
     self.setChartProps = function (index, newValues, unFlatten = false) {
         let updated = false
         const chartProp = config.chartProperties[index]
@@ -60,18 +71,42 @@ const $p = (function () {
         }
 
         const position = Number(newValues.position) - 1
-        if (position != index) {
-            function arrayMove(arr, oldIndex, newIndex) {
-                if (newIndex >= arr.length) {
-                    let k = newIndex - arr.length + 1
-                    while (k--) {
-                        arr.push(undefined)
-                    }
-                }
-                arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0])
-            }
-            //console.log(index, position)
-            arrayMove(config.chartProperties, index, position)
+        // if (position != index) {
+        //     function arrayMove(arr, oldIndex, newIndex) {
+        //         if (newIndex >= arr.length) {
+        //             let k = newIndex - arr.length + 1
+        //             while (k--) {
+        //                 arr.push(undefined)
+        //             }
+        //         }
+        //         arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0])
+        //     }
+        //     console.log(index, position)
+        //     arrayMove(config.chartProperties, index, position)
+        //     updated = true
+        // }
+        const chartProperties = config.chartProperties
+        const newPositions = arrayMove(
+            chartProperties.map((_, i) => i),
+            index,
+            position
+        )
+        if (newPositions) {
+            console.log(index, newPositions)
+            //move the charts
+            const newChartProperties = newPositions.map((i) =>
+                JSON.stringify(chartProperties[i])
+            )
+            chartProperties.forEach(
+                (_, i) =>
+                    (chartProperties[i] = JSON.parse(newChartProperties[i]))
+            )
+            //move callouts
+            const callouts = config.callOuts
+            if (callouts)
+                callouts.forEach((v) => {
+                    v.chartNumber = newPositions[Number(v.chartNumber)] + ""
+                })
             updated = true
         }
 
@@ -83,6 +118,11 @@ const $p = (function () {
         const chartProperties = config.chartProperties
         if (index > chartProperties.length - 1) return false
         chartProperties.splice(index, 1)
+        config.callOuts.forEach((co) => {
+            const chartNumber = co.chartNumber
+            if (chartNumber < index)
+                co.chartNumber = Number(chartNumber) - 1 + ""
+        })
         return true
     }
 
@@ -93,6 +133,11 @@ const $p = (function () {
         if (index > chartProperties.length - 1) return false
         const newValue = JSON.parse(JSON.stringify(chartProperties[index]))
         chartProperties.splice(index, 0, newValue)
+        config.callOuts.forEach((co) => {
+            const chartNumber = co.chartNumber
+            if (chartNumber > index)
+                co.chartNumber = Number(chartNumber) + 1 + ""
+        })
         return true
     }
 

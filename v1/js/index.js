@@ -31,7 +31,7 @@ async function loadPresetFile(presetType) {
         $p.setConfigJSON(configJSON, true) //$p.setPresetConfig(configJSON)
         clearCounts()
         destroyAllCharts()
-        await countNow(files[0], undefined, false)
+        await countNow()
         updateDataSource(files)
         showHideLoader("hide")
     } catch (error) {
@@ -62,23 +62,19 @@ async function loadNewFile() {
         const dd = await $c.processCSVFile("{}", file)
         $p.autoCreateConfig(file, undefined, "Reset Config", dd)
     }
-
-    await countNow(file, undefined, false)
+    await countNow()
     updateDataSource([file.name]) //files[0].name)
     showHideLoader("hide")
 }
-async function countNow(file, filter, update = true) {
+async function countNow(filter) {
     showHideLoader("show")
     $l.start()
-    // _clearHTML("#call-out-wrapper")
-    // _clearHTML("#wrapper")
-    const json = JSON.stringify({ filter, config: $p.getTheConfig() })
-    const allCounts = await $c.processCSVFile(json, file)
+    const config = $p.getTheConfig()
+    const json = JSON.stringify({ filter, config })
+    const allCounts = await $c.processCSVFile(json, config.file)
 
     saveCounts(allCounts)
-
-    if (update) updateCharts()
-    else showCharts()
+    showCharts()
     showFilters()
     $l.show()
     showHideLoader("hide")
@@ -250,37 +246,21 @@ function showCharts() {
 
 async function chartClick(chartId, category) {
     if (!category) return
-    let allCounts = getCounts()
+    const allCounts = getCounts()
     const key = getKey(chartId)
 
     const oneCount = allCounts.counts[key]
     for (const [k, v] of Object.entries(oneCount))
         if (k !== category) v.include = !v.include
-    const { file } = $p.getConfig()
-    await countNow(file, allCounts, true)
+    await countNow(allCounts)
 }
-async function chartResetFilter(chart) {
+async function chartResetFilter(chartId) {
     let allCounts = getCounts()
     const key = getKey(chartId)
     const oneCount = allCounts[key].counts
 
     for (const [k, v] of Object.entries(oneCount)) v.include = true
-
-    const { file } = $p.getConfig()
-    await countNow(file, allCounts, true)
-}
-
-function updateCharts() {
-    const allCounts = getCounts()
-    const memo = allCounts.memo
-
-    for (const key in allCounts.callOuts)
-        updateCallout(key, allCounts.callOuts[key])
-
-    for (const key in allCounts.counts) {
-        const oneCount = allCounts.counts[key]
-        updateChart(key, allCounts.memo[key], allCounts.data[key])
-    }
+    await countNow(allCounts)
 }
 
 function menu(action) {

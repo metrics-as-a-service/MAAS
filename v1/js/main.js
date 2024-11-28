@@ -81,14 +81,7 @@ const $c = (function () {
     }
     async function readCSV(
         resolveValue,
-        {
-            file,
-            stepFunction,
-            errorFunction,
-            completeFunction,
-            preview = 0,
-            token,
-        }
+        { file, step, error, complete, preview = 0, token }
     ) {
         const isRemoteFile = typeof file === "string"
         // const isPrivate = isRemoteFile ? file.includes("?private") : false
@@ -116,11 +109,11 @@ const $c = (function () {
                 skipEmptyLines: true,
                 downloadRequestHeaders,
                 preview,
-                step: (row) => stepFunction(row),
-                error: (err, file) => errorFunction(err, file),
+                step: (row) => step(row),
+                error: (err, file) => error(err, file),
                 complete: (result, file) => {
-                    completeFunction(result, file)
                     resolve(resolveValue)
+                    complete(result, file)
                 },
             })
         })
@@ -144,11 +137,13 @@ const $c = (function () {
         let firstRow
         return await readCSV(firstRow, {
             file,
-            stepFunction: (row) => {
+            step: (row) => {
                 firstRow = row
             },
-            errorFunction: (err, file) => console.error({ err, file }),
-            completeFunction: () => {},
+            error: (err, file) => console.error({ err, file }),
+            complete: () => {
+                //resolve(firstRow)
+            },
         })
     }
     //let input be {file, dataDescription, filter, config, }
@@ -159,6 +154,9 @@ const $c = (function () {
     //  no              no      amy     return data description (done)
 
     self.processCSVFile = async function (inputJSON, localFile) {
+        //TO DO FIX THIS MAJOR FUDGE on local file !!!!!!!!!!!!!!!!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        //if remote file then it is in config else it is f
+        //also later in client server we cant pass f (can we?)
         const SYMBOL_PREV_STATE = Symbol()
         let totalRowCounts = 0,
             filteredRowCounts = 0,
@@ -169,12 +167,8 @@ const $c = (function () {
         filteredRowCounts = 0
         const inputParams = JSON.parse(inputJSON)
         const { filter, config } = inputParams
-
-        //TO DO FIX THIS MAJOR FUDGE on file !!!!!!!!!!!!!!!!!!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        //if remote file then it is in config else it is f
-        //also later in client server we cant pass f (can we?)
-
-        const file = localFile ? localFile : inputParams.config.files[0]
+        //to do deal with multiple files
+        const file = localFile ? localFile : config.files[0]
 
         if (!config) {
             await passOne(file, 0)
@@ -196,23 +190,26 @@ const $c = (function () {
             await passOne(file, presetOffsetDays)
             allCounts.memo.dataDescription = dataDescription
         }
-        ////////////////////////////////////////////////////////////////////////// pass 2
         clearLog()
-
-        const response = await readCSV(allCounts, {
-            file,
-            stepFunction: (uncleanRow) => {
-                if (uncleanRow.errors.length > 0) {
-                    console.error(errors)
-                }
-                const row = cleanRow(uncleanRow.data, presetOffsetDays)
-                countRecords(allCounts, row)
-            },
-            errorFunction: (err, file) => console.error({ err, file }),
-            completeFunction: () => wrapUp(allCounts),
-        })
-        return response
+        return passTwo(file, allCounts)
         /////////////////////////////////////////////////////////////////
+        async function passTwo(file, allCounts) {
+            const response = await readCSV(allCounts, {
+                file,
+                step: (uncleanRow) => {
+                    if (uncleanRow.errors.length > 0) {
+                        console.error(errors)
+                    }
+                    const row = cleanRow(uncleanRow.data, presetOffsetDays)
+                    countRecords(allCounts, row)
+                },
+                error: (err, file) => console.error({ err, file }),
+                complete: () => {
+                    wrapUp(allCounts)
+                },
+            })
+            return response
+        }
         function countRecords(allCounts, row) {
             const isEndOfFile = !row
             if (isEndOfFile) {
@@ -1004,15 +1001,17 @@ const $c = (function () {
         async function passOne(file, presetOffsetDays) {
             dataDescription = {}
             // resolveValue,
-            // { file, stepFunction, errorFunction, completeFunction, preview = 0 }
+            // { file, step, error, complete, preview = 0 }
             await readCSV(true, {
                 file,
-                stepFunction: (row) => {
+                step: (row) => {
                     const cleanedRow = cleanRow(row.data, presetOffsetDays)
                     gatherDataDescription(cleanedRow, dataDescription)
                 },
-                errorFunction: (err, file) => console.error({ err, file }),
-                completeFunction: (result, file) => {},
+                error: (err, file) => console.error({ err, file }),
+                complete: (result, file) => {
+                    //resolve(true)
+                },
             })
         }
         function includeRowInChart(key, row) {
@@ -1798,13 +1797,13 @@ const $c = (function () {
             },
             validate: (properties, config) =>
                 chartTypes["Trend"].validate(properties, config),
-            getCallout: (properties, chartProperties, data) => {
-                return chartTypes["Trend"].getCallout(
-                    properties,
-                    chartProperties,
-                    data
-                )
-            },
+            // getCallout: (properties, chartProperties, data) => {
+            //     return chartTypes["Trend"].getCallout(
+            //         properties,
+            //         chartProperties,
+            //         data
+            //     )
+            // },
         },
         Bar: {
             validate: (properties) => {
