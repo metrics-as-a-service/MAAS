@@ -875,6 +875,15 @@ const presetConfigs = {
                 },
             ],
         },
+        "File Error": {
+            reportDate: "2023-08-01",
+            reportTitle: "Test Execution Dashboard",
+            maxValues: 30,
+            files: [
+                "file:///Users/abhijitmajumdar/Desktop/JS%20Programs/TestData/plan.csv",
+                // "https://xraw.githubusercontent.com/abhijitmajumdar2020/MAAS/main/datafiles/testexecution.csv",
+            ],
+        },
         "Error Reporting": {
             reportDate: "2023-08-01",
             reportTitle: "Error Reporting",

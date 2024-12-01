@@ -1,9 +1,14 @@
-const $preset = (function () {
+;(function (global, factory) {
+    typeof exports === "object" && typeof module !== "undefined"
+        ? factory(exports)
+        : typeof define === "function" && define.amd
+        ? define(["exports"], factory)
+        : ((global = global || self),
+          factory((global.Preset = global.Preset || {})))
+})(this, function (exports) {
     "use strict"
-    let $ = {}
     let presetConfig
-
-    $.getMenuItems = function (preset) {
+    function getMenuItems(preset) {
         if (!preset) {
             $dialog.alert(`Preset ${preset} not found`, ["Close"])
             return
@@ -15,7 +20,7 @@ const $preset = (function () {
         return menuitems
     }
 
-    $.getConfigJSON = function (type) {
+    function getConfigJSON(type) {
         if (!type) {
             $l.log(`Type: "${type}" incorrect`, "Error")
             return
@@ -44,7 +49,7 @@ const $preset = (function () {
                 return
             }
             const today = new Date().toISOString().substring(0, 10)
-            const daysToAdd = dateTimeDiff(reportDate, today, "Days")
+            const daysToAdd = _dateTimeDiff(reportDate, today, "Days")
             config.presetOffsetDays = daysToAdd
             //to do fix date conversion for any valid date
             const datePattern = /[0-9]{4}-[0-9]{2}-[0-9]{2}/g //pattern for date YYYY-MM-DD
@@ -52,7 +57,7 @@ const $preset = (function () {
             let configJSON = JSON.stringify(config)
             if (daysToAdd !== 0)
                 configJSON = configJSON.replace(datePattern, (date) =>
-                    addDays(date, daysToAdd)
+                    _addDays(date, daysToAdd)
                 )
             const x = JSON.parse(configJSON)
             return configJSON
@@ -76,5 +81,6 @@ const $preset = (function () {
             }, {})
         }
     }
-    return $
-})()
+    exports.getMenuItems = getMenuItems
+    exports.getConfigJSON = getConfigJSON
+})

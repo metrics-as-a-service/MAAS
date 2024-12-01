@@ -1,6 +1,19 @@
-const $l = (function () {
+//import common
+//export { clearLogs, startLog, showLogs }
+//steps comment const $.. () {  and the last return {} & }
+
+;(function (global, factory) {
+    typeof exports === "object" && typeof module !== "undefined"
+        ? factory(exports)
+        : typeof define === "function" && define.amd
+        ? define(["exports"], factory)
+        : ((global = global || self),
+          factory((global.Logger = global.Logger || {})))
+    // in strict mode we cannot access arguments.callee, so we need a named reference to
+    // stringify the factory method for the blob worker
+    // eslint-disable-next-line func-name
+})(this, function (exports) {
     "use strict"
-    const self = {}
     let startDateTime
     const logRecord = {}
 
@@ -12,25 +25,17 @@ const $l = (function () {
             chartNo: logKeyParts[2].trim(),
         }
     }
-    self.clear = function () {
+
+    function clearLogs() {
         for (const key in logRecord) {
             delete logRecord[key]
         }
     }
-    self.log = function (message, severity = "warning", chartNo) {
-        const logKey = `${message} | ${severity} | ${chartNo}`
-
-        if (!logRecord[logKey]) logRecord[logKey] = 0
-        logRecord[logKey] += 1
-    }
-    self.start = function () {
-        this.clear()
+    function startLogs() {
+        clearLogs()
         startDateTime = new Date()
     }
-    self.console = function () {
-        console.log(logRecord)
-    }
-    self.show = function () {
+    function showLogs() {
         const allCounts = getCounts()
         function resetChartLogs() {
             const counts = allCounts.counts
@@ -54,7 +59,7 @@ const $l = (function () {
         }
         function getTimeToPrepareReport() {
             const end = new Date()
-            const ms = dateTimeDiff(startDateTime, end, "Milliseconds")
+            const ms = _dateTimeDiff(startDateTime, end, "Milliseconds")
             return `Time taken to make charts: ${ms / 1000} seconds`
         }
         const logDiv = _clearHTML("#log")
@@ -85,5 +90,7 @@ const $l = (function () {
 
         addP(getTimeToPrepareReport(), "info")
     }
-    return self // expose externally
-})()
+    exports.clearLogs = clearLogs
+    exports.startLogs = startLogs
+    exports.showLogs = showLogs
+})

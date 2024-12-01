@@ -1,4 +1,6 @@
 "use strict"
+//import common
+//export parseGrammar and all grammars
 /**
  * A simple object parser with error messages
  * @param {string} input
@@ -35,7 +37,7 @@ function parseGrammar(input, grammar) {
         }
         return output
     } catch (error) {
-        console.log(grammar, error)
+        //console.log(grammar, error)
         return error
     }
     function getObjectFromString(input) {
@@ -236,7 +238,7 @@ const CHART_FILTER_GRAMMAR = {
     },
     where: (value) => {
         if (value === undefined) return "where missing"
-        const { columnNames } = $p.getConfig()
+        const { columnNames } = Param.getConfig()
         if (!columnNames) return `Cannot validate column-name`
         const error = `where must be an array with three or more entries`
         if (!Array.isArray(value)) return error

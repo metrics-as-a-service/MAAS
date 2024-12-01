@@ -1,39 +1,22 @@
 "use strict"
-const CHART_HEIGHT = undefined //350 //"auto"
-const FONT_FAMILY = _getCSSVar("--maas-font-family")
-let FONT_COLOR = _getCSSVar("--text-1")
-
-const CHART_COLORS = [_getCSSVar("--color-brand")]
-
-const RAG_COLORS = [
-    _getCSSVar("--color-green"),
-    _getCSSVar("--color-green-amber"),
-    _getCSSVar("--color-amber"),
-    _getCSSVar("--color-amber-red"),
-    _getCSSVar("--color-red"),
-]
-const RAG_CONTRAST_COLORS = ["black", "black", "black", "white", "white"]
+//import common Param.getChartProps(key)
+//export {drawChart, destroyAllCharts}
 
 function drawChart(chartId, memo, data, clickCallback) {
     const key = getKey(chartId)
-    const { chartType } = $p.getChartProps(key)
+    const { chartType } = Param.getChartProps(key)
 
-    if (_is2X2(chartType))
-        return createHeatMapChart(key, memo, data, clickCallback)
+    if (_is2X2(chartType)) return createHeatMapChart(key, data, clickCallback)
 
-    if (_isTable(chartType))
-        return createTableChart(key, memo, data, clickCallback)
+    if (_isTable(chartType)) return createTableChart(key, data, clickCallback)
 
-    if (chartType == "Note")
-        return createMessageChart(key, memo, data, clickCallback)
+    if (chartType == "Note") return createMessageChart(key, data, clickCallback)
 
-    if (chartType == "Plan")
-        return createPlanChart(key, memo, data, clickCallback)
+    if (chartType == "Plan") return createPlanChart(key, data, clickCallback)
 
-    if (_isTrend(chartType))
-        return createTrendChart(key, memo, data, clickCallback)
+    if (_isTrend(chartType)) return createTrendChart(key, data, clickCallback)
 
-    createBarChart(key, memo, data, clickCallback)
+    createBarChart(key, data, clickCallback)
 }
 
 function bounce(element, type, scales) {
@@ -129,10 +112,9 @@ function onHover(event, key, highlightAll = false) {
         return window.getComputedStyle(e).getPropertyValue(fillOrStroke)
     }
 }
-//////////////////////////////////////////////////////////////////////bar charts
-function createBarChart(key, memo, { data }, clickCallback) {
+function createBarChart(key, { data }, clickCallback) {
     const id = getChartId(key)
-    const { countType, x_dataType, chartType } = $p.getChartProps(key)
+    const { countType, x_dataType, chartType } = Param.getChartProps(key)
     const div = _clearHTML("#" + id)
     const x = "x",
         y = "v",
@@ -174,11 +156,17 @@ function createBarChart(key, memo, { data }, clickCallback) {
     div.append(_createElements({ data: { json: JSON.stringify(data) } }))
     return
 }
-///////////////////////////////////////////////////////////////////////////////////////////////heatmap
-
-function createHeatMapChart(key, memo, chartData, clickCallback) {
+function createHeatMapChart(key, chartData, clickCallback) {
+    const RAG_COLORS = [
+        _getCSSVar("--color-green"),
+        _getCSSVar("--color-green-amber"),
+        _getCSSVar("--color-amber"),
+        _getCSSVar("--color-amber-red"),
+        _getCSSVar("--color-red"),
+    ]
+    const RAG_CONTRAST_COLORS = ["black", "black", "black", "white", "white"]
     const id = getChartId(key)
-    const chartProp = $p.getChartProps(key)
+    const chartProp = Param.getChartProps(key)
     const {
         domain: { countDomain, xDomain, yDomain },
         data,
@@ -212,13 +200,13 @@ function createHeatMapChart(key, memo, chartData, clickCallback) {
         }
     }
     const fillFontColors = colorRange(countDomain)
-
     const color = {
         domain: countDomain,
         range: fillFontColors.fill,
         legend: countDomain.length > 1,
         type: "ordinal",
     }
+
     function getContrastingColor(x) {
         const i = countDomain.findIndex((v) => v === x)
         if (i === -1) return "red"
@@ -270,11 +258,10 @@ function createHeatMapChart(key, memo, chartData, clickCallback) {
     div.append(plot)
     // return
 }
-////////////////////////////////////////////////////////Message
 function createMessageChart(key) {
     const id = getChartId(key)
     const chartDiv = _clearHTML("#" + id)
-    const { message } = $p.getChartProps(key)
+    const { message } = Param.getChartProps(key)
 
     const makeElement = (line) => {
         const style = "123456789*".includes(line[0]) ? "margin-left:1rem;" : ""
@@ -316,8 +303,6 @@ function createMessageChart(key) {
     for (const line of lines) chartDiv.appendChild(makeElement(line.trim()))
     return
 }
-
-//////////////////////////////////////////////////////Call outs
 const callOutId = (key) => "call-out-" + key
 function createCallout(key, callOut) {
     const e = _select("#" + callOutId(key))
@@ -328,12 +313,10 @@ function createCallout(key, callOut) {
     topE.textContent = top
     bottomE.textContent = bottom
 }
-//////////////////////////////////////////////////////Table
-function createTableChart(key, memo, { data, labels }) {
+function createTableChart(key, { data, labels }) {
     const id = getChartId(key)
-    // const chartProp = $p.getChartProps(key)
-    const oneConfig = $p.getChartProps(key)
-    // const { data, labels } = $c.transformDataAndLabels(key, oneCount, oneConfig)
+    // const chartProp = Param.getChartProps(key)
+    const oneConfig = Param.getChartProps(key)
     const chartDiv = _clearHTML("#" + id)
 
     const tableElements = {
@@ -370,9 +353,6 @@ function createTableChart(key, memo, { data, labels }) {
     chartDiv.appendChild(table)
     return
 }
-
-/////////////////////////////////////////////////////////////////////createPlanChart
-
 function getAnnotations(annotations) {
     if (!annotations) return []
     const annotationArray = annotations.split(",")
@@ -389,7 +369,7 @@ function getAnnotations(annotations) {
 
         const position = isTop ? "top" : isMid ? "center" : "bottom"
         // const orientation = style[1] === "v" ? "vertical" : "horizontal"
-        const text = label + ": " + formatDate(date, "DD-MMM")
+        const text = label + ": " + _formatDate(date, "DD-MMM")
         plotAnnotations.push({
             x: new Date(date).getTime(),
             position,
@@ -399,12 +379,10 @@ function getAnnotations(annotations) {
     }
     return plotAnnotations
 }
-
-function createPlanChart(key, memo, { data }, clickCallback) {
+function createPlanChart(key, { data }, clickCallback) {
     const id = getChartId(key)
-    const { annotations, firstLabel, secondLabel } = $p.getChartProps(key)
-    const oneConfig = $p.getChartProps(key)
-    // const { data, labels } = $c.transformDataAndLabels(key, oneCount, oneConfig)
+    const { annotations, firstLabel, secondLabel } = Param.getChartProps(key)
+    const oneConfig = Param.getChartProps(key)
 
     const annotationArray = getAnnotations(annotations)
 
@@ -579,18 +557,15 @@ function createPlanChart(key, memo, { data }, clickCallback) {
     }
     div.append(p)
 }
-
-/////////////////////////////////////////////////////////////////////////////////// trends
-function createTrendChart(key, memo, { domain, data }, clickCallback) {
+function createTrendChart(key, { domain, data }, clickCallback) {
     const id = getChartId(key)
-    const { forecast, chartType, plan } = $p.getChartProps(key)
+    const { forecast, chartType, plan } = Param.getChartProps(key)
     const cumulative = true
-    const { reportDate } = $p.getConfig()
-    const { annotations, x_label, x_column } = $p.getChartProps(key)
+    const { reportDate } = Param.getConfig()
+    const { annotations, x_label, x_column } = Param.getChartProps(key)
     const xLabel = _pick1stNonBlank(x_label, x_column)
     const annotationArray = getAnnotations(annotations)
-    // const oneConfig = $p.getChartProps(key)
-    // const { data } = $c.transformDataAndLabels(key, oneCount, oneConfig)
+
     let cumSum = 0
 
     // const plotData = Object.keys(data).map((date) => {

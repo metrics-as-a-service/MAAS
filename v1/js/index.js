@@ -1,5 +1,39 @@
 "use strict"
 
+window.addEventListener("load", (event) => {
+    showHideLoader("hide")
+    const url = new URL(window.location.toLocaleString())
+    const search = url.search
+    if (!search) return
+
+    const preset = search.replace("?", "").trim()
+    if (preset === "") {
+        $dialog.alert(`Preset "${preset}" invalid`, ["Close"])
+        return
+    }
+    if (presetConfigs && presetConfigs[preset]) {
+        createPresetMenus(presetConfigs[preset]).click()
+        return
+    }
+    $dialog.alert(`Preset "${preset}" not found`, ["Close"])
+})
+
+window.addEventListener("scroll", (e) => {
+    const goToTop = _select("#go-to-top")
+    const docEl = document.documentElement
+    const pos = docEl.scrollTop
+    const h = docEl.scrollHeight - docEl.clientHeight
+    const scrollValue = Math.round((pos * 100) / h)
+
+    if (scrollValue < 20) goToTop.style.display = "none"
+    else {
+        goToTop.style.display = "grid"
+        goToTop.setAttribute("data-value", scrollValue)
+    }
+
+    // console.log(scrollValue)
+})
+//import common, Param.setConfigJSON Preset Counter.getCountsFromFile Logger
 ///////////////////////////////////////////////////////////////// loader functions
 function showHideLoader(action) {
     const loader = _select("#loader")
@@ -24,69 +58,82 @@ async function loadPresetFile(presetType) {
     hideDropdown()
     highlightPresetMenu(presetType)
     showLoading()
+    showHideLoader("show")
+    clearCounts()
+    destroyAllCharts()
+    const configJSON = Preset.getConfigJSON(presetType)
+    let config
     try {
-        showHideLoader("show")
-        const configJSON = $preset.getConfigJSON(presetType)
-        const { files } = JSON.parse(configJSON)
-        $p.setConfigJSON(configJSON, true) //$p.setPresetConfig(configJSON)
-        clearCounts()
-        destroyAllCharts()
-        await countNow()
-        updateDataSource(files)
-        showHideLoader("hide")
+        config = JSON.parse(configJSON)
     } catch (error) {
         console.log(error)
-        destroyAllCharts()
-        $l.show()
     }
+    if (config) {
+        const { files } = config
+        Param.setConfig(config)
+        await countNow()
+        updateDataSource(files)
+    }
+    Logger.showLogs()
+    showHideLoader("hide")
 }
 
 async function loadNewFile() {
-    $l.clear()
+    Logger.clearLogs()
     const files = _select("#file").files
     if (files.length == 0) {
         $dialog.alert("Please select a file")
         return
     }
     const file = files[0]
-    console.log(files)
-
-    const configAction = await $p.configAction(file)
-
-    if (configAction == "Abort Load") return
+    const config = Param.getConfig()
+    const action = _isEmpty(config) ? "Reset Config" : await actionOnConfig()
+    if (action === "Abort Load") return
     showHideLoader("show")
     showLoading()
     clearCounts()
     destroyAllCharts()
-    if (configAction == "Reset Config") {
-        const dd = await $c.processCSVFile("{}", file)
-        $p.autoCreateConfig(file, undefined, "Reset Config", dd)
+    if (action === "Reset Config") {
+        const dataDescription = await Counter.getCountsFromFile("{}", file)
+        Param.autoCreateConfig(file, dataDescription)
     }
+    if (action === "Keep Config") Param.updateFile(file)
     await countNow()
-    updateDataSource([file.name]) //files[0].name)
+    updateDataSource([file.name])
     showHideLoader("hide")
+    async function actionOnConfig() {
+        //to do get first row and compare
+        const areHeadersSame = false
+        if (areHeadersSame) return "Keep Config"
+        return await $dialog.alert(`Config present`, [
+            "Keep Config",
+            "Reset Config",
+            "Abort Load",
+        ])
+        return action
+    }
 }
 async function countNow(filter) {
     showHideLoader("show")
-    $l.start()
-    const config = $p.getTheConfig()
+    Logger.startLogs()
+    const config = Param.getConfig()
     const json = JSON.stringify({ filter, config })
-    const allCounts = await $c.processCSVFile(json, config.file)
+    const allCounts = await Counter.getCountsFromFile(json, config.file)
 
     saveCounts(allCounts)
     showCharts()
     showFilters()
-    $l.show()
+    Logger.showLogs()
     showHideLoader("hide")
 }
 function clearCounts() {
     saveCounts({})
 }
 function saveCounts(x) {
-    $p.setItem("allCounts", JSON.stringify(x))
+    setItem("allCounts", JSON.stringify(x))
 }
 function getCounts() {
-    return JSON.parse($p.getItem("allCounts"))
+    return JSON.parse(getItem("allCounts"))
 }
 
 function createTag(text, colorClass, tooltip) {
@@ -101,7 +148,7 @@ function createTag(text, colorClass, tooltip) {
 function showFilters() {
     const allCounts = getCounts()
     const filterValueDiv = _clearHTML("#filter-value")
-
+    if (!allCounts.memo.global) return
     const { totalRowCounts, filteredRowCounts } = allCounts.memo.global
 
     const label =
@@ -122,7 +169,7 @@ function showFilters() {
         if (excluded.length > 0) {
             const isMember = "=",
                 isNotMember = "\u2260"
-            let filterValue = $p.getChartProps(key).chartTitleWithIndex + " "
+            let filterValue = Param.getChartProps(key).chartTitleWithIndex + " "
             if (included.length <= excluded.length)
                 filterValue += isMember + " [" + included.join(", ") + "] "
             else filterValue += isNotMember + " [" + excluded.join(", ") + "] "
@@ -145,11 +192,11 @@ function getKey(id) {
 
 function showCharts() {
     const mainTitle = _select("#main-title")
-    const { reportDate, reportTitle } = $p.getConfig()
+    const { reportDate, reportTitle } = Param.getConfig()
     mainTitle.textContent = reportTitle
     const subTitle = _select("#sub-title")
     subTitle.textContent =
-        "Data as of: " + formatDate(reportDate, "DDD DD-MMM-YYYY")
+        "Data as of: " + _formatDate(reportDate, "DDD DD-MMM-YYYY")
 
     const callOutWrapper = _clearHTML("#call-out-wrapper")
     const wrapper = _clearHTML("#wrapper")
@@ -179,7 +226,7 @@ function showCharts() {
     }
 
     for (const key in allCounts.counts) {
-        const { chartTitleWithIndex, chartSize } = $p.getChartProps(key)
+        const { chartTitleWithIndex, chartSize } = Param.getChartProps(key)
         const spanClass = "maas-" + chartSize.toLowerCase()
 
         const id = getChartId(key)
@@ -288,7 +335,8 @@ function menu(action) {
     }
 
     if (action == "downloadConfig") {
-        const json = $p.getConfigJSON()
+        const config = Param.getConfig()
+        const json = JSON.stringify(config, null, 2)
         if (json == "{}") return
         navigator.clipboard.writeText(json)
         downloadFile(json, "config.json")
@@ -401,7 +449,7 @@ function highlightPresetMenu(label) {
     //     }
 }
 function createPresetMenus(preset) {
-    const presetMenu = $preset.getMenuItems(preset)
+    const presetMenu = Preset.getMenuItems(preset)
     const presetDiv = _select("#top-nav #preset")
     const notPresetDiv = _select("#top-nav #not-preset")
     loadMenu(presetMenu)
@@ -444,14 +492,13 @@ async function smokeTest(duration = 700) {
 
     async function testCharts() {
         showHideLoader("show")
-        const presetMenu = $preset.getMenuItems(presetConfigs.demo)
-        // const footer = _select("footer")
+        const presetMenu = Preset.getMenuItems(presetConfigs.demo)
         for (let i = 0; i < presetMenu.length; i++) {
             const startLap = new Date()
             const presetType = presetMenu[i].key
             loadPresetFile(presetType)
             await _sleep(duration)
-            const numberOfCharts = $p.getNoOfCharts()
+            const numberOfCharts = Param.getCountOf("chart")
             //select random chart
             const randomChart = SelectRandomChart()
             console.log(randomChart)
@@ -467,7 +514,8 @@ async function smokeTest(duration = 700) {
         }
 
         function SelectRandomChart() {
-            const { chartProperties } = $p.getTheConfig()
+            const { chartProperties } = Param.getConfig()
+            if (!chartProperties) return -1
             const chartCount = chartProperties.length
             const firstBarChart = chartProperties.findIndex(
                 (v) => v.chartType === "Bar"
@@ -492,7 +540,7 @@ async function smokeTest(duration = 700) {
     async function testConfigDialog() {
         configChart("0")
         const chartType = $dialog.getElement("chartType")
-        const chartTypes = $p.getChartTypes()
+        const chartTypes = Param.getChartTypes()
         for (let i = 0; i < chartTypes.length; i++) {
             const startLap = new Date()
             chartType.value = chartTypes[i]
@@ -505,7 +553,7 @@ async function smokeTest(duration = 700) {
     }
     function elapsedTime(start) {
         const end = new Date()
-        return Math.round(dateTimeDiff(start, end, "Milliseconds") / 1000)
+        return Math.round(_dateTimeDiff(start, end, "Milliseconds") / 1000)
     }
     function record(label) {
         if (!label) {
@@ -516,4 +564,13 @@ async function smokeTest(duration = 700) {
         elements.push({ component: "p", label })
         console.log(label)
     }
+}
+function setItem(key, value) {
+    localStorage.setItem(key, value)
+    // store[key] = value
+}
+function getItem(key) {
+    return localStorage.getItem(key)
+    // console.assert(store[key], `${key} is not found`)
+    // return store[key]
 }

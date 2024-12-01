@@ -1,4 +1,6 @@
 "use strict"
+//import common Counter.validate, Counter.validateCallout, all form $p
+//export {many}
 const subheading = (label) => [
     { component: "hr" },
     { component: "h3", label: label },
@@ -30,8 +32,8 @@ const subheading = (label) => [
 //         button_close: { label: "Close", onclick: click() },
 //     }
 //     const key = getKey(chartID)
-//     const { chartType } = $p.getChartProps(key)
-//     const cannotFilter = $p.cannotFilter(chartType)
+//     const { chartType } = Param.getChartProps(key)
+//     const cannotFilter = Param.cannotFilter(chartType)
 //     if (cannotFilter) elements.button_1.disabled = "disabled"
 //     // $dialog.make({ elements }, "small").position(chartID)
 //     // $dialog.show()
@@ -58,8 +60,8 @@ function showChartMenus(chartID) {
         { component: "button", label: "Close", onclick: "$dialog.close()" },
     ]
     const key = getKey(chartID)
-    const { chartType } = $p.getChartProps(key)
-    const cannotFilter = $p.cannotFilter(chartType)
+    const { chartType } = Param.getChartProps(key)
+    const cannotFilter = Param.cannotFilter(chartType)
     if (cannotFilter) elements[0].disabled = true
     $dialog.make(elements, { width: "small" })
     $dialog.show()
@@ -67,7 +69,7 @@ function showChartMenus(chartID) {
 
 /////////////////////////////////////////////////////////////layout dialog
 function showLayoutDialog() {
-    const { reportTitle, reportDate } = $p.getConfig()
+    const { reportTitle, reportDate } = Param.getConfig()
     const layoutDialog = [
         {
             component: "legend",
@@ -112,16 +114,16 @@ function layoutApply() {
     }
     if ($dialog.hasErrors()) return
 
-    $p.setConfig({ reportTitle, reportDate })
+    Param.setConfig({ reportTitle, reportDate })
     $dialog.close()
     reCreateCharts()
 }
 ///////////////////////////////
 async function removeChart(chartID) {
     const key = getKey(chartID)
-    const { chartTitle } = $p.getChartProps(key)
+    const { chartTitle } = Param.getChartProps(key)
 
-    const calloutProperties = $p.getConfig().callOuts
+    const calloutProperties = Param.getConfig().callOuts
     if (calloutProperties) {
         const callOutsWithSameKey = calloutProperties
             .map((v, i) => ({ chartNumber: v.chartNumber, position: i }))
@@ -145,11 +147,11 @@ async function removeChart(chartID) {
         `Are you sure to remove chart: "${chartTitle}"?`,
         [confirm, "No keep"]
     )
-    if (reply === confirm) if ($p.removeChart(key)) reCreateCharts()
+    if (reply === confirm) if (Param.removeChart(key)) reCreateCharts()
 }
 function cloneChart(chartID) {
     const key = getKey(chartID)
-    if ($p.cloneChart(key)) reCreateCharts()
+    if (Param.cloneChart(key)) reCreateCharts()
 }
 
 //////////////////////////////////////////////////////////////////// config dialog helpers
@@ -182,7 +184,7 @@ const validateChartFilterGrammar = (input) => {
 function configChart(chartID) {
     const key = getKey(chartID)
 
-    const { chartType, chartTitle, chartSize } = $p.getChartProps(key)
+    const { chartType, chartTitle, chartSize } = Param.getChartProps(key)
 
     const configDialog = [
         { component: "h2", label: `Configure chart` },
@@ -192,14 +194,14 @@ function configChart(chartID) {
             label: "Position: ",
             initialValue: Number(key) + 1,
             min: 1,
-            max: $p.getNoOfCharts(),
+            max: Param.getCountOf("chart"),
             returnvalue: "position",
         },
         {
             component: "input text",
             label: "Chart title: ",
             initialValue: chartTitle ?? "",
-            placeHolder: $p.getAutoTitle(key),
+            placeHolder: Param.getAutoTitle(key),
             returnvalue: "chartTitle",
         },
         {
@@ -214,7 +216,7 @@ function configChart(chartID) {
             component: "select",
             label: "Chart type: ",
             initialValue: chartType,
-            options: $p.getChartTypes(),
+            options: Param.getChartTypes(),
             returnvalue: "chartType",
         },
         { component: "overlay" },
@@ -238,7 +240,7 @@ function configChart(chartID) {
 }
 
 function showDialogOptions(key) {
-    const dataSource = key ? $p.getChartProps(key) : $dialog.data()
+    const dataSource = key ? Param.getChartProps(key) : $dialog.data()
     const chartFilterElements = (chartFilter) => {
         return {
             component: "textarea",
@@ -297,7 +299,7 @@ function showDialogOptions(key) {
         prefix
     ) {
         // const { dateFormat, order, bin } = dataSource
-        const dateFormats = $p.getDateFormats()
+        const dateFormats = Param.getDateFormats()
         if (dataType === "Date")
             return [
                 {
@@ -338,11 +340,11 @@ function showDialogOptions(key) {
         ]
     }
     const { chartType } = dataSource
-    const columns = $p.getConfig().columnNames
+    const columns = Param.getConfig().columnNames
     $dialog.error()
     {
         const chartTile = $dialog.getElement("chartTitle")
-        chartTile.placeholder = $p.getAutoTitle(dataSource)
+        chartTile.placeholder = Param.getAutoTitle(dataSource)
     }
 
     if (chartType == "Note") {
@@ -484,7 +486,7 @@ function showDialogOptions(key) {
                 ),
             ]
         }
-        const { reportDate } = $p.getConfig()
+        const { reportDate } = Param.getConfig()
         // future:
         // const xxx =
         //     [{
@@ -498,7 +500,7 @@ function showDialogOptions(key) {
         //     {
         //         name: "trendStartDate",
         //         type: "date",
-        //         fallback: addDays(reportDate, -28),
+        //         fallback: _addDays(reportDate, -28),
         //     },]
 
         $dialog.overlay(
@@ -517,7 +519,7 @@ function showDialogOptions(key) {
                 {
                     component: "input date",
                     // label: "Start trend from: ",
-                    initialValue: trendStartDate ?? addDays(reportDate, -28),
+                    initialValue: trendStartDate ?? _addDays(reportDate, -28),
                     // options: columns,
                     returnvalue: "trendStartDate",
                 },
@@ -719,7 +721,7 @@ const checkStringType = () => {
     if ($dialog.hasErrors()) return
 
     Object.assign(newCol, { countType, colOver, chartFilter })
-    const placeHolder = $p.getAutoTitle(newCol)
+    const placeHolder = Param.getAutoTitle(newCol)
 }
 function validateConfig() {
     $dialog.error()
@@ -738,8 +740,8 @@ function validateConfig() {
         chartType == "2X2" ||
         chartType == "Bar"
     ) {
-        const { reportDate } = $p.getConfig()
-        const { isValid, errors, warnings } = $c.validate(
+        const { reportDate } = Param.getConfig()
+        const { isValid, errors, warnings } = Counter.validate(
             chartType,
             properties,
             { reportDate }
@@ -756,14 +758,14 @@ function configChartApply(chartID) {
     validateConfig()
     if ($dialog.hasErrors()) return
     $dialog.close()
-    if ($p.setChartProps(key, properties)) reCreateCharts(key)
+    if (Param.setChartProps(key, properties)) reCreateCharts(key)
 }
 
 async function reCreateCharts(key) {
     const scrollY = window.scrollY
     clearCounts()
     destroyAllCharts()
-    const { file } = $p.getConfig()
+    const { file } = Param.getConfig()
     await countNow(file, undefined, false, "Keep Config")
     window.scroll(0, scrollY)
     scrollToChart(key)
@@ -840,7 +842,7 @@ async function applyFilter(chartID) {
         }
     })
     $dialog.close()
-    const { file } = $p.getConfig()
+    const { file } = Param.getConfig()
     /* await */ countNow(file, allCounts, true)
 }
 
@@ -1263,9 +1265,9 @@ function showCalloutMenu(key) {
 function showCalloutConfigDialog(key, addNew = false) {
     const { chartNumber, value, category, message } = addNew
         ? { chartNumber: key, value: "max" }
-        : $p.getCallOutProps(key)
+        : Param.getCallOutProps(key)
 
-    // const { chartNumber, value, category, message } = $p.getCallOutProps(key)
+    // const { chartNumber, value, category, message } = Param.getCallOutProps(key)
     const calloutConfigDialog = [
         { component: "h2", label: `Configure callout` },
         { component: "hr" },
@@ -1275,14 +1277,14 @@ function showCalloutConfigDialog(key, addNew = false) {
                   component: "input number",
                   initialValue: Number(key) + 1,
                   min: 1,
-                  max: $p.getNoOfCallOuts(),
+                  max: Param.getCountOf("callout"),
                   returnvalue: "position",
               },
         {
             component: "input number",
             initialValue: Number(chartNumber) + 1,
             min: 1,
-            max: $p.getNoOfCharts(),
+            max: Param.getCountOf("chart"),
             returnvalue: "chartNumber",
         },
         { component: "overlay" },
@@ -1312,7 +1314,7 @@ function showCalloutConfigDialog(key, addNew = false) {
         {
             component: "button",
             label: addNew ? "Add" : "Apply",
-            onclick: `applyConfigCallout()`,
+            onclick: `applyConfigCallout(${key})`,
         },
     ]
 
@@ -1322,7 +1324,7 @@ function showCalloutConfigDialog(key, addNew = false) {
 }
 function overlayCallout() {
     const { chartNumber } = $dialog.data()
-    const { chartType } = $p.getChartProps(chartNumber - 1)
+    const { chartType } = Param.getChartProps(chartNumber - 1)
     const overlayElements = [
         {
             component: "p",
@@ -1340,27 +1342,30 @@ function validateCalloutConfig() {
     $dialog.error()
     const properties = $dialog.data()
     const chartNumber = $dialog.getElement("chartNumber").value
-    const { chartType } = $p.getChartProps(chartNumber - 1)
-    const { errors, output } = $c.validateCallout(chartType, properties, {})
+    const { chartType } = Param.getChartProps(chartNumber - 1)
+    const { errors, output } = Counter.validateCallout(
+        chartType,
+        properties,
+        {}
+    )
     if (errors) return { errors }
     if (output) Object.assign(properties, output)
     return { output: properties }
 }
-function applyConfigCallout() {
+function applyConfigCallout(key) {
     const { output, errors } = validateCalloutConfig()
 
     if (errors) {
-        for (const key in errors) $dialog.error(errors[key], key)
+        for (const e in errors) $dialog.error(errors[e], e)
         return
     }
 
     const { chartNumber, position } = output
     output.chartNumber = Number(chartNumber) - 1
-    if (position) delete output.position
     $dialog.close()
-    const calloutPosition = position ? Number(position) - 1 : undefined
-    console.log(output, calloutPosition)
-    if ($p.setCallOutProps(calloutPosition, output)) reCreateCharts()
+    // const calloutPosition = Number(position) - 1
+    console.log(output)
+    if (Param.setCallOutProps(key, output)) reCreateCharts()
 }
 function getDefaultCalloutMessage({
     value,
@@ -1384,7 +1389,7 @@ async function removeCallout(key) {
         confirm,
         "No keep",
     ])
-    if (reply === confirm) if ($p.removeCallOut(key)) reCreateCharts()
+    if (reply === confirm) if (Param.removeCallOut(key)) reCreateCharts()
 }
 function addCallout(chartId) {
     const key = getKey(chartId)

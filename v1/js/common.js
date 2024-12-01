@@ -1,21 +1,13 @@
 "use strict"
+//import
+//export {everything}
 const DISPLAY_OTHERS = "..." //String.fromCharCode(8230)  //UNICODEU+02026 HEX CODE&#x2026; HTML CODE&#8230; HTML ENTITY&hellip; CSS CODE\2026
 const DISPLAY_INVALID = "Undefined" //String.fromCharCode(8264) //QUESTION EXCLAMATION MARK//"?" //HTML CODE&#8264;
-const DISPLAY_INVALID_NUMBER = "NAN" //chose all caps as NaN not displayed by apexcahrt
+const DISPLAY_INVALID_NUMBER = "NAN"
 const DISPLAY_INVALID_DATE = "NAD"
 const DISPLAY_SPACES = "Spaces" //String.fromCharCode(8709) //"Space" //&#8709;
 const DISPLAY_LESS = "<"
 const DISPLAY_MORE = ">"
-
-// const DISPLAY_VALUES = {
-//     [SYMBOL_OTHERS]: DISPLAY_OTHERS,
-//     [SYMBOL_INVALID]: DISPLAY_INVALID,
-//     [SYMBOL_INVALID_NUMBER]: DISPLAY_INVALID_NUMBER,
-//     [SYMBOL_INVALID_DATE]: DISPLAY_INVALID_DATE,
-//     [SYMBOL_SPACES]: DISPLAY_SPACES,
-//     [SYMBOL_LESS]: DISPLAY_LESS,
-//     [SYMBOL_MORE]: DISPLAY_MORE,
-// }
 
 const isInvalidDisplay = (x) =>
     x == DISPLAY_INVALID ||
@@ -68,13 +60,11 @@ const MAX_2X2_CATS = 10
  * @param {string} format any combination of dd mm mmm yy and yyyy
  * @returns {string} formatted date
  */
-
 function _formatDate(date, format) {
-    return formatDate(date, format)
-}
-
-function formatDate(date, format) {
-    if (!_isValidDate(date)) return DISPLAY_INVALID_DATE
+    if (!_isValidDate(date)) {
+        console.log(date)
+        return DISPLAY_INVALID_DATE
+    }
     const dateWithHyphen = date.replace(/\//g, "-").toUpperCase().trim()
     const newDate = new Date(dateWithHyphen)
     const date_DDD_MMM_DD_YYYY = newDate.toDateString()
@@ -163,7 +153,7 @@ function _isValidDate(date) {
     return false
 }
 
-const dateTimeDiff = (dateTimeStart, dateTimeEnd, format = "Days") => {
+function _dateTimeDiff(dateTimeStart, dateTimeEnd, format = "Days") {
     function workdays(startDate, endDate) {
         let workdays = 0
         let currentDate = new Date(startDate)
@@ -190,7 +180,7 @@ const dateTimeDiff = (dateTimeStart, dateTimeEnd, format = "Days") => {
     if (formatUC == "WEEKS") return days / 7
 }
 
-const addDays = function (dateTimeStart, days) {
+function _addDays(dateTimeStart, days) {
     const start = new Date(dateTimeStart)
     const daysInMS = 24 * 60 * 60 * 1000 * days
     start.setTime(start.getTime() + daysInMS)
@@ -198,7 +188,7 @@ const addDays = function (dateTimeStart, days) {
     return start.toISOString().substring(0, 10)
 }
 
-const _getCSSVar = function (v) {
+function _getCSSVar(v) {
     const style = getComputedStyle(document.body)
     return style.getPropertyValue(v)
 }
@@ -257,8 +247,9 @@ function _addGlobalEventListener(
     )
 }
 
-const _sleep = (timeInMilliSeconds) =>
-    new Promise((resolve) => setTimeout(resolve, timeInMilliSeconds))
+function _sleep(timeInMilliSeconds) {
+    return new Promise((resolve) => setTimeout(resolve, timeInMilliSeconds))
+}
 
 //https://github.com/WebDevSimplified/js-util-functions/
 
@@ -380,7 +371,7 @@ function _flatten(obj, parent, flattened = {}) {
  * @param {object} obj
  * @returns {object}
  */
-const _unFlatten = (obj) =>
+function _unFlatten(obj) {
     Object.keys(obj).reduce((res, k) => {
         k.split("_").reduce(
             (acc, e, i, keys) =>
@@ -394,8 +385,9 @@ const _unFlatten = (obj) =>
         )
         return res
     }, {})
+}
 
-const _cleanArray = (inString, format) => {
+function _cleanArray(inString, format) {
     const inArray = inString.split(",")
     const outArray = []
     inArray.forEach((v) => {
@@ -458,7 +450,7 @@ function _removeChildren(selector) {
         parent.removeChild(parent.lastChild)
     }
 }
-const _sortArrayOrObjects = (arrObj, { key, order = "a" }) => {
+function _sortArrayOrObjects(arrObj, { key, order = "a" }) {
     const isArray = Array.isArray(arrObj)
     const value = (x) => (typeof key === "function" ? key(x) : x[key])
     const sortedArrObj = arrObj.sort((a, b) => {
@@ -547,8 +539,9 @@ function _isEmpty(obj) {
     return Object.keys(obj).length === 0
 }
 
-const _is2X2 = (chartType) =>
-    ["Risk", "2X2", "State Change"].includes(chartType)
+function _is2X2(chartType) {
+    return ["Risk", "2X2", "State Change"].includes(chartType)
+}
 const _isTable = (chartType) =>
     ["Data Table", "Data Description"].includes(chartType)
 const _isTrend = (chartType) => ["Trend OC", "Trend"].includes(chartType)
@@ -583,10 +576,7 @@ function _pick1stNonBlank(...args) {
     )
     return x ? x.trim() : ""
 }
-function _tryCatch(x) {
-    try {
-    } catch (error) {}
-}
+
 // const sortArrayOfObjects = (arr, sortParams) => {
 //     const { key, order } = sortParams
 //     const sortedArr = arr.sort((a, b) => {
@@ -606,7 +596,11 @@ function _cleanObject(input) {
         .forEach((key) => {
             const value = input[key]
             if (typeof value === "undefined") return
-            if (!isNaN(value)) output[key] = value + ""
+
+            if (typeof value === "number") {
+                output[key] = value + ""
+                return
+            }
             if (typeof value === "object") {
                 output[key] = _cleanObject(value)
                 return
@@ -616,37 +610,4 @@ function _cleanObject(input) {
             output[key] = value.trim()
         })
     return output
-}
-function _isTrue(op) {
-    if (typeof op !== "object") return false
-    const operator = Object.keys(op)[0]
-    const compareNumeric = operator.includes("(n)")
-    const cleanOperand = (v) => {
-        if (compareNumeric)
-            if (!(typeof v === "number" || typeof v === "string")) return
-            else if (typeof v !== "string") return
-        return compareNumeric ? Number(v) : v.trim().toLowerCase()
-    }
-    const op1 = cleanOperand(op[1])
-    if (op1 === undefined) return false
-    const op2 = cleanOperand(op[1])
-    if (op2 === undefined) return false
-    switch (operator.replace("(n)", "")) {
-        case "in":
-            return op2.includes(op1)
-        case "eq":
-            return op1 == op2
-        case "neq":
-            return op1 != op2
-        case "gt":
-            return op1 > op2
-        case "ge":
-            return op1 >= op2
-        case "lt":
-            return op1 > op2
-        case "le":
-            return op1 > op2
-        default:
-            return false
-    }
 }
