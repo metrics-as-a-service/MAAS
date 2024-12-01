@@ -69,7 +69,7 @@
 
         <script src="./js/index.js" charset="utf-8" defer></script>
         <script src="./js/common.js" charset="utf-8" defer></script>
-        <script src="./js/main.js" charset="utf-8" defer></script>
+        <script src="./js/counter.js" charset="utf-8" defer></script>
         <script src="./js/param.js" charset="utf-8" defer></script>
         <script src="./js/preset.js" charset="utf-8" defer></script>
         <script src="./js/papaparse.js" charset="utf-8" defer></script>
@@ -181,40 +181,4 @@
             </button>
         </main>
     </body>
-    <script>
-        "use strict"
-        window.addEventListener("load", (event) => {
-            showHideLoader("hide")
-            const url = new URL(window.location.toLocaleString())
-            const search = url.search
-            if (!search) return
-
-            const preset = search.replace("?", "").trim()
-            if (preset === "") {
-                $dialog.alert(`Preset "${preset}" invalid`, ["Close"])
-                return
-            }
-            if (presetConfigs && presetConfigs[preset]) {
-                createPresetMenus(presetConfigs[preset]).click()
-                return
-            }
-            $dialog.alert(`Preset "${preset}" not found`, ["Close"])
-        })
-
-        window.addEventListener("scroll", (e) => {
-            const goToTop = _select("#go-to-top")
-            const docEl = document.documentElement
-            const pos = docEl.scrollTop
-            const h = docEl.scrollHeight - docEl.clientHeight
-            const scrollValue = Math.round((pos * 100) / h)
-
-            if (scrollValue < 20) goToTop.style.display = "none"
-            else {
-                goToTop.style.display = "grid"
-                goToTop.setAttribute("data-value", scrollValue)
-            }
-
-            // console.log(scrollValue)
-        })
-    </script>
 </html>
