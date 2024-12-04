@@ -15,7 +15,7 @@
     const SYMBOL_LESS = Symbol()
     const SYMBOL_MORE = Symbol()
 
-    function covertSymbolToDisplay(v) {
+    function symbolToDisplay(v) {
         if (v === SYMBOL_OTHERS) return DISPLAY_OTHERS
         if (v === SYMBOL_INVALID) return DISPLAY_INVALID
         if (v === SYMBOL_INVALID_NUMBER) return DISPLAY_INVALID_NUMBER
@@ -23,6 +23,7 @@
         if (v === SYMBOL_SPACES) return DISPLAY_SPACES
         if (v === SYMBOL_LESS) return DISPLAY_LESS
         if (v === SYMBOL_MORE) return DISPLAY_MORE
+        return v
     }
     function getDisplayValue(countType, v) {
         const count = v.count != undefined ? v.count : v.filteredCount
@@ -83,10 +84,6 @@
         return p
     }
 
-    function _isEmpty(obj) {
-        return Object.keys(obj).length === 0
-    }
-
     function getOrderedValues(chartType, chartProp, param) {
         if (!chartType) return []
         if (!chartTypes[chartType]) return []
@@ -132,7 +129,26 @@
             await passOne(file, 0)
             return dataDescription
         }
+        const isDefined = (v) => v !== undefined
         const hasFilterInInput = filter !== undefined
+        function isColumnFiltered(x_column) {
+            const { chartProperties } = config
+            const chartsWithFilterOnX = chartProperties
+                .map((chart, i) => ({ ...chart, key: i }))
+                .filter((chart) => chart.x_column === x_column)
+                .filter((chart) => {
+                    let isChartFiltered = false
+                    const count = allCounts.counts[chart.key]
+                    for (const cat in count) {
+                        const include = count[cat].include
+                        if (isDefined(include) && !include)
+                            isChartFiltered = true
+                    }
+                    return isChartFiltered
+                })
+
+            return chartsWithFilterOnX.length > 0
+        }
 
         const allCounts = hasFilterInInput
             ? JSON.parse(JSON.stringify(filter))
@@ -293,7 +309,7 @@
                         count.spaceCount++
                         continue
                     }
-                    if (_isValidDate(item)) {
+                    if (_.isValidDate(item)) {
                         count.maxDate = getMax(count.maxDate, item)
                         count.minDate = getMin(count.minDate, item)
                         count.dateCount++
@@ -431,8 +447,6 @@
                 if (isStartOfFile) init()
                 const memo = allCounts.memo[key]
                 if (isEndOfFile) {
-                    //addForecast?
-                    //addPlan ?
                     memo.totalRowCounts = totalRowCounts
                     memo.filteredRowCounts = filteredRowCounts
                     return
@@ -497,7 +511,7 @@
                     const { lookBack } = output
                     if (!allCounts.memo[key]) allCounts.memo[key] = {}
                     const { reportDate } = config
-                    const cutoffDate = _addDays(reportDate, -(lookBack - 1))
+                    const cutoffDate = _.addDays(reportDate, -(lookBack - 1))
 
                     memo.forecast = {
                         ...output,
@@ -571,7 +585,7 @@
                         const forecast = allCounts.memo[key].forecast
                         if (!forecast) return
                         const { cutoffDate } = forecast
-                        const dateDiff = _dateTimeDiff(cutoffDate, date) - 1
+                        const dateDiff = _.dateTimeDiff(cutoffDate, date) - 1
                         if (dateDiff >= 0) {
                             forecast.count += count
                             forecast.open += openCount
@@ -613,10 +627,20 @@
                 count[xy].filteredCount += filteredCount
             }
             function countStateChange(key, oneCount, filtered) {
+                //to do make <now> as a parameter
                 const { reportDate } = config
+                const { idCol, x_column, y_column, timestampCol } =
+                    getChartProps(key)
                 if (totalRowCounts === 1) {
                     oneCount[SYMBOL_PREV_STATE] = {}
                     readyPrevious({})
+                    const checkFilter = (col) => {
+                        if (isColumnFiltered(col))
+                            log(`"${col}" is filtered`, key)
+                    }
+                    checkFilter(x_column)
+                    checkFilter(y_column)
+                    checkFilter(timestampCol)
                 }
                 const prev = oneCount[SYMBOL_PREV_STATE]
                 if (isEndOfFile) {
@@ -626,13 +650,12 @@
                 }
                 if (!filtered) return
                 if (!includeRowInChart(key, row)) return
-                const { idCol, x_column, y_column, timestampCol } =
-                    getChartProps(key)
 
                 const id = row[idCol].trim()
                 const to = row[x_column].trim()
                 const from = row[y_column].trim()
                 let timestamp = row[timestampCol]
+
                 if (!isValidData(timestamp, "date", "Timestamp", key))
                     timestamp = 0
 
@@ -655,7 +678,7 @@
                 function calculatePrevious() {
                     // const prev = oneCount[SYMBOL_PREV_STATE]
                     if (prev.to !== "") {
-                        const delta = _dateTimeDiff(
+                        const delta = _.dateTimeDiff(
                             prev.timestamp,
                             reportDate,
                             "Days"
@@ -672,7 +695,7 @@
                     if (prev.to) {
                         if (prev.to !== from)
                             log(`"from" not same as previous "to"`, key)
-                        const delta = _dateTimeDiff(
+                        const delta = _.dateTimeDiff(
                             prev.timestamp,
                             timestamp,
                             "Days"
@@ -732,19 +755,22 @@
                     if (x_bin) {
                         const binCount = Number(x_bin.trim())
                         if (isNaN(binCount))
-                            memo.bin = _cleanArray(x_bin, "Number")
+                            memo.bin = _.cleanArray(x_bin, "Number")
                         else {
                             const { maxNumber, minNumber } =
                                 allCounts.memo["dataDescription"][x_column]
                             const max = Math.round(maxNumber)
                             const min = Math.floor(minNumber)
-                            const step = Math.round(
-                                (max - min) / (binCount + 1)
-                            )
-                            memo.bin = [min]
-                            for (let i = 1; i < binCount; i++)
-                                memo.bin.push(min + i * step)
-                            memo.bin.push(max)
+                            const rawStep = (max - min) / (binCount + 1)
+                            if (rawStep < 10) {
+                                memo.bin = [min, max]
+                            } else {
+                                const step = Math.round(rawStep)
+                                memo.bin = [min]
+                                for (let i = 1; i < binCount; i++)
+                                    memo.bin.push(min + i * step)
+                                memo.bin.push(max)
+                            }
                         }
                     }
                     if (x_order) memo.order = x_order
@@ -805,6 +831,7 @@
                     }
                 }
             }
+            //to do move countBasedOnType to chartTypes??
             function countBasedOnType(key, isFiltered) {
                 const oneCount = allCounts.counts[key]
                 const { chartType } = getChartProps(key)
@@ -855,6 +882,7 @@
             }
             return config.chartProperties[index]
         }
+        //to do move zeroCounters to chartTypes??
         function zeroCounters(allCounts) {
             for (const key in allCounts.counts) {
                 const { chartType } = getChartProps(key)
@@ -903,7 +931,7 @@
                     }
             }
 
-            if (_isEmpty(descriptions)) initCounter()
+            if (_.isEmpty(descriptions)) initCounter()
 
             function getMin(currentValue, value) {
                 if (currentValue == undefined) return value
@@ -925,7 +953,7 @@
                     description.spaceCount++
                     continue
                 }
-                if (_isValidDate(item)) {
+                if (_.isValidDate(item)) {
                     description.maxDate = getMax(description.maxDate, item)
                     description.minDate = getMin(description.minDate, item)
                     description.dateCount++
@@ -951,14 +979,14 @@
         function cleanRow(uncleanRow, presetOffsetDays) {
             const modifiedDate = (date) => {
                 const newDate = presetOffsetDays
-                    ? _addDays(date, presetOffsetDays)
+                    ? _.addDays(date, presetOffsetDays)
                     : date
-                return _formatDate(newDate, "YYYY-MM-DD")
+                return _.formatDate(newDate, "YYYY-MM-DD")
             }
             const row = {}
             for (const key in uncleanRow) {
                 const cell = uncleanRow[key].trim()
-                if (_isValidDate(cell)) row[key] = modifiedDate(cell)
+                if (_.isValidDate(cell)) row[key] = modifiedDate(cell)
                 else row[key] = cell
             }
             return row
@@ -1089,7 +1117,7 @@
                     return false
                 }
             if (dataTypeTlc == "date")
-                if (!_isValidDate(value)) {
+                if (!_.isValidDate(value)) {
                     log(`${prefix} is ${DISPLAY_INVALID_DATE}`, key)
                     return false
                 }
@@ -1103,10 +1131,10 @@
             formats: ["YYYY", "MMM", "MMM-YY", "DDD", "DD", "W8", "4W4", "8W"],
             getFormattedValue: (v, { dateFormat = "MMM", reportDate }) => {
                 if (v.trim() === "") return DISPLAY_SPACES
-                if (!_isValidDate(v)) return DISPLAY_INVALID_DATE
+                if (!_.isValidDate(v)) return DISPLAY_INVALID_DATE
 
                 const positionOfW = dateFormat.indexOf("W")
-                if (positionOfW === -1) return _formatDate(v, dateFormat)
+                if (positionOfW === -1) return _.formatDate(v, dateFormat)
 
                 const min = positionOfW === 0 ? 0 : -Number(dateFormat[0])
                 const max =
@@ -1118,7 +1146,7 @@
                     if (w > max) return DISPLAY_MORE
                     return (w ? w : "") + "W"
                 }
-                const days = _dateTimeDiff(reportDate, v, "Days")
+                const days = _.dateTimeDiff(reportDate, v, "Days")
                 const weeks = Math.floor(days / 7)
                 return formatWeek(weeks, min, max)
             },
@@ -1171,7 +1199,7 @@
                 }
                 const binArray = Array.isArray(bin)
                     ? bin
-                    : _cleanArray(bin, "Number")
+                    : _.cleanArray(bin, "Number")
 
                 return binnedValues(number, binArray)
             },
@@ -1214,14 +1242,13 @@
         },
     }
     /////////////////////////////////////////////////////////// common validation functions
+
     function validateGrammar(input, grammar) {
         if (!input) return
         if (input.trim() === "") return
         const output = parseGrammar(input.trim(), grammar)
-        if (typeof output === "object") return
+        if (_.isOject(output)) return
         return output
-        // $dialog.error(output, "chartFilter")
-        // return false
     }
     function validateAnnotations(annotations) {
         if (annotations.trim() === "") return
@@ -1236,7 +1263,7 @@
 
         for (let i = 0; i < annotationArray.length; i += 3) {
             const date = annotationArray[i].trim()
-            if (!_isValidDate(date)) return msg
+            if (!_.isValidDate(date)) return msg
 
             if (!annotationArray[i + 1]) return msg
 
@@ -1266,25 +1293,6 @@
         },
         Risk: {
             cannotFilter: true,
-            //formatValue chartProp must have all values to check y_column, x_column
-            // formatValue: (v, chartProp, param) => {
-            //     console.log(v)
-            //     const { row } = param
-            //     function reformat(x) {
-            //         if (!x) return DISPLAY_INVALID
-            //         if (isNaN(x)) return DISPLAY_INVALID
-            //         if (Number(x) < 1 || Number(x) > 5) return DISPLAY_INVALID
-            //         return x.toString()
-            //     }
-            //     //validate chartProp row earlier
-            //     if (!chartProp || !row) return DISPLAY_INVALID
-            //     const { y_column, x_column } = chartProp
-            //     //validate y_column, x_column?
-            //     const impact = row[y_column]
-            //     const likelihood = row[x_column]
-            //     const xy = reformat(likelihood) + "|" + reformat(impact)
-            //     return xy
-            // },
             validate: (properties) => {
                 const {
                     countType,
@@ -1693,7 +1701,7 @@
                 if (cats.length !== 2) return { error }
                 const firstCat = cats[0]
                 if (firstCat.toLowerCase() === "report-date") return {}
-                if (_isValidDate(firstCat)) return {}
+                if (_.isValidDate(firstCat)) return {}
                 return { error }
             },
             // getCallout: (properties, chartProperties, data) => {
@@ -1739,7 +1747,7 @@
                 const { trendStartDate } = chartProp
 
                 const datePoints = []
-                const dateDifference = _dateTimeDiff(
+                const dateDifference = _.dateTimeDiff(
                     trendStartDate,
                     trendEndDate,
                     "Days"
@@ -1798,7 +1806,8 @@
                         const binError =
                             "Required: integer > 1 or list of increasing numbers"
                         if (!isNaN(x_bin)) {
-                            if (_isInteger(x_bin)) if (Number(x_bin) > 1) return
+                            if (_.isInteger(x_bin))
+                                if (Number(x_bin) > 1) return
                             return err("x_bin", binError, errors)
                         }
                         const binArray = x_bin.split(",")
@@ -1874,7 +1883,7 @@
             },
         },
     }
-    function validate(chartType, properties, config) {
+    function validateChart(chartType, properties, config) {
         const error = {
             isValid: false,
             errors: { chartType: "Invalid chart type" },
@@ -1928,16 +1937,17 @@
     function makeChartData(allCounts, config) {
         allCounts.data = {}
         for (let i = 0; i < config.chartProperties.length; i++) {
-            allCounts.data[i] = dataForChart(i)
+            allCounts.data[i] = createChartData(i)
         }
 
-        function dataForChart(i) {
+        function createChartData(i) {
             const oneCount = allCounts.counts[i]
             const oneConfig = config.chartProperties[i]
             const memo = allCounts.memo[i]
             const { countType, chartType } = oneConfig
+            //to do move createChartData to chartTypes??
             if (chartType === "Note") return
-            if (chartType === "Bar" /* || chartType === "List Members" */) {
+            if (chartType === "Bar") {
                 // x_sortOn : category | value, x_sortOrder: ascending | descending
                 //available only for dataType = String or number without bin
                 const { x_dataType } = oneConfig
@@ -1970,7 +1980,7 @@
                         const sum = includeInCount(v)
                             ? oneCount[v].filteredSum
                             : 0
-                        return { x: covertSymbolToDisplay(v), count, sum }
+                        return { x: symbolToDisplay(v), count, sum }
                     })
                     .filter((v) => v.count > 0)
 
@@ -2007,7 +2017,7 @@
                 const sortedOptionals =
                     sortKey === ""
                         ? [...optionals]
-                        : _sortArrayOrObjects(optionals, {
+                        : _.sortArrayOrObjects(optionals, {
                               key: sortKey,
                               order: x_sortOrder,
                           })
@@ -2053,7 +2063,6 @@
                 })
                 return { data }
             }
-
             if (chartType == "Data Table") {
                 const data = [],
                     labels = []
@@ -2097,14 +2106,12 @@
                 const data = Object.keys(oneCount).map((key) => ({
                     x: oneCount[key].x,
                     y: oneCount[key].y,
-                    // ...oneCount[v],
-                    // fill: fill(displayValue(key)),
                     v: getDisplayValue(countType, oneCount[key]),
                 }))
                 const extent = d3.extent(data, (d) => d.v)
-                const xDomain = x_labels ? _getArray(x_labels) : []
-                const yDomain = y_labels ? _getArray(y_labels) : []
-                const countDomain = _getArray(countLabels)
+                const xDomain = x_labels ? _.getArray(x_labels) : []
+                const yDomain = y_labels ? _.getArray(y_labels) : []
+                const countDomain = _.getArray(countLabels)
                 data.forEach((v) => {
                     if (!xDomain.includes(v.x)) xDomain.push(v.x)
                     if (!yDomain.includes(v.y)) yDomain.push(v.y)
@@ -2115,17 +2122,18 @@
 
                 function fill(d) {
                     const min = extent[0]
+                    if (!extent[1]) console.log("Y")
                     const step = (extent[1] - min) / (countDomain.length - 1)
-                    const index = Math.floor((d - min) / step)
+                    const index = step === 0 ? 0 : Math.floor((d - min) / step)
                     return countDomain[index]
                 }
             }
             if (chartType == "Risk") {
                 const { x_labels, y_labels, countLabels } = oneConfig
 
-                const xDomain = _getArray(x_labels)
-                const yDomain = _getArray(y_labels)
-                const countDomain = _getArray(countLabels)
+                const xDomain = _.getArray(x_labels)
+                const yDomain = _.getArray(y_labels)
+                const countDomain = _.getArray(countLabels)
 
                 const colorValue = (count) => {
                     const value = Number(count.x) * Number(count.y)
@@ -2209,10 +2217,11 @@
 
                     const deltaScope = modifiedTo - modifiedFrom
                     const dateSteps =
-                        _dateTimeDiff(start, end, "Days") /
+                        _.dateTimeDiff(start, end, "Days") /
                         (planPoints.length - 1)
                     for (let i = 0; i < planPoints.length; i++) {
-                        const x = _addDays(start, Math.round(i * dateSteps))
+                        // console.log(Math.round(i * dateSteps))
+                        const x = _.addDays(start, Math.round(i * dateSteps))
                         const v = Math.round(
                             modifiedFrom + deltaScope * planPoints[i]
                         )
@@ -2266,16 +2275,16 @@
                     const endPoint = () => {
                         const endDate =
                             forecastTo === "max"
-                                ? _addDays(cutoffDate, endXModified)
-                                : _isValidDate(forecastTo)
+                                ? _.addDays(cutoffDate, endXModified)
+                                : _.isValidDate(forecastTo)
                                 ? forecastTo
-                                : _addDays(cutoffDate, forecastTo)
+                                : _.addDays(cutoffDate, forecastTo)
 
                         const endCount =
                             forecastTo === "max"
                                 ? filteredRowCounts
                                 : getY(
-                                      _dateTimeDiff(cutoffDate, endDate),
+                                      _.dateTimeDiff(cutoffDate, endDate),
                                       linear
                                   )
 
@@ -2346,9 +2355,11 @@
 
     exports.getFirstRecord = getFirstRecord
     exports.getCountsFromFile = getCountsFromFile
+
     exports.getChartDataTypes = getChartDataTypes
     exports.getChartDescription = getChartDescription
-    exports.validate = validate
+
+    exports.validateChart = validateChart
     exports.validateCallout = validateCallout
 })
 // import { Papa } from "./papaparse.js"

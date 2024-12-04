@@ -44,7 +44,7 @@ function parseGrammar(input, grammar) {
         const delimiters = `: [], "',{}`.split("")
         let stringFound = false
         let s = ""
-        const tokens = _tokenize(input, delimiters)
+        const tokens = _.tokenize(input, delimiters)
             .map((v) => {
                 if (v === '"' || v === "'") {
                     if (stringFound) {
@@ -128,19 +128,19 @@ const PLAN_GRAMMAR = {
     start: (value) => {
         if (value === undefined) return "start missing"
         const date = value.trim()
-        if (!_isValidDate(date)) return "start must be date"
-        return { value: _formatDate(date, "YYYY-MM-DD") }
+        if (!_.isValidDate(date)) return "start must be date"
+        return { value: _.formatDate(date, "YYYY-MM-DD") }
     },
     end: (value) => {
         if (value === undefined) return "end missing"
         const date = value.trim()
-        if (!_isValidDate(date)) return "end must be date"
-        return { value: _formatDate(date, "YYYY-MM-DD") }
+        if (!_.isValidDate(date)) return "end must be date"
+        return { value: _.formatDate(date, "YYYY-MM-DD") }
     },
     "scope-from": (value) => {
         if (value === undefined) return "scope-from must be present"
         const error = "scope-from must be integer >= 0"
-        if (!_isInteger(value)) return error
+        if (!_.isInteger(value)) return error
         const n = Number(value)
         if (n < 0) return error
         return { key: "scopeFrom", value: n }
@@ -151,7 +151,7 @@ const PLAN_GRAMMAR = {
         if (value.trim().toLowerCase() === "max")
             return { key: "scopeTo", value: "max" }
         const error = "scope-to must be max or integer >= 0"
-        if (!_isInteger(value)) return error
+        if (!_.isInteger(value)) return error
         const n = Number(value)
         if (n < 0) return error
         return { key: "scopeTo", value: n }
@@ -159,7 +159,7 @@ const PLAN_GRAMMAR = {
     points: (value) => {
         if (value === undefined) return "points missing" //mandatory
         const validValues = ["line", "sigmoid"]
-        const error = `points must be ${_niceJoin(
+        const error = `points must be ${_.niceJoin(
             validValues
         )} or numeric array [0 ... 1]`
         if (typeof value === "string") {
@@ -192,7 +192,7 @@ const TREND_GRAMMAR = {
     "look-back": (value) => {
         if (value === undefined) return "look-back must be present"
         const error = "look-back must be integer > 0"
-        if (!_isInteger(value)) return error
+        if (!_.isInteger(value)) return error
         const n = Number(value)
         if (n < 1) return error
         // return { value: n }
@@ -205,7 +205,7 @@ const TREND_GRAMMAR = {
     "forecast-to": (value) => {
         if (value === undefined) return "forecast-to must be present"
         const error = "forecast-to must be max, integer > 0 or date"
-        if (_isInteger(value)) {
+        if (_.isInteger(value)) {
             const n = Number(value)
             if (n < 1) return error
             // return { value: n }
@@ -213,10 +213,10 @@ const TREND_GRAMMAR = {
         }
         const tlcValue = value.trim().toLowerCase()
         if (tlcValue === "max") return { key: "forecastTo", value: "max" }
-        if (_isValidDate(tlcValue))
+        if (_.isValidDate(tlcValue))
             return {
                 key: "forecastTo",
-                value: _formatDate(tlcValue, "YYYY-MM-DD"),
+                value: _.formatDate(tlcValue, "YYYY-MM-DD"),
             }
         return error
     },
@@ -231,7 +231,7 @@ const CHART_FILTER_GRAMMAR = {
     action: (value) => {
         if (value === undefined) return "action missing"
         const validValues = ["exclude", "include"]
-        const error = `action must be ${_niceJoin(validValues)}`
+        const error = `action must be ${_.niceJoin(validValues)}`
         const actionTlc = value.trim().toLowerCase()
         if (!validValues.includes(actionTlc)) return error
         return { value: actionTlc }
@@ -266,7 +266,7 @@ const CHART_FILTER_GRAMMAR = {
                 const op = value[i + 1]
                 if (typeof op === undefined) return `op missing (${i})`
                 const validOps = ["eq", "neq"]
-                const error = `op must be ${_niceJoin(validOps)} (${i + 1})`
+                const error = `op must be ${_.niceJoin(validOps)} (${i + 1})`
                 if (typeof op !== "string") return error
                 const opTlc = op.trim().toLowerCase()
                 if (!validOps.includes(opTlc)) return error
@@ -335,7 +335,7 @@ const CALL_OUT_BAR_GRAMMAR = {
     template: "chart-no: number, value: max|min|category, category: string",
     "chart-no": (value) => {
         if (value === undefined) return "chart-no missing"
-        if (_isInteger(value)) return { key: "chartNo", value: Number(value) }
+        if (_.isInteger(value)) return { key: "chartNo", value: Number(value) }
         return `chart-no must be valid chart`
     },
     value: (value) => {
@@ -343,7 +343,7 @@ const CALL_OUT_BAR_GRAMMAR = {
         const valueTlc = value.trim().toLowerCase()
         const validValues = ["max", "min", "category"]
         if (validValues.includes(valueTlc)) return { value: valueTlc }
-        return `value must be ${_niceJoin(validValues)}`
+        return `value must be ${_.niceJoin(validValues)}`
     },
     category: (value) => {
         return value
@@ -351,7 +351,7 @@ const CALL_OUT_BAR_GRAMMAR = {
         // const valueTlc = value.trim().toLowerCase()
         // const validValues = ["max", "min", "category"]
         // if (validValues.includes(valueTlc)) return { value: valueTlc }
-        // return `value must be ${_niceJoin(validValues)}`
+        // return `value must be ${_.niceJoin(validValues)}`
     },
     isValidObject: (obj) => {
         if (obj.value !== "category") return ""
@@ -364,7 +364,7 @@ const CALL_OUT_2X2_GRAMMAR = {
         "chart-no: number, value: max|min|category, category: [x-column-name, y-column-name]",
     "chart-no": (value) => {
         if (value === undefined) return "chart-no missing"
-        if (_isInteger(value)) return { key: "chartNo", value: Number(value) }
+        if (_.isInteger(value)) return { key: "chartNo", value: Number(value) }
         return `chart-no must be valid chart`
     },
     value: (value) => {
@@ -372,7 +372,7 @@ const CALL_OUT_2X2_GRAMMAR = {
         const valueTlc = value.trim().toLowerCase()
         const validValues = ["max", "min", "category"]
         if (validValues.includes(valueTlc)) return { value: valueTlc }
-        return `value must be ${_niceJoin(validValues)}`
+        return `value must be ${_.niceJoin(validValues)}`
     },
     isValidObject: (obj) => {
         return ""
@@ -382,7 +382,7 @@ const CALL_OUT_TREND_GRAMMAR = {
     template: "chart-no: number, date: date, category: actual|plan|forecast",
     "chart-no": (value) => {
         if (value === undefined) return "chart-no missing"
-        if (_isInteger(value)) return { key: "chartNo", value: Number(value) }
+        if (_.isInteger(value)) return { key: "chartNo", value: Number(value) }
         return `chart-no must be valid chart`
     },
     value: (value) => {
@@ -390,7 +390,7 @@ const CALL_OUT_TREND_GRAMMAR = {
         const valueTlc = value.trim().toLowerCase()
         const validValues = ["max", "min", "category"]
         if (validValues.includes(valueTlc)) return { value: valueTlc }
-        return `value must be ${_niceJoin(validValues)}`
+        return `value must be ${_.niceJoin(validValues)}`
     },
     isValidObject: (obj) => {
         return ""

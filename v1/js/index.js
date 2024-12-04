@@ -1,5 +1,6 @@
 "use strict"
-
+// import { Param } from "./param.js"
+// import { Counter } from "./counter.js"
 window.addEventListener("load", (event) => {
     showHideLoader("hide")
     const url = new URL(window.location.toLocaleString())
@@ -8,18 +9,18 @@ window.addEventListener("load", (event) => {
 
     const preset = search.replace("?", "").trim()
     if (preset === "") {
-        $dialog.alert(`Preset "${preset}" invalid`, ["Close"])
+        Dialog.alert(`Preset "${preset}" invalid`, ["Close"])
         return
     }
     if (presetConfigs && presetConfigs[preset]) {
         createPresetMenus(presetConfigs[preset]).click()
         return
     }
-    $dialog.alert(`Preset "${preset}" not found`, ["Close"])
+    Dialog.alert(`Preset "${preset}" not found`, ["Close"])
 })
 
 window.addEventListener("scroll", (e) => {
-    const goToTop = _select("#go-to-top")
+    const goToTop = _.select("#go-to-top")
     const docEl = document.documentElement
     const pos = docEl.scrollTop
     const h = docEl.scrollHeight - docEl.clientHeight
@@ -36,21 +37,21 @@ window.addEventListener("scroll", (e) => {
 //import common, Param.setConfigJSON Preset Counter.getCountsFromFile Logger
 ///////////////////////////////////////////////////////////////// loader functions
 function showHideLoader(action) {
-    const loader = _select("#loader")
+    const loader = _.select("#loader")
     const display = action === "show" ? "block" : "none"
     loader.style.display = display
 }
 
 function showLoading() {
     //merge above??
-    _clearHTML("#data-source")
-    _clearHTML("#filter-value")
-    _clearHTML("#log")
+    _.clearHTML("#data-source")
+    _.clearHTML("#filter-value")
+    _.clearHTML("#log")
     showHideLoader("show")
-    const reportTitles = _select("#report-titles")
-    _select("h1", reportTitles).textContent = ""
-    _select("h2", reportTitles).textContent = ""
-    _sleep(1000)
+    const reportTitles = _.select("#report-titles")
+    _.select("h1", reportTitles).textContent = ""
+    _.select("h2", reportTitles).textContent = ""
+    _.sleep(1000)
 }
 
 async function loadPresetFile(presetType) {
@@ -62,32 +63,34 @@ async function loadPresetFile(presetType) {
     clearCounts()
     destroyAllCharts()
     const configJSON = Preset.getConfigJSON(presetType)
-    let config
-    try {
-        config = JSON.parse(configJSON)
-    } catch (error) {
-        console.log(error)
+    if (configJSON) {
+        let config
+        try {
+            config = JSON.parse(configJSON)
+        } catch (error) {
+            console.log(error)
+        }
+        if (config) {
+            const { files } = config
+            Param.setConfig(config)
+            await countNow()
+            updateDataSource(files)
+        }
+        Logger.showLogs()
     }
-    if (config) {
-        const { files } = config
-        Param.setConfig(config)
-        await countNow()
-        updateDataSource(files)
-    }
-    Logger.showLogs()
     showHideLoader("hide")
 }
 
 async function loadNewFile() {
     Logger.clearLogs()
-    const files = _select("#file").files
+    const files = _.select("#file").files
     if (files.length == 0) {
-        $dialog.alert("Please select a file")
+        Dialog.alert("Please select a file")
         return
     }
     const file = files[0]
     const config = Param.getConfig()
-    const action = _isEmpty(config) ? "Reset Config" : await actionOnConfig()
+    const action = _.isEmpty(config) ? "Reset Config" : await actionOnConfig()
     if (action === "Abort Load") return
     showHideLoader("show")
     showLoading()
@@ -95,7 +98,7 @@ async function loadNewFile() {
     destroyAllCharts()
     if (action === "Reset Config") {
         const dataDescription = await Counter.getCountsFromFile("{}", file)
-        Param.autoCreateConfig(file, dataDescription)
+        Param.setConfig("default", file, dataDescription)
     }
     if (action === "Keep Config") Param.updateFile(file)
     await countNow()
@@ -105,7 +108,7 @@ async function loadNewFile() {
         //to do get first row and compare
         const areHeadersSame = false
         if (areHeadersSame) return "Keep Config"
-        return await $dialog.alert(`Config present`, [
+        return await Dialog.alert(`Config present`, [
             "Keep Config",
             "Reset Config",
             "Abort Load",
@@ -137,7 +140,7 @@ function getCounts() {
 }
 
 function createTag(text, colorClass, tooltip) {
-    return _createElements({
+    return _.createElements({
         a: { class: colorClass, text, "data-title": tooltip },
     })
 }
@@ -147,7 +150,7 @@ function createTag(text, colorClass, tooltip) {
 
 function showFilters() {
     const allCounts = getCounts()
-    const filterValueDiv = _clearHTML("#filter-value")
+    const filterValueDiv = _.clearHTML("#filter-value")
     if (!allCounts.memo.global) return
     const { totalRowCounts, filteredRowCounts } = allCounts.memo.global
 
@@ -191,21 +194,21 @@ function getKey(id) {
 }
 
 function showCharts() {
-    const mainTitle = _select("#main-title")
+    const mainTitle = _.select("#main-title")
     const { reportDate, reportTitle } = Param.getConfig()
     mainTitle.textContent = reportTitle
-    const subTitle = _select("#sub-title")
+    const subTitle = _.select("#sub-title")
     subTitle.textContent =
-        "Data as of: " + _formatDate(reportDate, "DDD DD-MMM-YYYY")
+        "Data as of: " + _.formatDate(reportDate, "DDD DD-MMM-YYYY")
 
-    const callOutWrapper = _clearHTML("#call-out-wrapper")
-    const wrapper = _clearHTML("#wrapper")
-    const toc = _clearHTML("#toc")
-    const dropdownTOC = _clearHTML("#dropdown-toc")
+    const callOutWrapper = _.clearHTML("#call-out-wrapper")
+    const wrapper = _.clearHTML("#wrapper")
+    const toc = _.clearHTML("#toc")
+    const dropdownTOC = _.clearHTML("#dropdown-toc")
     const allCounts = getCounts()
 
     for (const key in allCounts.callOuts) {
-        const div = _createElements({
+        const div = _.createElements({
             div: {
                 class: `maas-call-out`,
                 id: `call-out-${key}`,
@@ -234,10 +237,10 @@ function showCharts() {
         createTOCentry()
 
         const data = allCounts.data[key]
-        const memo = allCounts.memo[key]
-        drawChart(id, memo, data, chartClick)
+        // const memo = allCounts.memo[key]
+        drawChart(id, data, chartClick)
         function createChartPlaceholder() {
-            const div = _createElements({
+            const div = _.createElements({
                 div: {
                     id: getChartContainer(key),
                     class: `surface-1 maas-chart ${spanClass}`,
@@ -266,7 +269,7 @@ function showCharts() {
                     div_msg: { id: "msg", class: "maas-tags" },
                     div_footer: {
                         class: "maas-chart-footer",
-                        text: _getCSSVar("--chart-footer"),
+                        text: _.getCSSVar("--chart-footer"),
                     },
                 },
             })
@@ -276,14 +279,14 @@ function showCharts() {
         function createTOCentry() {
             const a = {
                 a: {
-                    href: getChartContainer(id),
+                    href: "#" + getChartContainer(key),
                     text: `${chartTitleWithIndex}`,
                 },
             }
 
-            const tocEntry = _createElements({ div: a })
+            const tocEntry = _.createElements({ div: a })
             toc.appendChild(tocEntry)
-            const tocEntryDup = _createElements(a)
+            const tocEntryDup = _.createElements(a)
 
             dropdownTOC.appendChild(tocEntryDup)
             dropdownTOC.setAttribute("onclick", "toggleDropdown()")
@@ -318,7 +321,7 @@ function menu(action) {
         return
     }
     const readFile = (accept, onchange) => {
-        const input = _select("#file")
+        const input = _.select("#file")
         const forceReloadOfSameFile = ""
         input.value = forceReloadOfSameFile
         input.accept = accept
@@ -386,11 +389,11 @@ function menu(action) {
     }
     const error = `"${action}" not implemented`
     // console.error(error)
-    $dialog.alert(error)
+    Dialog.alert(error)
 }
 
 function updateDataSource(sources, clear = true) {
-    const dataSource = _select("#data-source")
+    const dataSource = _.select("#data-source")
     const isHTTPS = (source) => source.substring(0, 8) === "https://"
     const nameBeforeLastSlash = (fileName) => {
         const slashPosition = fileName.lastIndexOf("/")
@@ -403,7 +406,7 @@ function updateDataSource(sources, clear = true) {
         dataSource.appendChild(createTag(`Data source`, "maas-tag-info"))
     }
     for (const source of sources) {
-        const a = _createElements({ a: { class: "maas-tag-info" } })
+        const a = _.createElements({ a: { class: "maas-tag-info" } })
         if (isHTTPS(source)) {
             // const nameBeforeQuestionMark = name(sourceName) //find different solution for private file
             a.href = source //nameBeforeQuestionMark
@@ -425,14 +428,13 @@ function updateDataSource(sources, clear = true) {
 }
 ///////////////////////////menu bar functions
 function hideDropdown() {
-    const dropdownTOC = _select("#dropdown-toc")
+    const dropdownTOC = _.select("#dropdown-toc")
     dropdownTOC.style.display = "none"
 }
 function toggleDropdown() {
-    const dropdownTOC = _select("#dropdown-toc")
+    const dropdownTOC = _.select("#dropdown-toc")
     const tocIsHidden =
         dropdownTOC.style.display === "" || dropdownTOC.style.display === "none"
-    console.log({ tocIsHidden })
     if (tocIsHidden) dropdownTOC.style.display = "block"
     else dropdownTOC.style.display = "none"
     // toc.classList.toggle("maas-only-print");
@@ -450,13 +452,13 @@ function highlightPresetMenu(label) {
 }
 function createPresetMenus(preset) {
     const presetMenu = Preset.getMenuItems(preset)
-    const presetDiv = _select("#top-nav #preset")
-    const notPresetDiv = _select("#top-nav #not-preset")
+    const presetDiv = _.select("#top-nav #preset")
+    const notPresetDiv = _.select("#top-nav #not-preset")
     loadMenu(presetMenu)
-    return _selectAll("button", presetDiv)[0]
+    return _.selectAll("button", presetDiv)[0]
 
     function loadMenu(menus) {
-        const tocClone = _selectAll("button", notPresetDiv)[0]
+        const tocClone = _.selectAll("button", notPresetDiv)[0]
         menus.forEach((v) => {
             const { label } = v
             const clone = tocClone.cloneNode(true)
@@ -467,104 +469,7 @@ function createPresetMenus(preset) {
         notPresetDiv.style.display = "none"
     }
 }
-/////////////////////////////////////////////////////////////////////// test routines
-async function smokeTest(duration = 700) {
-    const startSmoke = new Date()
-    console.clear()
-    const elements = [
-        { component: "h2", label: "Smoke test results" },
-        { component: "hr" },
-    ]
-    await testCharts()
-    record()
-    await testConfigDialog()
-    record()
-    record(`Smoke test done: ${elapsedTime(startSmoke)} s`)
-    elements.push(
-        { component: "hr" },
-        {
-            component: "button",
-            label: "Close",
-            onclick: "$dialog.close();",
-        }
-    )
-    $dialog.make(elements, {}).show()
 
-    async function testCharts() {
-        showHideLoader("show")
-        const presetMenu = Preset.getMenuItems(presetConfigs.demo)
-        for (let i = 0; i < presetMenu.length; i++) {
-            const startLap = new Date()
-            const presetType = presetMenu[i].key
-            loadPresetFile(presetType)
-            await _sleep(duration)
-            const numberOfCharts = Param.getCountOf("chart")
-            //select random chart
-            const randomChart = SelectRandomChart()
-            console.log(randomChart)
-            for (let j = 0; j < numberOfCharts; j++) {
-                scrollToChart(j)
-                await _sleep(duration)
-                if (j === randomChart) {
-                    await _sleep(duration)
-                    filterChart(j)
-                }
-            }
-            record(`Chart for ${presetType} done: ${elapsedTime(startLap)} s`)
-        }
-
-        function SelectRandomChart() {
-            const { chartProperties } = Param.getConfig()
-            if (!chartProperties) return -1
-            const chartCount = chartProperties.length
-            const firstBarChart = chartProperties.findIndex(
-                (v) => v.chartType === "Bar"
-            )
-
-            if (firstBarChart === -1) return -1
-            let random = Math.floor(Math.random() * chartCount)
-            while (chartProperties[random].chartType !== "Bar") {
-                // console.log({ random, m: chartProperties.count })
-                random++
-                if (random >= chartCount) random = 0
-            }
-            return random
-        }
-        function filterChart(key) {
-            const cats = getChartCategories(key)
-            const random = Math.floor(Math.random() * cats.length)
-            console.log({ key, cat: cats[random] })
-            chartClick(getChartId(key), cats[random])
-        }
-    }
-    async function testConfigDialog() {
-        configChart("0")
-        const chartType = $dialog.getElement("chartType")
-        const chartTypes = Param.getChartTypes()
-        for (let i = 0; i < chartTypes.length; i++) {
-            const startLap = new Date()
-            chartType.value = chartTypes[i]
-            showDialogOptions()
-            await _sleep(duration * 4)
-            record(
-                `Dialog for ${chartTypes[i]} done: ${elapsedTime(startLap)} s`
-            )
-        }
-    }
-    function elapsedTime(start) {
-        const end = new Date()
-        return Math.round(_dateTimeDiff(start, end, "Milliseconds") / 1000)
-    }
-    function record(label) {
-        if (!label) {
-            elements.push({ component: "hr" })
-            console.log("-------------------------")
-            return
-        }
-        elements.push({ component: "p", label })
-        console.log(label)
-    }
-}
 function setItem(key, value) {
     localStorage.setItem(key, value)
     // store[key] = value

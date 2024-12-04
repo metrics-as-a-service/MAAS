@@ -41,7 +41,7 @@
             const counts = allCounts.counts
             for (const key in counts) {
                 const chartContainerId = getChartContainer(key)
-                _clearHTML(`#${chartContainerId} #msg`)
+                _.clearHTML(`#${chartContainerId} #msg`)
             }
         }
         function addP(message, severity, chartNo) {
@@ -50,7 +50,7 @@
             a.setAttribute("class", messageClass)
             a.textContent = message
             const chartContainerId = getChartContainer(chartNo)
-            const msg = _select(`#${chartContainerId} #msg`)
+            const msg = _.select(`#${chartContainerId} #msg`)
             if (msg) {
                 msg.appendChild(a)
                 return
@@ -59,10 +59,10 @@
         }
         function getTimeToPrepareReport() {
             const end = new Date()
-            const ms = _dateTimeDiff(startDateTime, end, "Milliseconds")
+            const ms = _.dateTimeDiff(startDateTime, end, "Milliseconds")
             return `Time taken to make charts: ${ms / 1000} seconds`
         }
-        const logDiv = _clearHTML("#log")
+        const logDiv = _.clearHTML("#log")
         if (!logDiv) {
             console.error("Log div not found", logRecord)
             return

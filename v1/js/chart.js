@@ -1,20 +1,21 @@
 "use strict"
 //import common Param.getChartProps(key)
 //export {drawChart, destroyAllCharts}
+//Big congrats on the new EMEA role—so exciting! If there’s room for me to join you on this adventure, let me know!
 
-function drawChart(chartId, memo, data, clickCallback) {
+function drawChart(chartId, data, clickCallback) {
     const key = getKey(chartId)
     const { chartType } = Param.getChartProps(key)
 
-    if (_is2X2(chartType)) return createHeatMapChart(key, data, clickCallback)
+    if (_.is2X2(chartType)) return createHeatMapChart(key, data, clickCallback)
 
-    if (_isTable(chartType)) return createTableChart(key, data, clickCallback)
+    if (_.isTable(chartType)) return createTableChart(key, data, clickCallback)
 
     if (chartType == "Note") return createMessageChart(key, data, clickCallback)
 
     if (chartType == "Plan") return createPlanChart(key, data, clickCallback)
 
-    if (_isTrend(chartType)) return createTrendChart(key, data, clickCallback)
+    if (_.isTrend(chartType)) return createTrendChart(key, data, clickCallback)
 
     createBarChart(key, data, clickCallback)
 }
@@ -94,8 +95,8 @@ function render(
 
 function onHover(event, key, highlightAll = false) {
     const tagsSupported = ["rect", "path"]
-    const chart = _select("#" + getChartId(key))
-    const elements = Array.from(_selectAll(tagsSupported.join(","), chart))
+    const chart = _.select("#" + getChartId(key))
+    const elements = Array.from(_.selectAll(tagsSupported.join(","), chart))
     for (const e of elements) e.style.opacity = 1
     const target = event.target
     if (!tagsSupported.includes(target.tagName)) return
@@ -115,14 +116,14 @@ function onHover(event, key, highlightAll = false) {
 function createBarChart(key, { data }, clickCallback) {
     const id = getChartId(key)
     const { countType, x_dataType, chartType } = Param.getChartProps(key)
-    const div = _clearHTML("#" + id)
+    const div = _.clearHTML("#" + id)
     const x = "x",
         y = "v",
         yLabel = countType
     const barY = {
         x,
         y,
-        fill: _getCSSVar("--color-brand"), //_getCSSVar("--maas-color-primary"),
+        fill: _.getCSSVar("--color-brand"), //_.getCSSVar("--maas-color-primary"),
         title: (d) => `${d[x]}: ${d[y]}`,
         // href: "XXX",
         render: (i, s, v, d, c, n) =>
@@ -153,16 +154,16 @@ function createBarChart(key, { data }, clickCallback) {
     div.onmouseover = (event) => {
         onHover(event, key)
     }
-    div.append(_createElements({ data: { json: JSON.stringify(data) } }))
+    div.append(_.createElements({ data: { json: JSON.stringify(data) } }))
     return
 }
 function createHeatMapChart(key, chartData, clickCallback) {
     const RAG_COLORS = [
-        _getCSSVar("--color-green"),
-        _getCSSVar("--color-green-amber"),
-        _getCSSVar("--color-amber"),
-        _getCSSVar("--color-amber-red"),
-        _getCSSVar("--color-red"),
+        _.getCSSVar("--color-green"),
+        _.getCSSVar("--color-green-amber"),
+        _.getCSSVar("--color-amber"),
+        _.getCSSVar("--color-amber-red"),
+        _.getCSSVar("--color-red"),
     ]
     const RAG_CONTRAST_COLORS = ["black", "black", "black", "white", "white"]
     const id = getChartId(key)
@@ -226,12 +227,12 @@ function createHeatMapChart(key, chartData, clickCallback) {
         y: { domain: yDomain },
         marks: [
             Plot.axisX({
-                label: _pick1stNonBlank(x_label, x_column),
+                label: _.firstNonBlank(x_label, x_column),
                 anchor: "top",
                 lineWidth: 0,
             }),
             Plot.axisY({
-                label: _pick1stNonBlank(y_label, y_column),
+                label: _.firstNonBlank(y_label, y_column),
                 lineWidth: 0,
                 marginLeft: 60,
             }),
@@ -251,7 +252,7 @@ function createHeatMapChart(key, chartData, clickCallback) {
             }),
         ],
     })
-    const div = _clearHTML("#" + id)
+    const div = _.clearHTML("#" + id)
     div.onmouseover = (event) => {
         onHover(event, key, true)
     }
@@ -260,7 +261,7 @@ function createHeatMapChart(key, chartData, clickCallback) {
 }
 function createMessageChart(key) {
     const id = getChartId(key)
-    const chartDiv = _clearHTML("#" + id)
+    const chartDiv = _.clearHTML("#" + id)
     const { message } = Param.getChartProps(key)
 
     const makeElement = (line) => {
@@ -271,7 +272,7 @@ function createMessageChart(key) {
             const startTags = allowedTags.map((v) => `<${v}>`)
             const endTags = allowedTags.map((v) => `</${v}>`)
 
-            const inputTokens = _tokenize(line, [...startTags, ...endTags])
+            const inputTokens = _.tokenize(line, [...startTags, ...endTags])
 
             const isStartTag = (x) => startTags.includes(x)
             const isEndTag = (x) => endTags.includes(x)
@@ -296,7 +297,7 @@ function createMessageChart(key) {
         const e = toElementObject(line)
         if (style !== "") e.p.style = style
 
-        return _createElements(e)
+        return _.createElements(e)
     }
 
     const lines = message.split("\n")
@@ -305,10 +306,10 @@ function createMessageChart(key) {
 }
 const callOutId = (key) => "call-out-" + key
 function createCallout(key, callOut) {
-    const e = _select("#" + callOutId(key))
+    const e = _.select("#" + callOutId(key))
     if (!e) return
-    const topE = _select("#top", e)
-    const bottomE = _select("#bottom", e)
+    const topE = _.select("#top", e)
+    const bottomE = _.select("#bottom", e)
     const { chartNo, top, bottom } = callOut
     topE.textContent = top
     bottomE.textContent = bottom
@@ -317,7 +318,7 @@ function createTableChart(key, { data, labels }) {
     const id = getChartId(key)
     // const chartProp = Param.getChartProps(key)
     const oneConfig = Param.getChartProps(key)
-    const chartDiv = _clearHTML("#" + id)
+    const chartDiv = _.clearHTML("#" + id)
 
     const tableElements = {
         table: {
@@ -327,7 +328,7 @@ function createTableChart(key, { data, labels }) {
         },
     }
 
-    const table = _createElements(tableElements)
+    const table = _.createElements(tableElements)
 
     function makeTableRow(row, thd, tooltip) {
         const tr = document.createElement("tr")
@@ -340,12 +341,12 @@ function createTableChart(key, { data, labels }) {
         return tr
     }
 
-    const thead = _select("thead", table)
+    const thead = _.select("thead", table)
     const tableHeaders = Object.keys(data[0])
     const head = makeTableRow(tableHeaders, "th")
     thead.appendChild(head)
 
-    const tbody = _select("tbody", table)
+    const tbody = _.select("tbody", table)
     labels.forEach((v, i) => {
         const row = makeTableRow(Object.values(data[i]), "td", true)
         tbody.appendChild(row)
@@ -369,7 +370,7 @@ function getAnnotations(annotations) {
 
         const position = isTop ? "top" : isMid ? "center" : "bottom"
         // const orientation = style[1] === "v" ? "vertical" : "horizontal"
-        const text = label + ": " + _formatDate(date, "DD-MMM")
+        const text = label + ": " + _.formatDate(date, "DD-MMM")
         plotAnnotations.push({
             x: new Date(date).getTime(),
             position,
@@ -417,7 +418,7 @@ function createPlanChart(key, { data }, clickCallback) {
             })
     })
     let domain = [firstLabel],
-        range = [_getCSSVar("--color-brand")]
+        range = [_.getCSSVar("--color-brand")]
     if (hasRag && hasSecondDate) {
         domain = [
             firstLabel,
@@ -427,16 +428,16 @@ function createPlanChart(key, { data }, clickCallback) {
             secondLabel + "(R)",
         ]
         range = [
-            _getCSSVar("--color-brand"),
-            _getCSSVar("--color-blue"),
-            _getCSSVar("--color-green"),
-            _getCSSVar("--color-amber"),
-            _getCSSVar("--color-red"),
+            _.getCSSVar("--color-brand"),
+            _.getCSSVar("--color-blue"),
+            _.getCSSVar("--color-green"),
+            _.getCSSVar("--color-amber"),
+            _.getCSSVar("--color-red"),
         ]
     }
     if (!hasRag && hasSecondDate) {
         domain = [firstLabel, secondLabel]
-        range = [_getCSSVar("--color-brand"), _getCSSVar("--color-90-90")]
+        range = [_.getCSSVar("--color-brand"), _.getCSSVar("--color-90-90")]
     }
     if (hasRag && !hasSecondDate) {
         domain = [
@@ -446,10 +447,10 @@ function createPlanChart(key, { data }, clickCallback) {
             firstLabel + "(R)",
         ]
         range = [
-            _getCSSVar("--color-blue"),
-            _getCSSVar("--color-green"),
-            _getCSSVar("--color-amber"),
-            _getCSSVar("--color-red"),
+            _.getCSSVar("--color-blue"),
+            _.getCSSVar("--color-green"),
+            _.getCSSVar("--color-amber"),
+            _.getCSSVar("--color-red"),
         ]
     }
 
@@ -470,7 +471,7 @@ function createPlanChart(key, { data }, clickCallback) {
         return prefix + startPart + "-" + endPart
     }
     const p = Plot.plot({
-        // height: _getCSSVar("--is-print") === "true" ? 600 : screen.height * 0.7,
+        // height: _.getCSSVar("--is-print") === "true" ? 600 : screen.height * 0.7,
         marginLeft: 5,
         style: "width:100%;height:100%;font-family:inherit;font-size:.75rem",
         // style: "width:100%; height: 100 %; ", //"width: 100%; height: 100 %; font: inherit; ",
@@ -487,14 +488,6 @@ function createPlanChart(key, { data }, clickCallback) {
         color: {
             domain,
             range,
-            // domain: ["Plan", "B", "G", "A", "R"],
-            // range: [
-            //     _getCSSVar("--color-brand"),
-            //     _getCSSVar("--color-blue"),
-            //     _getCSSVar("--color-green"),
-            //     _getCSSVar("--color-amber"),
-            //     _getCSSVar("--color-red"),
-            // ],
             legend: true,
         },
         r: {
@@ -549,9 +542,9 @@ function createPlanChart(key, { data }, clickCallback) {
         ],
     })
 
-    // _select(p).select("div").style("float", "left") // Floats the swatch on the left.
+    // _.select(p).select("div").style("float", "left") // Floats the swatch on the left.
 
-    const div = _clearHTML("#" + id)
+    const div = _.clearHTML("#" + id)
     div.onmouseover = (event) => {
         onHover(event, key, true)
     }
@@ -563,7 +556,7 @@ function createTrendChart(key, { domain, data }, clickCallback) {
     const cumulative = true
     const { reportDate } = Param.getConfig()
     const { annotations, x_label, x_column } = Param.getChartProps(key)
-    const xLabel = _pick1stNonBlank(x_label, x_column)
+    const xLabel = _.firstNonBlank(x_label, x_column)
     const annotationArray = getAnnotations(annotations)
 
     let cumSum = 0
@@ -585,22 +578,22 @@ function createTrendChart(key, { domain, data }, clickCallback) {
         x: new Date(d.x),
         // type: xLabel,
     }))
-    const timelineColor = _getCSSVar("--color-brand")
-    const planColor = _getCSSVar("--color-120-120")
-    const forecastColor = _getCSSVar("--color-120-240")
+    const timelineColor = _.getCSSVar("--color-brand")
+    const planColor = _.getCSSVar("--color-120-120")
+    const forecastColor = _.getCSSVar("--color-120-240")
     // if (domain.plan)
     const range = [timelineColor]
     if (domain.plan) range.push(planColor)
     if (domain.forecast) range.push(forecastColor)
     const color = {
         domain: Object.keys(domain).map((key) => domain[key]), //: [xLabel],
-        range, //: [_getCSSVar("--color-brand")],
+        range, //: [_.getCSSVar("--color-brand")],
         legend: false,
     }
 
     const maxPlotValue = plotData.reduce((max, v) => (v.v > max ? v.v : max), 0)
     const p = Plot.plot({
-        // height: _getCSSVar("--is-print") === "true" ? 600 : screen.height * 0.7,
+        // height: _.getCSSVar("--is-print") === "true" ? 600 : screen.height * 0.7,
         // marginLeft: 5,
         // style: "width:100%; height: 100 %; ", //"width: 100%; height: 100 %; font: inherit; ",
         x: { axis: "bottom", label: null /* grid: true */ },
@@ -672,7 +665,7 @@ function createTrendChart(key, { domain, data }, clickCallback) {
         ],
     })
 
-    const div = _clearHTML("#" + id)
+    const div = _.clearHTML("#" + id)
     div.onmouseover = (event) => {
         onHover(event, key, true)
     }
@@ -690,9 +683,9 @@ function createTrendChart(key, { domain, data }, clickCallback) {
 }
 
 function destroyAllCharts() {
-    _clearHTML("#wrapper")
-    _clearHTML("#toc")
-    _clearHTML(".maas-call-out-container")
+    _.clearHTML("#wrapper")
+    _.clearHTML("#toc")
+    _.clearHTML(".maas-call-out-container")
 }
 ///////////////////////////////////////////
 // d3.linearRegression

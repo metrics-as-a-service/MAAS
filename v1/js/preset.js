@@ -10,7 +10,7 @@
     let presetConfig
     function getMenuItems(preset) {
         if (!preset) {
-            $dialog.alert(`Preset ${preset} not found`, ["Close"])
+            Dialog.alert(`Preset ${preset} not found`, ["Close"])
             return
         }
         presetConfig = preset
@@ -19,37 +19,38 @@
             menuitems.push({ onclick: `loadPresetFile(this)`, label: key, key })
         return menuitems
     }
-
+    async function showError(message) {
+        console.log(message)
+        await Dialog.alert(message)
+    }
     function getConfigJSON(type) {
         if (!type) {
-            $l.log(`Type: "${type}" incorrect`, "Error")
+            showError(`Type missing`)
             return
         }
-
         const config = presetConfig[type]
-
         if (!config) {
-            $l.log(`Config missing for type: "${type}"`, "Error")
+            showError(`Config missing for type: "${type}"`)
             return
         }
         const { files } = config
         if (!files) {
-            $l.log(`File name(s) missing`, "Error")
+            showError(`File name(s) missing`)
             return
         }
 
         try {
             const { reportDate } = config
             if (!reportDate) {
-                $l.log(`reportDate missing`, "Error")
+                showError(`reportDate missing`)
                 return
             }
-            if (!_isValidDate(reportDate)) {
-                $l.log(`reportDate invalid ("${reportDate}")`, "Error")
+            if (!_.isValidDate(reportDate)) {
+                showError(`reportDate invalid ("${reportDate}")`)
                 return
             }
             const today = new Date().toISOString().substring(0, 10)
-            const daysToAdd = _dateTimeDiff(reportDate, today, "Days")
+            const daysToAdd = _.dateTimeDiff(reportDate, today, "Days")
             config.presetOffsetDays = daysToAdd
             //to do fix date conversion for any valid date
             const datePattern = /[0-9]{4}-[0-9]{2}-[0-9]{2}/g //pattern for date YYYY-MM-DD
@@ -57,13 +58,14 @@
             let configJSON = JSON.stringify(config)
             if (daysToAdd !== 0)
                 configJSON = configJSON.replace(datePattern, (date) =>
-                    _addDays(date, daysToAdd)
+                    _.addDays(date, daysToAdd)
                 )
             const x = JSON.parse(configJSON)
             return configJSON
         } catch (e) {
             const msg = `Error in $.getConfigJSON. Type: "${type}" Error: ${e}`
-            $l.log(msg, "Error")
+            // $l.log(msg, "Error")
+            console.log(msg)
             return
         }
         function replaceDates(arg) {
@@ -81,6 +83,7 @@
             }, {})
         }
     }
+
     exports.getMenuItems = getMenuItems
     exports.getConfigJSON = getConfigJSON
 })
