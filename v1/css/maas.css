@@ -7,8 +7,8 @@
 
 body {
     --is-print: false;
-    background-image: url("../images/back.svg");
-    /* background-image: url("../images/testback.svg"); */
+    /* background-image: url("../images/back.svg"); */
+    background-image: url("../images/back-1.svg");
     background-size: cover;
     padding: 1rem;
 
@@ -129,6 +129,7 @@ section {
 .maas-chart-container {
     display: grid;
     margin: 0 auto;
+    /* margin: 0; */
     gap: 1rem;
     columns: 400px;
 }
@@ -393,7 +394,7 @@ section {
 
 /**************************************************************** dialog */
 
-.maas-dialog[open] {
+dialog[open] {
     /* open prop animation */
     animation: var(--animation-slide-in-up) forwards;
 
@@ -430,7 +431,8 @@ section {
     }
     & error {
         color: var(--color-red);
-        display: block;
+        /* clear: both; */
+        display: inline-block;
     }
     & hr {
         margin: 0.5rem;
