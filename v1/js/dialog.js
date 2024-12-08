@@ -7,18 +7,8 @@
           factory((global.Dialog = global.Dialog || {})))
 })(this, function (exports) {
     "use strict"
-    const specials = {
-        tag: 1,
-        label: 1,
-        initialValue: 1,
-        name: 1,
-        elements: 1,
-        options: 1,
-        focus: 1,
-        disable: 1,
-    }
 
-    let dialog, idCounter, overlayDiv, alertButtonPressed
+    let dialog, idCounter, alertButtonPressed, dialogOptions
     function getLabel(name) {
         //camel case to sentence
         if (!name) return "Undefined"
@@ -27,151 +17,90 @@
         return label[0].toUpperCase() + label.substring(1)
     }
     let hasErrors = false
-    //TO DO remove all styles
-    const HTMLs = {
-        dialog: () =>
-            `<dialog class="maas-dialog"><form><fieldset></fieldset></form></dialog>`, //class is OK
-        legend: (label) => `<legend>${label}</legend>`,
-        // mainTitle: (label) => `<h4>${label}</h4>`,
-        input: (label, type, name) =>
-            `<p>
-                <label for="${++idCounter}">${label}: </label>
-                <input type="${type}" id="${idCounter}" name=${name} tabindex="0">
-            </p>`,
-        button: (label) => `<button tabindex="0">${label}</button>`,
-        textarea: (label, name) =>
-            `<p>
-                <label for="${++idCounter}">${label}:</label>
-                <textarea id="${idCounter}" name=${name} tabindex="0" rows=1></textarea>
-            </p>`,
-        select: (label, name) =>
-            `<p>
-                <label for="${++idCounter}">${label}: </label>
-                <select id="${idCounter}" name=${name} tabindex="0"> </select>
-            </p>`,
-        checkbox: (label, checked, name) =>
-            `<p>
-                <input type="checkbox" id="${++idCounter}" ${
-                checked ? "checked" : ""
-            } name=${name} tabindex="0">
-                <label for="${idCounter}"> ${label}</label>
-            </p>`,
-
-        error: (messages) => `<error>${messages}</error>`,
+    const templates = {
+        input: `<p><label></label><input data-error="p"></p>`,
+        textarea: `<p><label></label><textarea data-error="p"></textarea></p>`,
+        select: `<p><label></label><select data-error="p"> </select></p>`,
     }
 
     function getElement(elementName) {
         return _.select(`[name = ${elementName}]`, dialog)
     }
 
-    function isSpecial(attr) {
-        return specials[attr] ? true : false
-    }
+    // function isSpecial(attr) {
+    //     return specials[attr] ? true : false
+    // }
 
-    function createElement(param) {
-        const { tag, options, initialValue, name, disable, disabled } = param
+    function createElement(elParam) {
+        const { tag, options, value, name } = elParam
+        //disable, disabled, type removed
+        const label = elParam.label ?? getLabel(name)
 
-        const label = param.label ?? getLabel(name)
+        if (!tag) return
+        if (typeof tag === "function") {
+            const div = tag()
+            return div
+        }
+        if (tag == "button") {
+            const button = _.createElements(`<button>${label}</button>`)
+            setProperties(button, false)
+            return button
+        }
 
-        function setReturnAndInitialValues(e) {
-            // if (name) e.setAttribute("name", name)
-            if (initialValue) e.value = initialValue
+        //to do radio
+        if (["input", "select", "textarea"].includes(tag)) {
+            const html = templates[tag] //(label, name, labelOnRight)
+            const div = _.createElements(html)
+            setProperties(div)
+            return div
+        }
+        const e = document.createElement(tag)
+        setProperties(e, false)
+        e.textContent = label
+        return e
 
-            for (const key in param) {
-                if (!isSpecial(key)) {
+        function setProperties(parent, setForChild = true) {
+            const el = setForChild ? _.select(tag, parent) : parent
+            if (name) {
+                el.name = name
+            }
+            if (!el) return
+            const labelEl = setForChild ? _.select("label", parent) : undefined
+            if (labelEl) {
+                const id = name ? name : idCounter++
+                el.id = id
+                labelEl.setAttribute("for", id)
+                labelEl.textContent = label
+            }
+            if (options)
+                options.forEach((value) => {
+                    const option = document.createElement("option")
+                    option.setAttribute("value", value)
+                    option.textContent = value
+                    el.appendChild(option)
+                })
+            if (value) el.value = value
+            const preProcessed = ["tag", "label", "name", "options", "value"]
+            for (const key in elParam) {
+                if (!preProcessed.includes(key)) {
+                    const attr = elParam[key]
                     try {
-                        e.setAttribute(key, param[key])
+                        el.setAttribute(key, attr)
                     } catch (error) {
-                        console.assert(
-                            false,
-                            "Invalid attribute Name in dialog spec"
-                        )
+                        console.error(`Invalid attribute: ${key}`)
                     }
                 }
             }
         }
-
-        if (!tag) return
-
-        if (tag == "legend") {
-            if (!label) return
-            const html = HTMLs[tag](label)
-            const legend = _.createElements(html)
-            _.select("form fieldset", dialog).appendChild(legend)
-            return
-        }
-
-        if (tag.substring(0, 5) == "input") {
-            const inputType = tag.replace("input ", "")
-            const html = HTMLs["input"](label, inputType, name)
-            const div = _.createElements(html)
-            const input = _.select("input", div)
-            setReturnAndInitialValues(input)
-            return div
-        }
-        if (tag == "button") {
-            const html = HTMLs[tag](label)
-            const button = _.createElements(html)
-            //button.preventDefault()
-            setReturnAndInitialValues(button)
-            return button
-        }
-        if (tag == "textarea") {
-            const html = HTMLs[tag](label, name)
-            const div = _.createElements(html)
-            const textarea = _.select("textarea", div)
-            setReturnAndInitialValues(textarea)
-            return div
-        }
-
-        if (tag == "check") {
-            function createACheckBox(label, checked, disabled) {
-                const html = HTMLs["checkbox"](label, checked, label)
-                const p = _.createElements(html)
-                const input = _.select("input", p)
-                if (disabled) input.disabled = true
-                return p
-            }
-            const div = document.createElement("div")
-
-            const checked = Boolean(initialValue)
-            const checkEntry = createACheckBox(label, checked)
-            div.appendChild(checkEntry)
-            //requires a wrapper to display error message
-            const wrapper = document.createElement("div")
-            wrapper.append(div)
-            return wrapper
-        }
-        if (tag == "overlay") {
-            overlayDiv = document.createElement("div")
-            return overlayDiv
-        }
-
-        if (tag == "select") {
-            if (!options) return
-            const html = HTMLs[tag](label, name)
-
-            const div = _.createElements(html)
-            const select = _.select("select", div)
-            options.forEach((value) => {
-                const option = document.createElement("option")
-                option.setAttribute("value", value)
-                option.textContent = value
-                select.appendChild(option)
-            })
-            setReturnAndInitialValues(select)
-            return div
-        }
-        const e = document.createElement(tag)
-        setReturnAndInitialValues(e)
-        e.textContent = label
-        return e
     }
 
-    function error(errorMessages, errorItem) {
+    function error(errorMessages, name) {
         if (!dialog) return
-        const disableOnError = _.select(".disable-on-error", dialog)
-        if (disableOnError) disableOnError.disabled = false
+        function setDisable(flag) {
+            const elementsToDisable = _.selectAll("[disable-on-error]", dialog)
+            elementsToDisable.forEach((e) => (e.disabled = flag))
+        }
+        setDisable(false)
         if (!errorMessages) {
             const errors = _.selectAll("error", dialog)
             for (const error of errors) error.remove()
@@ -179,67 +108,73 @@
             return this
         }
         hasErrors = true
-        if (disableOnError) disableOnError.disabled = true
-        if (!errorItem) {
-            console.error("No errorItem for: " + errorMessages)
+        setDisable(true)
+        if (!name) {
+            console.error("No name for: " + errorMessages)
             return this
         }
         const errorToDisplay = Array.isArray(errorMessages)
             ? errorMessages.join(". ")
             : errorMessages
 
-        const errorElement = getElement(errorItem)
-        const elementToShowError = errorElement.parentElement
-        const mark = _.createElements(HTMLs["error"](errorToDisplay))
+        const errorElement = getElement(name)
+        if (!errorElement) {
+            console.error(errorMessages, name)
+            return this
+        }
+        const errorLocation = errorElement.dataset.error
+        const elementToShowError =
+            errorLocation === "p"
+                ? errorElement.parentElement
+                : errorLocation === "s"
+                ? errorElement.previousSibling
+                : errorElement
+        const mark = _.createElements(`<error>${errorToDisplay}</error>`)
         elementToShowError.after(mark)
-
         return this
     }
-    function addLabelAndInitialValue(e, initialValues) {
-        if (!initialValues) return e
-        const name = e.name // const name = e.name
-        if (!name) return e
-        const label = e.label ?? getLabel(name)
-        const initialValue = e.initialValue
-            ? e.initialValue
-            : initialValues[name]
-        return { ...e, label, initialValue }
-    }
-    function overlay(elements, initialValues) {
+    function overlay(elements, values, overlayCount) {
         if (!dialog) return
+        const overlays = _.selectAll("overlay", dialog)
+        const overlayDiv = overlayCount ? overlays[overlayCount] : overlays[0]
         _.clearHTML(overlayDiv)
         if (!elements) return
         elements.forEach((e) => {
             if (_.isEmpty(e)) return
             const overlayElement = createElement(
-                addLabelAndInitialValue(e, initialValues)
+                e.name ? { ...e, value: values[e.name] } : e
             )
             overlayDiv.appendChild(overlayElement)
         })
         return this
     }
-    function make(elements, { onchange, width = "medium" }) {
+    function make(elements, options) {
+        const defaultOption = { className: "medium" }
+        dialogOptions = Object.assign(defaultOption, options)
+        const { onchange, className } = dialogOptions
         if (dialog) close()
-        dialog = _.createElements(HTMLs["dialog"]())
-        dialog.classList.add(width)
+        dialog = _.createElements(`<dialog><form><main></main></form></dialog>`)
+        // console.log(dialog)
+        if (!dialog) throw Error("Dialog not created")
+        dialog.classList.add(className)
         const body = document.body
         body.appendChild(dialog)
-        dialog.setAttribute("onchange", onchange)
+        if (onchange) dialog.setAttribute("onchange", onchange)
         idCounter = 0
+
+        let main = _.select("main", dialog)
         elements.forEach((e) => {
             if (_.isEmpty(e)) return
             const element = createElement(e)
             if (!element) return
-            _.select("form fieldset", dialog).appendChild(element)
+            main.appendChild(element)
         })
-
         const form = _.select("form", dialog)
-        form.addEventListener("submit", (event) => {
-            event.preventDefault()
-            // const data = new FormData(event.target)
-            // const formJSON = Object.fromEntries(data.entries())
-        })
-
+        // form.addEventListener("submit", (event) => {
+        //     event.preventDefault()
+        //     // const data = new FormData(event.target)
+        //     // const formJSON = Object.fromEntries(data.entries())
+        // })
         return this
     }
     function show(modal = true) {
@@ -289,7 +224,7 @@
         })
 
         alertButtonPressed = ""
-        make(alertElements, {})
+        make(alertElements)
         show()
 
         const alertButtons = Array.from(_.selectAll("button", dialog))

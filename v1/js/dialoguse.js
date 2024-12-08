@@ -40,7 +40,7 @@ function showChartMenus(chartID) {
     const key = getKey(chartID)
     const { chartType } = Param.getChartProps(key)
     if (cannotFilter(chartType)) elements[0].disabled = true
-    Dialog.make(elements, { width: "small" }).show()
+    Dialog.make(elements, { className: "small" }).show()
 }
 
 /////////////////////////////////////////////////////////////layout dialog
@@ -56,7 +56,8 @@ function showLayoutDialog() {
             name: "reportTitle",
         },
         {
-            tag: "input date",
+            tag: "input",
+            type: "date",
             name: "reportDate",
         },
         { tag: "hr" },
@@ -73,7 +74,7 @@ function showLayoutDialog() {
     ]
 
     if (!reportDate) return
-    Dialog.make(layoutDialog, {}).show()
+    Dialog.make(layoutDialog).show()
 }
 
 function layoutApply() {
@@ -158,24 +159,25 @@ function configChart(chartID) {
         { tag: "h2", label: `Configure chart` },
         { tag: "hr" },
         {
-            tag: "input number",
+            tag: "input",
+            type: "number",
             // label: "Position",
-            initialValue: Number(key) + 1,
+            value: Number(key) + 1,
             min: 1,
             max: Param.getCountOf("chart"),
             name: "position",
         },
         {
-            tag: "input text",
+            tag: "input",
             // label: "Chart title",
-            initialValue: chartTitle ?? "",
+            value: chartTitle ?? "",
             placeHolder: Param.getAutoTitle(key),
             name: "chartTitle",
         },
         {
             tag: "select",
             // label: "Chart size",
-            initialValue: chartSize,
+            value: chartSize,
             options: ["Small", "Medium", "Large"],
             name: "chartSize",
         },
@@ -183,7 +185,7 @@ function configChart(chartID) {
         {
             tag: "select",
             // label: "Chart type",
-            initialValue: chartType,
+            value: chartType,
             options: getChartTypes(),
             name: "chartType",
         },
@@ -197,7 +199,7 @@ function configChart(chartID) {
         {
             tag: "button",
             label: "Apply",
-            class: "disable-on-error",
+            "disable-on-error": true,
             onclick: `configChartApply("${chartID}")`,
         },
     ]
@@ -214,16 +216,16 @@ function showDialogOptions(key) {
             tag: "textarea",
             placeholder: "Click for template",
             onclick: "displayGrammarTemplate(this, CHART_FILTER_GRAMMAR)",
-            initialValue: chartFilter ?? "",
+            value: chartFilter ?? "",
             name: "chartFilter",
         }
     }
 
-    const selectElement = (label, initialValue, name, addSpace = false) => {
+    const selectElement = (label, value, name, addSpace = false) => {
         return {
             tag: "select",
             label,
-            initialValue: initialValue,
+            value: value,
             options: addSpace ? ["", ...columns] : columns,
             name: name,
         }
@@ -242,7 +244,7 @@ function showDialogOptions(key) {
             {
                 tag: "select",
                 // label: "Count type",
-                initialValue: countTypeToDisplay,
+                value: countTypeToDisplay,
                 // onchange: "showDialogOptions()",
                 options: types,
                 name: "countType",
@@ -250,7 +252,7 @@ function showDialogOptions(key) {
             {
                 tag: "select",
                 label: "Column over",
-                initialValue: colOver ?? "",
+                value: colOver ?? "",
                 options: options,
                 name: "colOver",
             },
@@ -267,7 +269,7 @@ function showDialogOptions(key) {
                 {
                     tag: "select",
                     label: "Date formats",
-                    initialValue: dateFormat ?? "MMM",
+                    value: dateFormat ?? "MMM",
                     options: dateFormats,
                     name: prefix + "dateFormat",
                 },
@@ -275,9 +277,9 @@ function showDialogOptions(key) {
         if (dataType === "Number")
             return [
                 {
-                    tag: "input text",
+                    tag: "input",
                     label: "Bin values",
-                    initialValue: bin ?? "",
+                    value: bin ?? "",
                     options: columns,
                     name: prefix + "bin",
                 },
@@ -285,9 +287,9 @@ function showDialogOptions(key) {
         if (dataType === "List" || dataType === "List Members")
             return [
                 {
-                    tag: "input text",
+                    tag: "input",
                     label: "List separator",
-                    initialValue: separator ?? ",",
+                    value: separator ?? ",",
                     name: prefix + "separator",
                 },
             ]
@@ -295,7 +297,7 @@ function showDialogOptions(key) {
             {
                 tag: "textarea",
                 label: "Order",
-                initialValue: order ?? "",
+                value: order ?? "",
                 options: columns,
                 name: prefix + "order",
             },
@@ -317,7 +319,7 @@ function showDialogOptions(key) {
                 {
                     tag: "textarea",
                     rows: 10,
-                    // initialValue: message || "",
+                    // value: message || "",
                     name: "message",
                 },
             ],
@@ -333,9 +335,10 @@ function showDialogOptions(key) {
             [
                 { tag: "hr" },
                 {
-                    tag: "input number",
+                    tag: "input",
+                    type: "number",
                     label: "Rows to display",
-                    initialValue: maxEntries ?? 10,
+                    value: maxEntries ?? 10,
                     max: 100,
                     min: 1,
                     name: "maxEntries",
@@ -379,9 +382,9 @@ function showDialogOptions(key) {
                 ),
                 selectElement("End date column", endDateCol, "endDateCol"),
                 {
-                    tag: "input text",
+                    tag: "input",
                     label: "Label",
-                    // initialValue: firstLabel,
+                    // value: firstLabel,
                     name: "firstLabel",
                 },
                 ...subheading("Second set of dates..."),
@@ -398,9 +401,9 @@ function showDialogOptions(key) {
                     true
                 ),
                 {
-                    tag: "input text",
+                    tag: "input",
                     label: "Label",
-                    // initialValue: secondLabel,
+                    // value: secondLabel,
                     name: "secondLabel",
                 },
                 ...subheading("Count..."),
@@ -410,7 +413,7 @@ function showDialogOptions(key) {
                 {
                     tag: "textarea",
                     // label: "Annotations",
-                    // initialValue: annotations,
+                    // value: annotations,
                     name: "annotations",
                 },
             ],
@@ -468,7 +471,7 @@ function showDialogOptions(key) {
                 ...subheading("X axis..."),
                 ...trendDates(),
                 {
-                    tag: "input text",
+                    tag: "input",
                     label: "Label",
                     name: "x_label",
                 },
@@ -476,8 +479,9 @@ function showDialogOptions(key) {
                 chartFilterElements(chartFilter),
                 ...subheading("Others..."),
                 {
-                    tag: "input date",
-                    initialValue: trendStartDate ?? _.addDays(reportDate, -28),
+                    tag: "input",
+                    type: "date",
+                    value: trendStartDate ?? _.addDays(reportDate, -28),
                     name: "trendStartDate",
                 },
                 {
@@ -495,7 +499,7 @@ function showDialogOptions(key) {
                     // label: "Plan",
                     placeholder: "Click for template",
                     onclick: "displayGrammarTemplate(this, PLAN_GRAMMAR)",
-                    // initialValue: plan ?? "",
+                    // value: plan ?? "",
                     name: "plan",
                 },
             ],
@@ -548,9 +552,9 @@ function showDialogOptions(key) {
                 ...subheading("X axis..."),
                 selectElement("Column", x_column, "x_column"),
                 {
-                    tag: "input text",
+                    tag: "input",
                     label: "Label",
-                    initialValue: x_label ?? x_column,
+                    value: x_label ?? x_column,
                     name: "x_label",
                 },
                 {
@@ -562,9 +566,9 @@ function showDialogOptions(key) {
                 ...subheading("Y axis..."),
                 selectElement("Column", y_column, "y_column"),
                 {
-                    tag: "input text",
+                    tag: "input",
                     label: "Label",
-                    initialValue: y_label ?? y_column,
+                    value: y_label ?? y_column,
                     name: "y_label",
                 },
                 {
@@ -577,7 +581,7 @@ function showDialogOptions(key) {
                 chartFilterElements(chartFilter),
                 ...countTypeInDialog,
                 {
-                    tag: "input text",
+                    tag: "input",
                     // placeHolder: "VL,L,M.H,VH",
                     name: "countLabels",
                 },
@@ -604,7 +608,7 @@ function showDialogOptions(key) {
                 {
                     tag: "select",
                     label: "Data type",
-                    initialValue: x_dataType ?? "String",
+                    value: x_dataType ?? "String",
                     options: [
                         "Date",
                         "String",
@@ -690,6 +694,7 @@ function validateConfig() {
         chartType == "Bar"
     ) {
         const { reportDate } = Param.getConfig()
+
         const { isValid, errors, warnings } = Counter.validateChart(
             chartType,
             properties,
@@ -742,10 +747,19 @@ function filterChart(chartID) {
     const chartCategories = getChartCategories(key)
     const oneCount = allCounts.counts[key]
     const filterTags = chartCategories.map((v) => ({
-        tag: "check",
-        initialValue: oneCount[v] ? oneCount[v].include : "disable",
-        label: v,
-        name: v,
+        tag: () => {
+            const checked = oneCount[v]
+                ? oneCount[v].include
+                    ? "checked"
+                    : ""
+                : "disabled"
+            return _.createElements(
+                `<p>
+                <input type="checkbox" id="${v}" name="${v}" ${checked} data-error="p">
+                <label for="${v}">${v}</label>
+                </p>`
+            )
+        },
     }))
     const filterDialog = [
         { tag: "h3", label: `Filter items` },
@@ -760,13 +774,14 @@ function filterChart(chartID) {
         {
             tag: "button",
             label: "Apply",
-            class: "disable-on-error",
+            "disable-on-error": true,
             onclick: `applyFilter("${chartID}")`,
         },
     ]
+
     Dialog.make(filterDialog, {
         onchange: "checkFilterDialog()",
-        width: "small",
+        className: "small",
     }).show()
 }
 function checkFilterDialog() {
@@ -811,7 +826,7 @@ function showCalloutMenu(key) {
         { tag: "br" },
         { tag: "button", label: "Close", onclick: "Dialog.close()" },
     ]
-    Dialog.make(elements, { width: "small" }).show()
+    Dialog.make(elements, { className: "small" }).show()
 }
 //////////////////////////////////////////////////////////////////// callout config
 
@@ -827,15 +842,17 @@ function showCalloutConfigDialog(key, addNew = false) {
         addNew
             ? {}
             : {
-                  tag: "input number",
-                  initialValue: Number(key) + 1,
+                  tag: "input",
+                  type: "number",
+                  value: Number(key) + 1,
                   min: 1,
                   max: Param.getCountOf("callout"),
                   name: "position",
               },
         {
-            tag: "input number",
-            initialValue: Number(chartNumber) + 1,
+            tag: "input",
+            type: "number",
+            value: Number(chartNumber) + 1,
             min: 1,
             max: Param.getCountOf("chart"),
             name: "chartNumber",
@@ -844,18 +861,18 @@ function showCalloutConfigDialog(key, addNew = false) {
         {
             tag: "select",
             label: "Value",
-            initialValue: value,
+            value: value,
             options: ["max", "min", "category"],
             name: "value",
         },
         {
-            tag: "input text",
-            initialValue: category,
+            tag: "input",
+            value: category,
             name: "category",
         },
         {
-            tag: "input text",
-            initialValue: message,
+            tag: "input",
+            value: message,
             name: "message",
         },
         { tag: "hr" },
