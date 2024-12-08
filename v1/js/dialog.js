@@ -27,14 +27,9 @@
         return _.select(`[name = ${elementName}]`, dialog)
     }
 
-    // function isSpecial(attr) {
-    //     return specials[attr] ? true : false
-    // }
-
     function createElement(elParam) {
         const { tag, options, value, name } = elParam
-        //disable, disabled, type removed
-        const label = elParam.label ?? getLabel(name)
+        const label = elParam.label ?? (name ? getLabel(name) : "")
 
         if (!tag) return
         if (typeof tag === "function") {
@@ -55,8 +50,8 @@
             return div
         }
         const e = document.createElement(tag)
+        if (label) e.textContent = label
         setProperties(e, false)
-        e.textContent = label
         return e
 
         function setProperties(parent, setForChild = true) {

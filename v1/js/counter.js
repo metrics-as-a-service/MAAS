@@ -759,18 +759,19 @@
                         else {
                             const { maxNumber, minNumber } =
                                 allCounts.memo["dataDescription"][x_column]
+                            function binValues(min, max, count = 5) {
+                                if (min == max) return [min, min + 1]
+                                const step = (max - min) / (count + 1)
+                                if (step < 1) return [min, max]
+                                const bin = [min]
+                                for (let i = 1; i < count; i++)
+                                    bin.push(min + i * Math.round(step))
+                                bin.push(max)
+                                return bin
+                            }
                             const max = Math.round(maxNumber)
                             const min = Math.floor(minNumber)
-                            const rawStep = (max - min) / (binCount + 1)
-                            if (rawStep < 10) {
-                                memo.bin = [min, max]
-                            } else {
-                                const step = Math.round(rawStep)
-                                memo.bin = [min]
-                                for (let i = 1; i < binCount; i++)
-                                    memo.bin.push(min + i * step)
-                                memo.bin.push(max)
-                            }
+                            memo.bin = binValues(min, max, binCount)
                         }
                     }
                     if (x_order) memo.order = x_order

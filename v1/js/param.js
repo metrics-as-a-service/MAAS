@@ -76,13 +76,13 @@
         const position = Number(newValues.position) - 1
 
         const chartProperties = config.chartProperties
-        const newPositions = arrayMove(
-            chartProperties.map((_, i) => i),
-            index,
-            position
-        )
-        if (newPositions) {
-            console.log(index, newPositions)
+
+        if (position !== Number(index)) {
+            const newPositions = arrayMove(
+                chartProperties.map((_, i) => i),
+                index,
+                position
+            )
             //move the charts
             const newChartProperties = newPositions.map((i) =>
                 JSON.stringify(chartProperties[i])
@@ -422,7 +422,7 @@
             autoCreateConfig(file, dataDescription)
             return true
         }
-        Object.assign(config, {})
+        for (const key in config) delete config[key]
         Object.assign(config, newConfig)
         return true
     }
