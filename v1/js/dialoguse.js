@@ -713,29 +713,6 @@ function configChartApply(chartID) {
     Dialog.close()
     if (Param.setChartProps(key, properties)) reCreateCharts(key)
 }
-
-async function reCreateCharts(key) {
-    const scrollY = window.scrollY
-    clearCounts()
-    destroyAllCharts()
-    const { file } = Param.getConfig()
-    await countNow()
-    window.scroll(0, scrollY)
-    scrollToChart(key)
-    // if (key) {
-    //     const chart = _.select("#" + getChartId(key))
-    //     if (chart) {
-    //         chart.scrollIntoView(false)
-    //         return
-    //     }
-    // }
-    // window.scroll(0, scrollY)
-}
-function scrollToChart(key) {
-    if (!key) return
-    const chart = _.select(`#${getChartContainer(key)}`)
-    if (chart) chart.scrollIntoView(false)
-}
 /////////////////////////////////////////////////////////////////////// filter chart
 function getChartCategories(key) {
     const allCounts = getCounts()

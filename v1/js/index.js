@@ -479,3 +479,19 @@ function getItem(key) {
     // console.assert(store[key], `${key} is not found`)
     // return store[key]
 }
+async function reCreateCharts(key) {
+    const scrollY = window.scrollY
+    clearCounts()
+    destroyAllCharts()
+    await countNow()
+    window.scroll(0, scrollY)
+    //scrollToChart(key)
+}
+function scrollToChart(key) {
+    if (!key) return
+    const chart = _.select(`#${getChartContainer(key)}`)
+    if (!chart) return
+    chart.scrollIntoView({ behavior: "smooth" })
+    chart.focus({ preventScroll: true })
+    return true
+}

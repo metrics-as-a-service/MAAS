@@ -1,13 +1,13 @@
 "use strict"
 async function smokeTest(duration = 700) {
-    const startSmoke = new Date()
+    const start = new Date()
     console.clear()
     const elements = [{ tag: "h2", label: "Smoke test results" }, { tag: "hr" }]
     await testCharts()
     record()
     await testConfigDialog()
     record()
-    record(`Smoke test done: ${elapsedTime(startSmoke)} s`)
+    record(`Smoke test done: ${elapsedTime(start)} s`)
     elements.push(
         { tag: "hr" },
         {
@@ -16,23 +16,22 @@ async function smokeTest(duration = 700) {
             onclick: "Dialog.close();",
         }
     )
-    Dialog.make(elements, {}).show()
+    Dialog.make(elements).show()
 
     async function testCharts() {
         showHideLoader("show")
         const presetMenu = Preset.getMenuItems(presetConfigs.demo)
-        for (let i = 7; i < presetMenu.length; i++) {
+        for (let i = 0; i < presetMenu.length; i++) {
             const startLap = new Date()
             const presetType = presetMenu[i].key
             loadPresetFile(presetType)
             await _.sleep(duration)
-            const numberOfCharts = _selectAll("") //Param.getCountOf("chart")
+            const numberOfCharts = Param.getCountOf("chart")
 
             //select random chart
             const randomChart = SelectRandomChart()
-            // console.log(randomChart)
             for (let j = 0; j < numberOfCharts; j++) {
-                scrollToChart(j)
+                if (!scrollToChart(j)) continue
                 await _.sleep(duration)
                 if (j === randomChart) {
                     await _.sleep(duration)
@@ -69,7 +68,7 @@ async function smokeTest(duration = 700) {
     async function testConfigDialog() {
         configChart("0")
         const chartType = Dialog.getElement("chartType")
-        const chartTypes = Param.getChartTypes()
+        const chartTypes = getChartTypes()
         for (let i = 0; i < chartTypes.length; i++) {
             const startLap = new Date()
             chartType.value = chartTypes[i]
