@@ -1,0 +1,108 @@
+/* reset Open Prop*/
+body {
+    padding: 1rem;
+}
+
+:where(h1, h2, h3, h4, h5, h6, p) {
+    font-size: revert;
+    max-inline-size: revert;
+}
+
+h1 {
+    font-size: 2rem;
+}
+
+* {
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+.tree {
+    display: grid;
+    /* padding-right: .5rem; */
+    /* background: grey; */
+    /* grid-template-columns: repeat(88, 1fr);
+    grid-template-rows: repeat(11, 1fr); */
+    grid-gap: 0.5rem;
+    /* grid-auto-rows: auto; */
+
+    /* scroll-behavior: auto; */
+    /* font-size:50%; */
+    /* font-size:${fontSize}px`; */
+}
+
+.flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    color: var(--text-1);
+    background-color: var(--surface-3);
+    transition: 500ms;
+
+    & * {
+        /* cursor: default; */
+        transition: 500ms;
+    }
+}
+
+#search-bar {
+    background-color: hsl(0, 9%, 93%);
+    padding: 2%;
+}
+
+#search-dropdown {
+    transition: all 5sec ease;
+}
+
+.F,
+.M {
+    box-shadow: var(--shadow-4);
+}
+
+.F {
+    background-color: var(--pink-3);
+}
+
+.M {
+    background-color: var(--blue-3);
+}
+
+.flex-container>div {
+    margin: 0.5rem;
+    padding: 0.5rem;
+    font-size: 1rem;
+}
+
+.selected {
+    font-weight: 900;
+    font-style: italic;
+    animation: flash-briefly 2s ease;
+}
+
+@keyframes flash-briefly {
+    0% {
+        scale: 1.2;
+    }
+
+    100% {
+        scale: 1;
+    }
+}
+
+#generation {
+    break-inside: avoid;
+}
+
+#error {
+    color: var(--red-5);
+}
+
+dialog {
+    line-height: normal;
+}
+
+/* #searchDrpDown {
+    transition: 1s;
+    width: 100%;
+} */
+/* #children {
+    margin-top: 0.25rem;
+} */

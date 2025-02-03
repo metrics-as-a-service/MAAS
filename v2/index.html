@@ -1,11 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h1>V2 of metrics</h1>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Read file</title>
+    <!-- the props -->
+    <link rel="stylesheet" href="https://unpkg.com/open-props" />
+
+    <!-- optional imports that use the props -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/open-props/normalize.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/open-props/buttons.min.css"
+    />
+    <link rel="stylesheet" href="main.css" />
+    <script src="main.js" utf-8></script>
+    <script src="papaparse.min.js"></script>
+  </head>
+
+  <body>
+    <dialog id="search-dialog">
+      <form>
+        <p>Many matches found, please confirm one to use.</p>
+        <div id="radio-group"></div>
+        <div>
+          <button id="confirm" value="default">Confirm</button>
+          <button value="cancel" formmethod="dialog">Cancel</button>
+        </div>
+      </form>
+    </dialog>
+
+    <h1 id="main-title">Read File</h1>
+    <br />
+    <div id="search-bar">
+      <input type="text" placeholder="Enter file name .." />
+      <button onclick="buttonReadFile()">Read file</button>
+
+      <span id="error"></span>
+      <br />
+    </div>
+    <div id="tree" onclick="childClicked(this,event)"></div>
+    <br />
+    <label>
+      <input
+        type="radio"
+        checked
+        name="file-name"
+        value="https://raw.githubusercontent.com/abhijitmajumdar2020/MAAS/main/datafiles/incidents.csv"
+      />
+      Github (works)
+    </label>
+    <br />
+    <label>
+      <input
+        type="radio"
+        name="file-name"
+        value="https://docs.google.com/spreadsheets/d/e/2PACX-1vSQqvT3WCpTuIlqLcqBYDRoF4Wi8tNVM4-Xu-A6sm_r4kioWKhgTLiwdFm37Fr6uPzPU3Uafl54XBmP/pub?gid=0&single=true&output=csv"
+      />
+      Google Sheet (works)
+    </label>
+    <br />
+    <label>
+      <input
+        type="radio"
+        name="file-name"
+        value="https://drive.google.com/file/d/17LyCwhDXklp3Q6gv1uwSIvzQRXA7bO4e/view?usp=drive_linkhttps://drive.google.com/file/d/17LyCwhDXklp3Q6gv1uwSIvzQRXA7bO4e/pub?gid=0&single=true&output=csv"
+      />
+      Google Drive (not yet working)
+    </label>
+    <br />
+    <label>
+      <input type="radio" name="file-name" value="https://" />
+      MS SharePoint (not yet tried)
+    </label>
+    <br>
+    <label>
+      <input type="radio" name="file-name" value="https://" />
+      MS Teams (not yet tried)
+    </label>
+    <br />
+    <label>
+      <input
+        type="radio"
+        name="file-name"
+        value="https://www.icloud.com/iclouddrive/015-gAvFDy5wOqUp8Xd2QbzgA#plan"
+      />
+      iCloud (does not work)
+    </label>
+    <br />
+    <h2>Output</h2>
+    <div id="output"></div>
+    <hr />
+
+    <footer>
+      <p>Read file Tree (Version Beta Feb 2025)</p>
+      <p>Copyright &#169; 2025 Abhijit Majumdar</p>
+      <a
+        href="mailto: a.majumdar85+FamilyTree@gmail.com?&subject=Feedback%20on%20Family%2DTree"
+      >
+        Click to send feedback email</a
+      >
+    </footer>
+    <template id="generation-template">
+      <div id="geneation">
+        <div id="generation-number"></div>
+        <div id="parents" class="flex-container"></div>
+        <div style="height: 0.1rem"></div>
+        <div id="children" class="flex-container"></div>
+        <br />
+      </div>
+    </template>
+    <template id="parents-template">
+      <div id="parents">
+        <div id="main"></div>
+        <div id="plus"></div>
+        <div id="spouse"></div>
+      </div>
+    </template>
+    <template id="pesron-template">
+      <div>X</div>
+    </template>
+  </body>
 </html>
